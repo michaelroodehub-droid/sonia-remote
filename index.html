@@ -484,7 +484,7 @@ function applyConfig() {
   document.getElementById('app').classList.add('on');
   if (CLIENT_ID) {
     document.getElementById('driveBtn').classList.add('visible');
-    loadGapi();
+    loadDriveLibs(); // pre-load GIS + gapi silently so button tap is instant
   }
   setStatus('systems online · ' + OWNER_NAME.toLowerCase());
   renderNotes();
@@ -667,56 +667,80 @@ chatBox.addEventListener('input', () => {
   chatBox.style.height = Math.min(chatBox.scrollHeight, 80) + 'px';
 });
 
-/* ══ GOOGLE DRIVE API ════════════════════════════════════════════════ */
-function loadGapi() {
-  if (window.gapi) { initGapi(); return; }
-  const s = document.createElement('script');
-  s.src = 'https://apis.google.com/js/api.js';
-  s.onload = initGapi;
-  document.head.appendChild(s);
+/* ══ GOOGLE DRIVE API — Google Identity Services (GIS) ══════════════
+   Uses the modern GIS + gapi.client approach.
+   Works on mobile — no popups, no deprecated auth2.
+════════════════════════════════════════════════════════════════════ */
+let gapiReady = false;
+let gisReady  = false;
+let tokenClient = null;
+
+function loadDriveLibs() {
+  // Load gapi (for Drive REST calls)
+  if (!window.gapi) {
+    const s1 = document.createElement('script');
+    s1.src = 'https://apis.google.com/js/api.js';
+    s1.onload = () => {
+      gapi.load('client', async () => {
+        await gapi.client.init({});
+        await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest');
+        gapiReady = true;
+      });
+    };
+    document.head.appendChild(s1);
+  }
+
+  // Load GIS (for OAuth token)
+  if (!window.google?.accounts) {
+    const s2 = document.createElement('script');
+    s2.src = 'https://accounts.google.com/gsi/client';
+    s2.onload = () => { gisReady = true; };
+    document.head.appendChild(s2);
+  }
 }
 
-function initGapi() {
-  gapi.load('client:auth2', async () => {
-    try {
-      await gapi.client.init({
-        clientId: CLIENT_ID,
-        scope: 'https://www.googleapis.com/auth/drive.file',
-        discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
-      });
-      const auth = gapi.auth2.getAuthInstance();
-      if (auth.isSignedIn.get()) {
-        driveToken = auth.currentUser.get().getAuthResponse().access_token;
-        setStatus('drive connected · ' + OWNER_NAME.toLowerCase());
+function signInDrive() {
+  if (!CLIENT_ID) { setStatus('no google client id set', 'err'); return; }
+
+  // Build token client if not yet done
+  if (!tokenClient) {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/drive.file',
+      callback: (resp) => {
+        if (resp.error) {
+          setStatus('drive auth failed: ' + resp.error, 'err');
+          console.warn('GIS error:', resp);
+          return;
+        }
+        driveToken = resp.access_token;
+        // Also set on gapi.client so REST calls work
+        gapi.client.setToken({ access_token: driveToken });
+        setStatus('drive connected', 'ok');
         document.getElementById('driveBtn').textContent = 'DRIVE: ON';
         loadMemoryFromDrive();
       }
-    } catch(e) {
-      console.warn('Drive init failed:', e);
-    }
-  });
+    });
+  }
+  tokenClient.requestAccessToken({ prompt: '' });
 }
 
-document.getElementById('driveBtn').addEventListener('click', async () => {
-  if (!CLIENT_ID) {
-    setStatus('no google client id set', 'err'); return;
+document.getElementById('driveBtn').addEventListener('click', () => {
+  if (!CLIENT_ID) { setStatus('no google client id set', 'err'); return; }
+  // If libs not loaded yet, load them then wait briefly
+  if (!window.google?.accounts || !gapiReady) {
+    setStatus('loading drive...', 'busy');
+    loadDriveLibs();
+    const wait = setInterval(() => {
+      if (window.google?.accounts && gapiReady) {
+        clearInterval(wait);
+        signInDrive();
+      }
+    }, 200);
+    return;
   }
-  if (!window.gapi) { loadGapi(); setTimeout(() => signInDrive(), 1500); return; }
   signInDrive();
 });
-
-async function signInDrive() {
-  try {
-    const auth = gapi.auth2.getAuthInstance();
-    await auth.signIn();
-    driveToken = auth.currentUser.get().getAuthResponse().access_token;
-    setStatus('drive connected', 'ok');
-    document.getElementById('driveBtn').textContent = 'DRIVE: ON';
-    loadMemoryFromDrive();
-  } catch(e) {
-    setStatus('drive auth failed', 'err');
-  }
-}
 
 /* ── Find or create file in Drive ─────────────── */
 async function findOrCreateFile(name, mimeType, initialContent) {
