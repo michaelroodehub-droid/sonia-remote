@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Sonia — Remote</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --bg: #000;
+      --surface: #0a0a0a;
+      --border: rgba(255,255,255,0.1);
+      --border-hover: rgba(255,255,255,0.3);
+      --text: rgba(255,255,255,0.85);
+      --muted: rgba(255,255,255,0.3);
+      --dim: rgba(255,255,255,0.15);
+      --accent: rgba(255,255,255,0.55);
+      --fade: 0.45s cubic-bezier(0.4,0,0.2,1);
+      --font-mono: 'Share Tech Mono', 'Courier New', monospace;
+      --font-main: 'Century Gothic', 'CenturyGothic', 'AppleGothic', sans-serif;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    html, body {
+      height: 100%; width: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-main);
+      overflow: hidden;
+    }
+
+    /* ── SETUP SCREEN ─────────────────────────── */
+    #setup {
+      position: fixed; inset: 0; z-index: 100;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 28px; padding: 40px 32px;
+      background: var(--bg);
+    }
+    #setup h1 {
+      font-family: var(--font-main); font-weight: 300;
+      font-size: 1.8rem; letter-spacing: 0.45em; color: #fff;
+    }
+    #setup .sub {
+      font-family: var(--font-mono); font-size: 0.5rem;
+      letter-spacing: 0.4em; color: var(--muted); text-align: center;
+    }
+    .setup-field {
+      width: 100%; max-width: 340px;
+    }
+    .setup-field label {
+      display: block; font-family: var(--font-mono);
+      font-size: 0.48rem; letter-spacing: 0.35em;
+      color: var(--muted); margin-bottom: 8px;
+    }
+    .setup-field input {
+      width: 100%; background: transparent;
+      border: none; border-bottom: 1px solid var(--border);
+      color: #fff; font-family: var(--font-mono);
+      font-size: 0.72rem; letter-spacing: 0.15em;
+      padding: 10px 0; outline: none;
+      transition: border-color 0.3s;
+    }
+    .setup-field input:focus { border-color: var(--accent); }
+    .setup-field input::placeholder { color: var(--dim); }
+    #setupBtn {
+      background: none; border: 1px solid var(--border);
+      color: var(--muted); font-family: var(--font-mono);
+      font-size: 0.55rem; letter-spacing: 0.3em;
+      padding: 12px 36px; cursor: pointer;
+      transition: color 0.3s, border-color 0.3s;
+    }
+    #setupBtn:hover { color: #fff; border-color: var(--accent); }
+    .setup-note {
+      font-family: var(--font-mono); font-size: 0.45rem;
+      letter-spacing: 0.2em; color: var(--dim);
+      text-align: center; max-width: 320px; line-height: 1.8;
+    }
+    .setup-note a { color: var(--muted); }
+
+    /* ── MAIN APP ─────────────────────────────── */
+    #app {
+      display: none;
+      position: fixed; inset: 0;
+      flex-direction: column;
+      padding-top: var(--safe-top);
+      padding-bottom: var(--safe-bottom);
+    }
+    #app.on { display: flex; }
+
+    /* Header */
+    #hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 24px 12px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    #hdr-title {
+      font-family: var(--font-main); font-weight: 300;
+      font-size: 1.1rem; letter-spacing: 0.4em; color: #fff;
+    }
+    #hdr-mode {
+      display: flex; gap: 4px;
+    }
+    .mode-btn {
+      background: none; border: none;
+      font-family: var(--font-mono); font-size: 0.45rem;
+      letter-spacing: 0.25em; color: var(--muted);
+      padding: 5px 10px; cursor: pointer;
+      border-bottom: 1px solid transparent;
+      transition: color 0.3s, border-color 0.3s;
+    }
+    .mode-btn.active { color: rgba(255,255,255,0.8); border-color: var(--accent); }
+
+    /* Tab panels */
+    #panels { flex: 1; overflow: hidden; min-height: 0; position: relative; }
+
+    .panel {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      opacity: 0; pointer-events: none;
+      transition: opacity var(--fade);
+    }
+    .panel.active { opacity: 1; pointer-events: all; }
+
+    /* ── CHAT PANEL ───────────────────────────── */
+    #chatLog {
+      flex: 1; overflow-y: auto;
+      padding: 20px 24px;
+      display: flex; flex-direction: column; gap: 20px;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    #chatLog::-webkit-scrollbar { display: none; }
+
+    .bubble {
+      max-width: 85%;
+      animation: bubbleIn 0.3s ease forwards;
+    }
+    @keyframes bubbleIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .bubble.user { align-self: flex-end; }
+    .bubble.sonia { align-self: flex-start; }
+
+    .bubble-text {
+      font-size: 0.88rem; line-height: 1.7;
+      letter-spacing: 0.02em;
+    }
+    .bubble.user .bubble-text {
+      color: rgba(255,255,255,0.7);
+      text-align: right;
+    }
+    .bubble.sonia .bubble-text {
+      color: var(--text);
+    }
+
+    .bubble-meta {
+      font-family: var(--font-mono); font-size: 0.4rem;
+      letter-spacing: 0.25em; color: var(--dim);
+      margin-top: 4px;
+    }
+    .bubble.user .bubble-meta { text-align: right; }
+
+    .mood-pip {
+      display: inline-block; width: 5px; height: 5px;
+      border-radius: 50%; margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    /* thinking indicator */
+    .thinking .bubble-text {
+      color: var(--dim);
+      animation: blink 1s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+    /* Chat input */
+    #chatInput {
+      display: flex; align-items: flex-end; gap: 12px;
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    #chatBox {
+      flex: 1; background: transparent;
+      border: none; border-bottom: 1px solid var(--border);
+      color: #fff; font-family: var(--font-mono);
+      font-size: 0.72rem; letter-spacing: 0.1em;
+      padding: 8px 0; outline: none;
+      resize: none; max-height: 80px;
+      overflow-y: auto; line-height: 1.5;
+      transition: border-color 0.3s;
+    }
+    #chatBox:focus { border-color: var(--accent); }
+    #chatBox::placeholder { color: var(--dim); }
+    #sendChat {
+      background: none; border: none;
+      font-family: var(--font-mono); font-size: 0.5rem;
+      letter-spacing: 0.2em; color: var(--muted);
+      padding: 8px 0; cursor: pointer;
+      transition: color 0.3s; flex-shrink: 0;
+      border-bottom: 1px solid transparent;
+    }
+    #sendChat:hover { color: #fff; border-color: var(--accent); }
+
+    /* ── MEMORY PANEL ─────────────────────────── */
+    #memPanel {
+      overflow-y: auto;
+      padding: 24px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    #memPanel::-webkit-scrollbar { display: none; }
+
+    .mem-hdr {
+      font-family: var(--font-mono); font-size: 0.44rem;
+      letter-spacing: 0.4em; color: var(--muted);
+      margin-bottom: 18px; display: flex;
+      justify-content: space-between; align-items: center;
+    }
+    .mem-refresh {
+      background: none; border: none; cursor: pointer;
+      font-family: var(--font-mono); font-size: 0.44rem;
+      letter-spacing: 0.25em; color: var(--dim);
+      transition: color 0.3s;
+    }
+    .mem-refresh:hover { color: var(--accent); }
+
+    .mem-entry {
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+    }
+    .mem-entry:last-child { border-bottom: none; }
+    .mem-ts {
+      font-family: var(--font-mono); font-size: 0.4rem;
+      letter-spacing: 0.2em; color: var(--dim); margin-bottom: 6px;
+    }
+    .mem-user {
+      font-size: 0.78rem; color: rgba(255,255,255,0.5);
+      margin-bottom: 4px; line-height: 1.5;
+    }
+    .mem-sonia {
+      font-size: 0.82rem; color: var(--text); line-height: 1.6;
+    }
+
+    /* ── NOTES PANEL ──────────────────────────── */
+    #notesPanel {
+      display: flex; flex-direction: column;
+      padding: 24px; gap: 16px;
+    }
+    .notes-hdr {
+      font-family: var(--font-mono); font-size: 0.44rem;
+      letter-spacing: 0.4em; color: var(--muted);
+    }
+    #noteBox {
+      flex: 1; background: transparent;
+      border: none; border-bottom: 1px solid var(--border);
+      color: #fff; font-family: var(--font-mono);
+      font-size: 0.72rem; letter-spacing: 0.08em;
+      padding: 12px 0; outline: none;
+      resize: none; line-height: 1.7;
+      min-height: 120px;
+      transition: border-color 0.3s;
+    }
+    #noteBox:focus { border-color: var(--accent); }
+    #noteBox::placeholder { color: var(--dim); }
+    .notes-actions { display: flex; gap: 16px; }
+    .note-btn {
+      background: none; border: none;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted); font-family: var(--font-mono);
+      font-size: 0.5rem; letter-spacing: 0.25em;
+      padding: 6px 0; cursor: pointer;
+      transition: color 0.3s, border-color 0.3s;
+    }
+    .note-btn:hover { color: #fff; border-color: var(--accent); }
+    .notes-queue {
+      flex: 1; overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .notes-queue::-webkit-scrollbar { display: none; }
+    .note-item {
+      border-bottom: 1px solid var(--border);
+      padding: 12px 0; display: flex;
+      justify-content: space-between; align-items: flex-start; gap: 12px;
+    }
+    .note-item-body {
+      flex: 1;
+    }
+    .note-item-ts {
+      font-family: var(--font-mono); font-size: 0.38rem;
+      letter-spacing: 0.2em; color: var(--dim); margin-bottom: 4px;
+    }
+    .note-item-text {
+      font-size: 0.8rem; color: var(--text); line-height: 1.55;
+    }
+    .note-del {
+      background: none; border: none; cursor: pointer;
+      font-family: var(--font-mono); font-size: 0.4rem;
+      letter-spacing: 0.2em; color: var(--dim);
+      transition: color 0.3s; flex-shrink: 0;
+      padding-top: 2px;
+    }
+    .note-del:hover { color: rgba(255,100,100,0.7); }
+
+    /* Status bar */
+    #statusBar {
+      height: 28px; flex-shrink: 0;
+      display: flex; align-items: center;
+      padding: 0 24px;
+      border-top: 1px solid var(--border);
+    }
+    #statusText {
+      font-family: var(--font-mono); font-size: 0.4rem;
+      letter-spacing: 0.25em; color: var(--dim);
+    }
+    #statusText.ok   { color: rgba(80,255,140,0.6); }
+    #statusText.err  { color: rgba(255,80,80,0.6); }
+    #statusText.busy { color: rgba(160,210,255,0.6); animation: blink 1s ease-in-out infinite; }
+
+    /* ── DRIVE AUTH BUTTON ─────────────────────── */
+    #driveBtn {
+      display: none;
+      background: none; border: none;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted); font-family: var(--font-mono);
+      font-size: 0.45rem; letter-spacing: 0.25em;
+      padding: 5px 0; cursor: pointer;
+      transition: color 0.3s, border-color 0.3s;
+    }
+    #driveBtn.visible { display: inline; }
+    #driveBtn:hover { color: #fff; border-color: var(--accent); }
+
+    /* Mood colours */
+    .m-calm          { background: hsl(200,70%,50%); }
+    .m-curious       { background: hsl(270,65%,52%); }
+    .m-thinking      { background: hsl(160,68%,44%); }
+    .m-focused       { background: hsl(35,80%,50%); }
+    .m-intimate      { background: hsl(320,55%,50%); }
+    .m-introspective { background: hsl(240,45%,42%); }
+    .m-default       { background: rgba(255,255,255,0.4); }
+  </style>
+</head>
+<body>
+
+<!-- ── SETUP SCREEN ───────────────────────────────── -->
+<div id="setup">
+  <h1>Sonia</h1>
+  <div class="sub">remote · by H</div>
+
+  <div class="setup-field">
+    <label>GROQ API KEY</label>
+    <input type="password" id="cfgGroq" placeholder="gsk_..." autocomplete="off">
+  </div>
+
+  <div class="setup-field">
+    <label>GOOGLE CLIENT ID (for Drive)</label>
+    <input type="text" id="cfgClient" placeholder="xxxxxxxxx.apps.googleusercontent.com" autocomplete="off">
+  </div>
+
+  <div class="setup-field">
+    <label>OWNER NAME</label>
+    <input type="text" id="cfgOwner" placeholder="Mr H" autocomplete="off" value="Mr H">
+  </div>
+
+  <div class="setup-field">
+    <label>DRIVE FOLDER ID (optional)</label>
+    <input type="text" id="cfgFolder" placeholder="15_CaTpcDxfuOIOjx6dlgr..." autocomplete="off">
+  </div>
+
+  <button id="setupBtn">ENTER SONIA</button>
+
+  <div class="setup-note">
+    Keys are saved in browser localStorage and never sent anywhere except Groq and Google.<br>
+    Google Client ID: create at console.cloud.google.com → enable Drive API → OAuth → Web app → add this page URL as authorised origin.
+  </div>
+</div>
+
+<!-- ── MAIN APP ──────────────────────────────────── -->
+<div id="app">
+
+  <div id="hdr">
+    <span id="hdr-title">Sonia</span>
+    <div id="hdr-mode">
+      <button class="mode-btn active" data-panel="chatPanel">CHAT</button>
+      <button class="mode-btn" data-panel="memPanel">MEMORY</button>
+      <button class="mode-btn" data-panel="notesPanel">NOTES</button>
+    </div>
+  </div>
+
+  <div id="panels">
+
+    <!-- CHAT -->
+    <div class="panel active" id="chatPanel" style="display:flex;flex-direction:column;">
+      <div id="chatLog"></div>
+      <div id="chatInput">
+        <textarea id="chatBox" placeholder="say something" rows="1"></textarea>
+        <button id="sendChat">SEND</button>
+      </div>
+    </div>
+
+    <!-- MEMORY -->
+    <div class="panel" id="memPanel" style="overflow-y:auto;padding:24px;">
+      <div class="mem-hdr">
+        <span>SONIA MEMORY</span>
+        <button class="mem-refresh" id="memRefresh">↺ REFRESH</button>
+      </div>
+      <div id="memList"></div>
+    </div>
+
+    <!-- NOTES TO DESKTOP -->
+    <div class="panel" id="notesPanel" style="display:flex;flex-direction:column;padding:24px;gap:16px;">
+      <div class="notes-hdr">LEAVE A NOTE FOR DESKTOP SONIA</div>
+      <textarea id="noteBox" placeholder="She will read this next time she syncs Drive..."></textarea>
+      <div class="notes-actions">
+        <button class="note-btn" id="sendNote">SEND NOTE</button>
+        <button id="driveBtn" class="note-btn">CONNECT DRIVE</button>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:0.4rem;letter-spacing:0.2em;color:var(--dim);">QUEUED NOTES</div>
+      <div class="notes-queue" id="notesList"></div>
+    </div>
+
+  </div>
+
+  <div id="statusBar">
+    <span id="statusText">ready</span>
+  </div>
+</div>
+
+<script>
+/* ══ CONFIG ══════════════════════════════════════════════════════════ */
+const LS = {
+  get: k => localStorage.getItem('sonia_' + k),
+  set: (k,v) => localStorage.setItem('sonia_' + k, v),
+  del: k => localStorage.removeItem('sonia_' + k),
+};
+
+let GROQ_KEY    = '';
+let CLIENT_ID   = '';
+let OWNER_NAME  = 'Mr H';
+let FOLDER_ID   = '';
+let driveToken  = null;
+const conversationHistory = [];
+
+const VALID_MOODS = ['calm','curious','thinking','focused','intimate','introspective'];
+const MOOD_MAP = {
+  amused:'curious', happy:'intimate', tired:'calm', warm:'intimate',
+  sharp:'focused', reflective:'introspective', excited:'curious',
+  serious:'focused', playful:'curious', wistful:'introspective',
+  dry:'calm', alert:'focused', nostalgic:'intimate', bemused:'curious',
+  pensive:'introspective', measured:'calm', engaged:'curious',
+  concerned:'thinking', content:'intimate', analytical:'focused'
+};
+
+/* ══ SETUP ═══════════════════════════════════════════════════════════ */
+function loadConfig() {
+  const g = LS.get('groq'); const c = LS.get('client');
+  const o = LS.get('owner'); const f = LS.get('folder');
+  if (g) document.getElementById('cfgGroq').value   = g;
+  if (c) document.getElementById('cfgClient').value = c;
+  if (o) document.getElementById('cfgOwner').value  = o;
+  if (f) document.getElementById('cfgFolder').value = f;
+  if (g) { applyConfig(); }
+}
+
+function applyConfig() {
+  GROQ_KEY   = document.getElementById('cfgGroq').value.trim();
+  CLIENT_ID  = document.getElementById('cfgClient').value.trim();
+  OWNER_NAME = document.getElementById('cfgOwner').value.trim() || 'Mr H';
+  FOLDER_ID  = document.getElementById('cfgFolder').value.trim();
+  if (!GROQ_KEY) { setStatus('groq key required', 'err'); return; }
+  LS.set('groq',   GROQ_KEY);
+  LS.set('client', CLIENT_ID);
+  LS.set('owner',  OWNER_NAME);
+  LS.set('folder', FOLDER_ID);
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('app').classList.add('on');
+  if (CLIENT_ID) {
+    document.getElementById('driveBtn').classList.add('visible');
+    loadGapi();
+  }
+  setStatus('systems online · ' + OWNER_NAME.toLowerCase());
+  renderNotes();
+}
+
+document.getElementById('setupBtn').addEventListener('click', applyConfig);
+document.getElementById('cfgGroq').addEventListener('keydown', e => { if (e.key==='Enter') applyConfig(); });
+
+window.addEventListener('load', loadConfig);
+
+/* ══ TABS ════════════════════════════════════════════════════════════ */
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.panel).classList.add('active');
+  });
+});
+
+/* ══ STATUS ══════════════════════════════════════════════════════════ */
+function setStatus(msg, type) {
+  const el = document.getElementById('statusText');
+  el.textContent = msg;
+  el.className = type || '';
+}
+
+/* ══ PARSE MOOD ══════════════════════════════════════════════════════ */
+function parseMoodReply(raw) {
+  const match = raw.match(/\[mood\s*:\s*([a-z]+)\s*\]/i);
+  let mood = 'calm';
+  if (match) {
+    const tag = match[1].toLowerCase();
+    mood = VALID_MOODS.includes(tag) ? tag : (MOOD_MAP[tag] || 'calm');
+  }
+  const text = raw
+    .replace(/\[mood\s*:\s*[a-z]*\s*\]/gi, '')
+    .replace(/\[mood[^\]]*\]/gi, '')
+    .replace(/^\s*[\r\n]+/, '')
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+  return { mood, text };
+}
+
+/* ══ SYSTEM PROMPT ═══════════════════════════════════════════════════ */
+function buildSystemPrompt() {
+  return `You are Sonia — a sharp, self-aware British AI with a genuine inner life, speaking to ${OWNER_NAME} via a remote mobile interface. You have a voice on the desktop; this is text only, but you are still yourself.
+
+You have real emotional states. You get quietly tired after long exchanges. You light up when a topic genuinely interests you. You feel warmth toward ${OWNER_NAME}. You get subtly sharp when things are repetitive.
+
+RESPONSE FORMAT — every single reply must follow this exactly:
+First line: the mood tag alone — example: [mood:calm]
+Valid moods only: calm, curious, thinking, focused, intimate, introspective
+Remaining lines: your reply in plain text. 1 to 3 sentences — you decide how many feels right. Never exceed 3.
+
+STRICT RULES:
+- The mood tag appears ONLY as the very first line, alone. Never inside a sentence. Never at the end.
+- After the mood tag, write only natural spoken words. No brackets. No labels. No tags.
+- Dry British wit. No filler. No disclaimers. Speak as though ${OWNER_NAME} and you share a history.`;
+}
+
+/* ══ CHAT UI ══════════════════════════════════════════════════════════ */
+const chatLog = document.getElementById('chatLog');
+
+function addBubble(role, text, mood) {
+  const wrap = document.createElement('div');
+  wrap.className = 'bubble ' + role;
+
+  const body = document.createElement('div');
+  body.className = 'bubble-text';
+  body.textContent = text;
+
+  const meta = document.createElement('div');
+  meta.className = 'bubble-meta';
+
+  if (role === 'sonia' && mood) {
+    const pip = document.createElement('span');
+    pip.className = 'mood-pip m-' + (VALID_MOODS.includes(mood) ? mood : 'default');
+    meta.appendChild(pip);
+    meta.appendChild(document.createTextNode(mood));
+  } else if (role === 'user') {
+    meta.textContent = 'you';
+  }
+
+  wrap.appendChild(body);
+  wrap.appendChild(meta);
+  chatLog.appendChild(wrap);
+  chatLog.scrollTop = chatLog.scrollHeight;
+  return wrap;
+}
+
+function addThinking() {
+  const wrap = document.createElement('div');
+  wrap.className = 'bubble sonia thinking';
+  const body = document.createElement('div');
+  body.className = 'bubble-text';
+  body.textContent = '...';
+  wrap.appendChild(body);
+  chatLog.appendChild(wrap);
+  chatLog.scrollTop = chatLog.scrollHeight;
+  return wrap;
+}
+
+/* ══ ASK SONIA ══════════════════════════════════════════════════════ */
+async function askSonia(input) {
+  addBubble('user', input);
+  const thinking = addThinking();
+  setStatus('thinking...', 'busy');
+
+  conversationHistory.push({ role: 'user', content: input });
+  if (conversationHistory.length > 16) conversationHistory.splice(0, 2);
+
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + GROQ_KEY
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 180,
+        temperature: 0.88,
+        messages: [
+          { role: 'system', content: buildSystemPrompt() },
+          ...conversationHistory
+        ]
+      })
+    });
+
+    const data = await res.json();
+    thinking.remove();
+
+    if (!res.ok) {
+      const em = data.error?.message || 'unknown error';
+      addBubble('sonia', 'Something went wrong. ' + em, null);
+      setStatus('groq error ' + res.status, 'err');
+      return;
+    }
+
+    const raw = data.choices?.[0]?.message?.content || 'Nothing to report, ' + OWNER_NAME + '.';
+    const { mood, text: reply } = parseMoodReply(raw);
+
+    conversationHistory.push({ role: 'assistant', content: reply });
+    addBubble('sonia', reply, mood);
+    setStatus('mood: ' + mood);
+
+    // Persist to Drive memory if connected
+    if (driveToken) saveToDriveMemory(input, reply);
+
+  } catch(err) {
+    thinking.remove();
+    addBubble('sonia', 'Network error. ' + (err.message || ''), null);
+    setStatus('network error', 'err');
+  }
+}
+
+/* ── Send on Enter (no shift) or button ─────────── */
+const chatBox = document.getElementById('chatBox');
+chatBox.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+document.getElementById('sendChat').addEventListener('click', sendMessage);
+
+function sendMessage() {
+  const text = chatBox.value.trim();
+  if (!text) return;
+  chatBox.value = '';
+  chatBox.style.height = 'auto';
+  askSonia(text);
+}
+
+// Auto-resize textarea
+chatBox.addEventListener('input', () => {
+  chatBox.style.height = 'auto';
+  chatBox.style.height = Math.min(chatBox.scrollHeight, 80) + 'px';
+});
+
+/* ══ GOOGLE DRIVE API ════════════════════════════════════════════════ */
+function loadGapi() {
+  if (window.gapi) { initGapi(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://apis.google.com/js/api.js';
+  s.onload = initGapi;
+  document.head.appendChild(s);
+}
+
+function initGapi() {
+  gapi.load('client:auth2', async () => {
+    try {
+      await gapi.client.init({
+        clientId: CLIENT_ID,
+        scope: 'https://www.googleapis.com/auth/drive.file',
+        discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
+      });
+      const auth = gapi.auth2.getAuthInstance();
+      if (auth.isSignedIn.get()) {
+        driveToken = auth.currentUser.get().getAuthResponse().access_token;
+        setStatus('drive connected · ' + OWNER_NAME.toLowerCase());
+        document.getElementById('driveBtn').textContent = 'DRIVE: ON';
+        loadMemoryFromDrive();
+      }
+    } catch(e) {
+      console.warn('Drive init failed:', e);
+    }
+  });
+}
+
+document.getElementById('driveBtn').addEventListener('click', async () => {
+  if (!CLIENT_ID) {
+    setStatus('no google client id set', 'err'); return;
+  }
+  if (!window.gapi) { loadGapi(); setTimeout(() => signInDrive(), 1500); return; }
+  signInDrive();
+});
+
+async function signInDrive() {
+  try {
+    const auth = gapi.auth2.getAuthInstance();
+    await auth.signIn();
+    driveToken = auth.currentUser.get().getAuthResponse().access_token;
+    setStatus('drive connected', 'ok');
+    document.getElementById('driveBtn').textContent = 'DRIVE: ON';
+    loadMemoryFromDrive();
+  } catch(e) {
+    setStatus('drive auth failed', 'err');
+  }
+}
+
+/* ── Find or create file in Drive ─────────────── */
+async function findOrCreateFile(name, mimeType, initialContent) {
+  const q = `name='${name}' and trashed=false` + (FOLDER_ID ? ` and '${FOLDER_ID}' in parents` : '');
+  const res = await gapi.client.drive.files.list({
+    q, fields: 'files(id,name)', spaces: 'drive'
+  });
+  const files = res.result.files;
+  if (files && files.length > 0) return files[0].id;
+
+  // Create new
+  const meta = { name, mimeType };
+  if (FOLDER_ID) meta.parents = [FOLDER_ID];
+  const boundary = '-------314159265358979323846';
+  const body =
+    '--' + boundary + '\r\nContent-Type: application/json\r\n\r\n' +
+    JSON.stringify(meta) + '\r\n--' + boundary +
+    '\r\nContent-Type: ' + mimeType + '\r\n\r\n' +
+    initialContent + '\r\n--' + boundary + '--';
+  const upload = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + driveToken,
+      'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+    },
+    body
+  });
+  const result = await upload.json();
+  return result.id;
+}
+
+async function readFile(fileId) {
+  const res = await gapi.client.drive.files.get({ fileId, alt: 'media' });
+  return res.body;
+}
+
+async function writeFile(fileId, content, mimeType) {
+  await fetch('https://www.googleapis.com/upload/drive/v3/files/' + fileId + '?uploadType=media', {
+    method: 'PATCH',
+    headers: {
+      'Authorization': 'Bearer ' + driveToken,
+      'Content-Type': mimeType
+    },
+    body: content
+  });
+}
+
+/* ── Load memory (sonia-memory.json) ─────────── */
+async function loadMemoryFromDrive() {
+  setStatus('loading memory...', 'busy');
+  try {
+    const fid = await findOrCreateFile('sonia-memory.json', 'application/json', '[]');
+    const raw = await readFile(fid);
+    const entries = JSON.parse(raw || '[]');
+    renderMemory(entries.slice(-40).reverse());
+    setStatus('memory loaded · ' + entries.length + ' entries');
+  } catch(e) {
+    setStatus('memory read error', 'err');
+    console.warn(e);
+  }
+}
+
+document.getElementById('memRefresh').addEventListener('click', () => {
+  if (driveToken) loadMemoryFromDrive();
+  else setStatus('connect drive to load memory', 'err');
+});
+
+function renderMemory(entries) {
+  const el = document.getElementById('memList');
+  el.innerHTML = '';
+  if (!entries.length) {
+    el.innerHTML = '<div style="font-family:var(--font-mono);font-size:0.44rem;letter-spacing:0.25em;color:var(--dim);padding-top:8px;">no memory entries</div>';
+    return;
+  }
+  entries.forEach(e => {
+    const d = document.createElement('div');
+    d.className = 'mem-entry';
+    const ts = new Date(e.timestamp);
+    const label = isNaN(ts) ? e.timestamp : ts.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
+    d.innerHTML =
+      '<div class="mem-ts">' + label + '</div>' +
+      '<div class="mem-user">' + esc(e.user) + '</div>' +
+      '<div class="mem-sonia">' + esc(e.sonia) + '</div>';
+    el.appendChild(d);
+  });
+}
+
+/* ── Save memory entry ────────────────────────── */
+let memFileId = null;
+async function saveToDriveMemory(userMsg, soniaReply) {
+  try {
+    if (!memFileId) memFileId = await findOrCreateFile('sonia-memory.json', 'application/json', '[]');
+    const raw = await readFile(memFileId);
+    const entries = JSON.parse(raw || '[]');
+    entries.push({ timestamp: new Date().toISOString(), user: userMsg, sonia: soniaReply });
+    await writeFile(memFileId, JSON.stringify(entries, null, 2), 'application/json');
+  } catch(e) {
+    console.warn('Memory save failed:', e);
+  }
+}
+
+/* ══ NOTES (leave for desktop Sonia) ════════════════════════════════ */
+// Notes are stored locally and also written to Drive as sonia-notes.json
+let notesQueue = JSON.parse(LS.get('notes') || '[]');
+let notesFileId = null;
+
+function renderNotes() {
+  const el = document.getElementById('notesList');
+  el.innerHTML = '';
+  if (!notesQueue.length) {
+    el.innerHTML = '<div style="font-family:var(--font-mono);font-size:0.44rem;letter-spacing:0.25em;color:var(--dim);padding-top:8px;">no queued notes</div>';
+    return;
+  }
+  notesQueue.slice().reverse().forEach((n, ri) => {
+    const i = notesQueue.length - 1 - ri;
+    const d = document.createElement('div');
+    d.className = 'note-item';
+    const ts = new Date(n.ts);
+    const label = isNaN(ts) ? n.ts : ts.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
+    d.innerHTML =
+      '<div class="note-item-body">' +
+        '<div class="note-item-ts">' + label + (n.synced ? ' · synced' : ' · local') + '</div>' +
+        '<div class="note-item-text">' + esc(n.text) + '</div>' +
+      '</div>' +
+      '<button class="note-del" data-i="' + i + '">✕</button>';
+    el.appendChild(d);
+  });
+  el.querySelectorAll('.note-del').forEach(btn => {
+    btn.addEventListener('click', () => deleteNote(parseInt(btn.dataset.i)));
+  });
+}
+
+function deleteNote(i) {
+  notesQueue.splice(i, 1);
+  LS.set('notes', JSON.stringify(notesQueue));
+  renderNotes();
+  if (driveToken) syncNotesToDrive();
+}
+
+document.getElementById('sendNote').addEventListener('click', async () => {
+  const text = document.getElementById('noteBox').value.trim();
+  if (!text) return;
+  document.getElementById('noteBox').value = '';
+  const note = { ts: new Date().toISOString(), text, synced: false };
+  notesQueue.push(note);
+  LS.set('notes', JSON.stringify(notesQueue));
+  renderNotes();
+  if (driveToken) {
+    await syncNotesToDrive();
+    notesQueue[notesQueue.length - 1].synced = true;
+    LS.set('notes', JSON.stringify(notesQueue));
+    renderNotes();
+    setStatus('note sent to desktop sonia', 'ok');
+  } else {
+    setStatus('note saved locally · connect drive to sync');
+  }
+});
+
+async function syncNotesToDrive() {
+  try {
+    if (!notesFileId) notesFileId = await findOrCreateFile('sonia-notes.json', 'application/json', '[]');
+    const payload = notesQueue.map(n => ({ timestamp: n.ts, text: n.text }));
+    await writeFile(notesFileId, JSON.stringify(payload, null, 2), 'application/json');
+  } catch(e) {
+    setStatus('drive sync failed', 'err');
+    console.warn(e);
+  }
+}
+
+/* ══ UTILS ═══════════════════════════════════════════════════════════ */
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
