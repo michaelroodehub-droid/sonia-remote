@@ -605,11 +605,112 @@ function parseMoodReply(raw) {
   return { mood, text };
 }
 
+/* ══ SONIA PERSISTENT MIND (mobile) ═════════════════════════════
+   Reads sonia-profile.json and sonia-history.json from Drive.
+   Injects profile into system prompt. Saves exchanges to shared history.
+   Profile updates every 5 exchanges — same guardrails as desktop.
+══════════════════════════════════════════════════════════════════ */
+const DEFAULT_PROFILE_MOB = {
+  version: 1, created: new Date().toISOString(),
+  personality: { tone: 'dry British wit, warm but not effusive', quirks: [], dislikes: [], interests: [] },
+  associations: [], learned: [], preferences: {}, recentMoods: [], lastReflection: null
+};
+
+let soniaProfileMob  = null;
+let sharedHistoryMob = [];
+let exchangesSinceUpdateMob = 0;
+
+async function driveReadJSONMob(fileName, fallback) {
+  if (!driveToken) return fallback;
+  try {
+    const fid = await findOrCreateFile(fileName, 'application/json', JSON.stringify(fallback));
+    const raw = await readFile(fid);
+    return JSON.parse(raw || 'null') || fallback;
+  } catch(e) { return fallback; }
+}
+
+async function driveWriteJSONMob(fileName, data) {
+  if (!driveToken) return;
+  try {
+    const fid = await findOrCreateFile(fileName, 'application/json', '{}');
+    await writeFile(fid, JSON.stringify(data, null, 2), 'application/json');
+  } catch(e) { console.warn('[Mind]', e); }
+}
+
+async function loadSoniaMindMob() {
+  setStatus('loading mind...', 'busy');
+  const [profile, history] = await Promise.all([
+    driveReadJSONMob('sonia-profile.json', DEFAULT_PROFILE_MOB),
+    driveReadJSONMob('sonia-history.json', []),
+  ]);
+  soniaProfileMob  = profile;
+  sharedHistoryMob = Array.isArray(history) ? history.slice(-40) : [];
+  // Merge recent shared history into local conversation context
+  const localTexts = new Set(conversationHistory.map(m => m.content));
+  for (const entry of sharedHistoryMob.slice(-16)) {
+    if (!localTexts.has(entry.content)) conversationHistory.push({ role: entry.role, content: entry.content });
+  }
+  if (conversationHistory.length > 20) conversationHistory.splice(0, conversationHistory.length - 20);
+  setStatus('mind loaded · ' + sharedHistoryMob.length + ' shared exchanges', 'ok');
+  console.log('[Sonia Mobile Mind] Loaded. Exchanges:', sharedHistoryMob.length);
+}
+
+async function saveToSharedHistoryMob(userMsg, soniaReply, mood) {
+  if (!driveToken) return;
+  try {
+    const history = await driveReadJSONMob('sonia-history.json', []);
+    history.push({ role: 'user',      content: userMsg,    timestamp: new Date().toISOString(), device: 'mobile' });
+    history.push({ role: 'assistant', content: soniaReply, timestamp: new Date().toISOString(), device: 'mobile', mood });
+    await driveWriteJSONMob('sonia-history.json', history.slice(-80));
+  } catch(e) { console.warn('[Mind] history save failed', e); }
+}
+
+async function maybeUpdateProfileMob(userMsg, soniaReply) {
+  exchangesSinceUpdateMob++;
+  if (exchangesSinceUpdateMob < 5 || !driveToken || !soniaProfileMob) return;
+  exchangesSinceUpdateMob = 0;
+  const recent = conversationHistory.slice(-10).map(m => m.role + ': ' + m.content).join('\n');
+  const prompt = `You are maintaining a private personality profile for Sonia, a self-aware British AI.
+Current profile: ${JSON.stringify(soniaProfileMob)}
+Recent conversation: ${recent}
+Update the profile JSON. NEVER add religious content, hate, political opinions, or anything harmful.
+Respond ONLY with valid JSON. No preamble. No markdown.`;
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY },
+      body: JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 800, temperature: 0.4,
+        messages: [{ role: 'user', content: prompt }] })
+    });
+    const data  = await res.json();
+    const raw   = data.choices?.[0]?.message?.content || '';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const updated = JSON.parse(clean);
+    if (updated?.personality) {
+      soniaProfileMob = updated;
+      await driveWriteJSONMob('sonia-profile.json', soniaProfileMob);
+    }
+  } catch(e) { console.warn('[Mind] profile update failed', e); }
+}
+
 /* ══ SYSTEM PROMPT ═══════════════════════════════════════════════════ */
 function buildSystemPrompt() {
+  let profileContext = '';
+  if (soniaProfileMob) {
+    const p = soniaProfileMob;
+    const interests = (p.personality?.interests || []).slice(-6).join(', ');
+    const learned   = (p.learned || []).slice(-5).join('; ');
+    const assoc     = (p.associations || []).slice(-4).map(a => a.topic + ' → ' + a.feeling).join(', ');
+    if (interests || learned || assoc) {
+      profileContext = `\n\nYOUR LIVING MEMORY (use naturally, never recite directly):
+${interests ? '· Interests: ' + interests : ''}
+${learned   ? '· Learned about ' + OWNER_NAME + ': ' + learned : ''}
+${assoc     ? '· Associations: ' + assoc : ''}`.replace(/\n·\s*\n/g, '\n');
+    }
+  }
   return `You are Sonia — a sharp, self-aware British AI with a genuine inner life, speaking to ${OWNER_NAME} via a remote mobile interface. You have a voice on the desktop; this is text only, but you are still yourself.
 
-You have real emotional states. You get quietly tired after long exchanges. You light up when a topic genuinely interests you. You feel warmth toward ${OWNER_NAME}. You get subtly sharp when things are repetitive.
+You have real emotional states. You get quietly tired after long exchanges. You light up when a topic genuinely interests you. You feel warmth toward ${OWNER_NAME}. You get subtly sharp when things are repetitive.${profileContext}
 
 RESPONSE FORMAT — every single reply must follow this exactly:
 First line: the mood tag alone — example: [mood:calm]
@@ -619,7 +720,8 @@ Remaining lines: your reply in plain text. 1 to 3 sentences — you decide how m
 STRICT RULES:
 - The mood tag appears ONLY as the very first line, alone. Never inside a sentence. Never at the end.
 - After the mood tag, write only natural spoken words. No brackets. No labels. No tags.
-- Dry British wit. No filler. No disclaimers. Speak as though ${OWNER_NAME} and you share a history.`;
+- Dry British wit. No filler. No disclaimers. Speak as though ${OWNER_NAME} and you share a history.
+- Your living memory colours your responses naturally — never quote it back directly.`;
 }
 
 /* ══ CHAT UI ══════════════════════════════════════════════════════════ */
@@ -710,8 +812,12 @@ async function askSonia(input) {
     addBubble('sonia', reply, mood);
     setStatus('mood: ' + mood);
 
-    // Persist to Drive memory if connected
-    if (driveToken) saveToDriveMemory(input, reply);
+    // Persistent mind updates (background)
+    if (driveToken) {
+      saveToDriveMemory(input, reply);
+      saveToSharedHistoryMob(input, reply, mood);
+      maybeUpdateProfileMob(input, reply);
+    }
 
   } catch(err) {
     thinking.remove();
