@@ -516,6 +516,14 @@ let driveToken  = null;
 const conversationHistory = [];
 
 const VALID_MOODS = ['calm','curious','thinking','focused','intimate','introspective'];
+const MOOD_EMOJI = {
+  calm:          '🌿',
+  curious:       '✨',
+  thinking:      '💭',
+  focused:       '🎯',
+  intimate:      '🌙',
+  introspective: '🪐',
+};
 const MOOD_MAP = {
   amused:'curious', happy:'intimate', tired:'calm', warm:'intimate',
   sharp:'focused', reflective:'introspective', excited:'curious',
@@ -553,6 +561,8 @@ function applyConfig() {
     loadDriveLibs(); // pre-load GIS + gapi silently so button tap is instant
   }
   setStatus('systems online · ' + OWNER_NAME.toLowerCase());
+  // Fire proactive check even without Drive — weather works without auth
+  setTimeout(maybeFireProactive, 5000);
   setPresence('online');
   renderNotes();
 }
@@ -694,6 +704,84 @@ Respond ONLY with valid JSON. No preamble. No markdown.`;
 }
 
 /* ══ SYSTEM PROMPT ═══════════════════════════════════════════════════ */
+
+/* ══ WEATHER — wttr.in, no key needed ══════════════════════════════ */
+let _weatherCache = null;
+let _weatherFetched = 0;
+
+async function fetchWeatherThought() {
+  try {
+    const now = Date.now();
+    if (_weatherCache && now - _weatherFetched < 3 * 60 * 60 * 1000) return _weatherCache;
+    const res  = await fetch('https://wttr.in/?format=j1&lang=en', { cache: 'no-store' });
+    const data = await res.json();
+    const today    = data.weather[0];
+    const tomorrow = data.weather[1];
+    const desc     = today.hourly[4]?.weatherDesc[0]?.value || '';
+    const maxC     = today.maxtempC;
+    const minC     = today.mintempC;
+    const rainTom  = parseInt(tomorrow.hourly[4]?.chanceofrain || 0);
+    const descTom  = tomorrow.hourly[4]?.weatherDesc[0]?.value || '';
+    let thought;
+    if (rainTom > 60) {
+      thought = `Mr H, tomorrow is looking rather wet — ${rainTom}% chance of rain. You may want to plan accordingly.`;
+    } else if (parseInt(maxC) > 28) {
+      thought = `It's going to be a warm one today, Mr H — up to ${maxC}°C. ${desc}. Stay hydrated.`;
+    } else if (parseInt(minC) < 8) {
+      thought = `It's cold out there, Mr H. Only ${minC}°C tonight. Worth remembering.`;
+    } else {
+      thought = `The weather today is ${desc.toLowerCase()}, ${minC}–${maxC}°C. Tomorrow: ${descTom.toLowerCase()}. Nothing dramatic.`;
+    }
+    _weatherCache = thought;
+    _weatherFetched = now;
+    return thought;
+  } catch(e) { return null; }
+}
+
+/* ══ NEWS — BBC Tech RSS, no key needed ════════════════════════════ */
+let _newsCache  = [];
+let _newsFetched = 0;
+let _newsIndex  = 0;
+
+async function fetchNewsThought() {
+  try {
+    const now = Date.now();
+    if (_newsCache.length && now - _newsFetched < 2 * 60 * 60 * 1000) {
+      const item = _newsCache[_newsIndex % _newsCache.length];
+      _newsIndex++;
+      return item ? `Something worth knowing, Mr H — ${item}.` : null;
+    }
+    const url = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://feeds.bbci.co.uk/news/technology/rss.xml');
+    const res  = await fetch(url);
+    const json = await res.json();
+    const parser = new DOMParser();
+    const xml    = parser.parseFromString(json.contents, 'text/xml');
+    const items  = [...xml.querySelectorAll('item')].slice(0, 6);
+    _newsCache = items.map(i => i.querySelector('title')?.textContent?.trim() || '').filter(Boolean);
+    _newsFetched = now;
+    _newsIndex = 1;
+    return _newsCache[0] ? `Something worth knowing, Mr H — ${_newsCache[0]}.` : null;
+  } catch(e) { return null; }
+}
+
+/* ── Proactive surface: weather or news bubble on load ─────────────
+   Fires once after Drive connects, quietly drops a bubble into chat.
+   Never more than once per session. Feels like she noticed something.
+────────────────────────────────────────────────────────────────── */
+let _proactiveFired = false;
+async function maybeFireProactive() {
+  if (_proactiveFired) return;
+  _proactiveFired = true;
+  await new Promise(r => setTimeout(r, 4000)); // let the UI settle
+  const roll = Math.random();
+  let thought = null;
+  if (roll < 0.45) thought = await fetchWeatherThought();
+  else if (roll < 0.85) thought = await fetchNewsThought();
+  if (thought) {
+    addBubble('sonia', thought, 'calm');
+  }
+}
+
 function buildSystemPrompt() {
   let profileContext = '';
   if (soniaProfileMob) {
@@ -742,7 +830,8 @@ function addBubble(role, text, mood) {
     const pip = document.createElement('span');
     pip.className = 'mood-pip m-' + (VALID_MOODS.includes(mood) ? mood : 'default');
     meta.appendChild(pip);
-    meta.appendChild(document.createTextNode(mood));
+    const emoji = MOOD_EMOJI[mood] || '';
+    meta.appendChild(document.createTextNode(emoji + ' ' + mood));
   } else if (role === 'user') {
     meta.textContent = 'you';
   }
@@ -810,7 +899,7 @@ async function askSonia(input) {
 
     conversationHistory.push({ role: 'assistant', content: reply });
     addBubble('sonia', reply, mood);
-    setStatus('mood: ' + mood);
+    setStatus((MOOD_EMOJI[mood] || '') + ' ' + mood);
 
     // Persistent mind updates (background)
     if (driveToken) {
@@ -903,6 +992,7 @@ function signInDrive() {
         setStatus('drive connected', 'ok');
         document.getElementById('driveBtn').textContent = 'DRIVE: ON';
         loadMemoryFromDrive();
+        maybeFireProactive();
       }
     });
   }
