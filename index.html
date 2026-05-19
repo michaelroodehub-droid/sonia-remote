@@ -401,6 +401,54 @@
     .m-introspective { background: hsl(240,55%,52%); }
     .m-default       { background: rgba(255,255,255,0.5); }
 
+    /* ══ LIGHT MODE ════════════════════════════════════════════════ */
+    body.light {
+      --bg:           #ffffff;
+      --surface:      #f5f5f5;
+      --border:       rgba(0,0,0,0.18);
+      --border-hover: rgba(0,0,0,0.45);
+      --text:         rgba(0,0,0,1.0);
+      --muted:        rgba(0,0,0,0.65);
+      --dim:          rgba(0,0,0,0.42);
+      --accent:       rgba(0,0,0,0.85);
+    }
+    body.light #setup           { background: #fff; }
+    body.light #setup h1        { color: #000; }
+    body.light .setup-field input { color: #000; }
+    body.light #hdr-title       { color: #000; }
+    body.light .mode-btn.active { color: #000; border-color: #000; }
+    body.light .bubble.user  .bubble-text { color: #000; }
+    body.light .bubble.sonia .bubble-text { color: #111; }
+    body.light #chatBox         { color: #000; }
+    body.light #chatBox:focus   { border-color: #000; }
+    body.light .mem-user        { color: rgba(0,0,0,0.7); }
+    body.light .mem-sonia       { color: #000; }
+    body.light #noteBox         { color: #000; }
+    body.light #noteBox:focus   { border-color: #000; }
+    body.light .note-item-text  { color: #000; }
+    body.light #presence.online {
+      background: rgba(0,160,70,1);
+      box-shadow: 0 0 6px rgba(0,160,70,0.7), 0 0 14px rgba(0,160,70,0.3);
+    }
+    body.light #presence.thinking {
+      background: rgba(80,100,220,1);
+      box-shadow: 0 0 6px rgba(80,100,220,0.7), 0 0 14px rgba(80,100,220,0.3);
+    }
+    body.light #statusText.ok   { color: rgba(0,140,60,0.9); }
+    body.light #statusText.err  { color: rgba(200,30,30,0.9); }
+    body.light #statusText.busy { color: rgba(60,80,200,0.9); }
+
+    /* theme toggle */
+    #themeBtn {
+      background: none; border: none;
+      font-size: 1.1rem;
+      padding: 0 0 0 12px; cursor: pointer;
+      transition: opacity 0.3s; flex-shrink: 0;
+      min-height: 44px; min-width: 36px;
+      line-height: 1; opacity: 0.7;
+    }
+    #themeBtn:active { opacity: 1; }
+
     /* ══ TABLET / DESKTOP ══════════════════════════════════════════ */
     @media (min-width: 600px) {
       :root {
@@ -477,6 +525,7 @@
     <div style="display:flex;align-items:center;">
       <span id="hdr-title">Sonia</span>
       <span id="presence"></span>
+      <button id="themeBtn" title="Toggle theme">☀️</button>
     </div>
     <div id="hdr-mode">
       <button class="mode-btn active" data-panel="chatPanel">CHAT</button>
@@ -525,6 +574,44 @@
 </div>
 
 <script>
+/* ══ PING SOUND ══════════════════════════════════════════════════════ */
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function playPing(type) {
+  // type: 'send' (slightly lower) | 'receive' (brighter)
+  try {
+    const ctx  = getAudioCtx();
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    const freq = type === 'send' ? 620 : 820;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(freq * 0.85, ctx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.07, ctx.currentTime + 0.01); // very faint
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.2);
+  } catch(e) { /* audio blocked — silent fail */ }
+}
+
+/* ══ THEME TOGGLE ════════════════════════════════════════════════════ */
+(function() {
+  const btn = document.getElementById('themeBtn');
+  const saved = localStorage.getItem('sonia_theme');
+  if (saved === 'light') { document.body.classList.add('light'); btn.textContent = '🌙'; }
+  btn.addEventListener('click', () => {
+    const isLight = document.body.classList.toggle('light');
+    btn.textContent = isLight ? '🌙' : '☀️';
+    localStorage.setItem('sonia_theme', isLight ? 'light' : 'dark');
+  });
+})();
+
 /* ══ CONFIG ══════════════════════════════════════════════════════════ */
 const LS = {
   get: k => localStorage.getItem('sonia_' + k),
@@ -722,6 +809,7 @@ async function sendMessage(text) {
 
     thinkEl.remove();
     appendBubble('sonia', reply, mood);
+    playPing('receive');
     setPresence('online');
     setStatus('');
     saveMemory(text, reply);
@@ -742,6 +830,7 @@ sendChat.addEventListener('click', () => {
   if (!v) return;
   chatBox.value = '';
   chatBox.style.height = '';
+  playPing('send');
   sendMessage(v);
 });
 
