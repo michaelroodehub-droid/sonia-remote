@@ -99,26 +99,28 @@
     /* Header */
     #hdr {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 18px 24px 12px;
+      padding: 14px 16px 10px;
       border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
+      flex-shrink: 0; gap: 8px;
     }
     #hdr-title {
       font-family: var(--font-main); font-weight: 300;
       font-size: var(--fs-title); letter-spacing: 0.4em; color: #fff;
+      flex-shrink: 0;
     }
     #hdr-mode {
-      display: flex; gap: 4px;
+      display: flex; gap: 0; overflow: hidden;
     }
     .mode-btn {
       background: none; border: none;
-      font-family: var(--font-mono); font-size: var(--fs-sm);
-      letter-spacing: 0.25em; color: var(--muted);
-      padding: 6px 12px; cursor: pointer;
+      font-family: var(--font-mono); font-size: 0.72rem;
+      letter-spacing: 0.12em; color: var(--muted);
+      padding: 6px 8px; cursor: pointer;
       border-bottom: 1px solid transparent;
       transition: color 0.3s, border-color 0.3s;
+      white-space: nowrap;
     }
-    .mode-btn.active { color: rgba(255,255,255,0.8); border-color: var(--accent); }
+    .mode-btn.active { color: rgba(255,255,255,0.9); border-color: var(--accent); }
 
     /* Tab panels */
     #panels { flex: 1; overflow: hidden; min-height: 0; position: relative; }
@@ -446,6 +448,57 @@
     .m-intimate      { background: hsl(320,55%,50%); }
     .m-introspective { background: hsl(240,45%,42%); }
     .m-default       { background: rgba(255,255,255,0.4); }
+    /* ══ RADIO PANEL ══ */
+    #radioPanel {
+      overflow-y: auto; padding: 22px 20px;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    #radioPanel::-webkit-scrollbar { display: none; }
+    .radio-hdr {
+      font-family: var(--font-mono); font-size: var(--fs-sm);
+      letter-spacing: 0.35em; color: var(--muted);
+    }
+    .radio-sub {
+      font-family: var(--font-mono); font-size: var(--fs-xs);
+      letter-spacing: 0.18em; color: var(--dim); line-height: 1.7;
+    }
+    .station-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .station-btn {
+      background: none; border: 1px solid var(--border);
+      color: var(--muted); font-family: var(--font-mono);
+      font-size: 0.68rem; letter-spacing: 0.15em;
+      padding: 14px 8px; cursor: pointer; text-align: center;
+      line-height: 1.5;
+      transition: color 0.3s, border-color 0.3s, background 0.3s;
+    }
+    .station-btn:active,
+    .station-btn.playing {
+      color: #fff; border-color: rgba(255,160,200,0.7);
+      background: rgba(255,160,200,0.06);
+    }
+    .station-btn .st-name { display: block; color: var(--text); margin-bottom: 3px; }
+    .station-btn .st-loc  { display: block; font-size: 0.58rem; color: var(--dim); }
+    #radioPlayer { display: none; }
+    #radioNowPlaying {
+      font-family: var(--font-mono); font-size: var(--fs-xs);
+      letter-spacing: 0.22em; color: rgba(255,160,200,0.85);
+      min-height: 20px; animation: blink 2s ease-in-out infinite;
+    }
+    #radioNowPlaying:empty { animation: none; }
+    #radioStop {
+      background: none; border: none;
+      border-bottom: 1px solid var(--border);
+      color: var(--dim); font-family: var(--font-mono);
+      font-size: var(--fs-xs); letter-spacing: 0.25em;
+      padding: 8px 0; cursor: pointer;
+      transition: color 0.3s; display: none;
+    }
+    #radioStop.visible { display: inline; }
+    #radioStop:active { color: rgba(255,100,100,0.8); }
   </style>
 </head>
 <body>
@@ -495,6 +548,7 @@
       <button class="mode-btn active" data-panel="chatPanel">CHAT</button>
       <button class="mode-btn" data-panel="memPanel">MEMORY</button>
       <button class="mode-btn" data-panel="notesPanel">NOTES</button>
+      <button class="mode-btn" data-panel="radioPanel">RADIO</button>
     </div>
   </div>
 
@@ -530,6 +584,16 @@
       <div id="driveHint">no google client id set · add one in setup to enable drive sync</div>
       <div style="font-family:var(--font-mono);font-size:0.4rem;letter-spacing:0.2em;color:var(--dim);">QUEUED NOTES</div>
       <div class="notes-queue" id="notesList"></div>
+    </div>
+
+    <!-- RADIO -->
+    <div class="panel" id="radioPanel">
+      <div class="radio-hdr">RADIO</div>
+      <div class="radio-sub">direct stream · no sign-in needed</div>
+      <div id="radioNowPlaying"></div>
+      <button id="radioStop">■ STOP</button>
+      <div class="station-grid" id="stationGrid"></div>
+      <audio id="radioPlayer" preload="none"></audio>
     </div>
 
   </div>
@@ -1333,6 +1397,79 @@ async function syncNotesToDrive() {
     console.warn(e);
   }
 }
+
+/* ══ RADIO ════════════════════════════════════════════════════════════
+   Direct MP3/AAC streams — no iframes, no sign-in, works on mobile.
+   Sourced from public broadcaster endpoints.
+════════════════════════════════════════════════════════════════════ */
+const STATIONS = [
+  { name: 'BBC Radio 6',    loc: 'London, UK',       url: 'https://stream.live.vc.bbcmedia.co.uk/bbc_6music' },
+  { name: 'BBC World Svc',  loc: 'London, UK',       url: 'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service' },
+  { name: 'Radio FG',       loc: 'Paris, FR',        url: 'https://radiofg.impek.com/fg' },
+  { name: 'Chillhop',       loc: 'lo-fi · global',   url: 'https://streams.ilovemusic.de/iloveradio17.mp3' },
+  { name: 'Jazz24',         loc: 'Seattle, US',      url: 'https://live.wostreaming.net/direct/ppm-jazz24aac-ibc1' },
+  { name: 'SomaFM Drone',   loc: 'San Francisco',    url: 'https://ice6.somafm.com/dronezone-128-mp3' },
+  { name: 'SomaFM Groove',  loc: 'San Francisco',    url: 'https://ice6.somafm.com/groovesalad-128-mp3' },
+  { name: 'Radio Paradise', loc: 'worldwide',        url: 'https://stream.radioparadise.com/aac-128' },
+];
+
+let currentStation = null;
+const radioPlayer  = document.getElementById('radioPlayer');
+const radioNowPlaying = document.getElementById('radioNowPlaying');
+const radioStop    = document.getElementById('radioStop');
+
+function buildStationGrid() {
+  const grid = document.getElementById('stationGrid');
+  grid.innerHTML = '';
+  STATIONS.forEach((s, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'station-btn';
+    btn.dataset.i = i;
+    btn.innerHTML =
+      '<span class="st-name">' + esc(s.name) + '</span>' +
+      '<span class="st-loc">' + esc(s.loc) + '</span>';
+    btn.addEventListener('click', () => playStation(i, btn));
+    grid.appendChild(btn);
+  });
+}
+
+function playStation(i, btn) {
+  const s = STATIONS[i];
+  // Toggle off if already playing
+  if (currentStation === i && !radioPlayer.paused) {
+    stopRadio(); return;
+  }
+  // Clear previous active
+  document.querySelectorAll('.station-btn').forEach(b => b.classList.remove('playing'));
+  btn.classList.add('playing');
+  currentStation = i;
+  radioPlayer.src = s.url;
+  radioPlayer.load();
+  radioPlayer.play().catch(() => {});
+  radioNowPlaying.textContent = '▶ ' + s.name + ' · ' + s.loc;
+  radioStop.classList.add('visible');
+  setStatus('radio · ' + s.name.toLowerCase());
+}
+
+function stopRadio() {
+  radioPlayer.pause();
+  radioPlayer.src = '';
+  currentStation = null;
+  document.querySelectorAll('.station-btn').forEach(b => b.classList.remove('playing'));
+  radioNowPlaying.textContent = '';
+  radioStop.classList.remove('visible');
+  setStatus('radio stopped');
+}
+
+radioStop.addEventListener('click', stopRadio);
+radioPlayer.addEventListener('error', () => {
+  setStatus('stream error · try another station', 'err');
+  radioNowPlaying.textContent = '';
+  document.querySelectorAll('.station-btn').forEach(b => b.classList.remove('playing'));
+  radioStop.classList.remove('visible');
+});
+
+buildStationGrid();
 
 /* ══ UTILS ═══════════════════════════════════════════════════════════ */
 function esc(s) {
