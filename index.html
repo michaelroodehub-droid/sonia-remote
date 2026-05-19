@@ -10,23 +10,23 @@
 
     :root {
       --bg: #000;
-      --surface: #0a0a0a;
-      --border: rgba(255,255,255,0.22);
-      --border-hover: rgba(255,255,255,0.55);
+      --surface: #050505;
+      --border: rgba(255,255,255,0.1);
+      --border-hover: rgba(255,255,255,0.3);
       --text: rgba(255,255,255,0.95);
-      --muted: rgba(255,255,255,0.62);
-      --dim: rgba(255,255,255,0.38);
-      --accent: rgba(255,255,255,0.82);
-      --fade: 0.45s cubic-bezier(0.4,0,0.2,1);
+      --muted: rgba(255,255,255,0.6);
+      --dim: rgba(255,255,255,0.35);
+      --accent: rgba(255,255,255,0.8);
+      --fade: 0.3s cubic-bezier(0.4,0,0.2,1);
       --font-mono: 'Share Tech Mono', 'Courier New', monospace;
       --font-main: 'Century Gothic', 'CenturyGothic', 'AppleGothic', sans-serif;
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --fs-xs:   0.78rem;
-      --fs-sm:   0.88rem;
-      --fs-base: 1.05rem;
-      --fs-body: 1.1rem;
-      --fs-title: 1.25rem;
+      --fs-xs:   0.75rem;
+      --fs-sm:   0.85rem;
+      --fs-base: 1.0rem;
+      --fs-body: 1.05rem;
+      --fs-title: 1.2rem;
     }
 
     html, body {
@@ -49,25 +49,27 @@
     #setup h1 {
       font-family: var(--font-main); font-weight: 300;
       font-size: 2rem; letter-spacing: 0.45em; color: #fff;
+      text-indent: 0.45em;
     }
     #setup .sub {
       font-family: var(--font-mono); font-size: var(--fs-sm);
       letter-spacing: 0.4em; color: var(--muted); text-align: center;
+      text-indent: 0.4em;
     }
     .setup-field {
       width: 100%; max-width: 340px;
     }
     .setup-field label {
       display: block; font-family: var(--font-mono);
-      font-size: var(--fs-sm); letter-spacing: 0.35em;
-      color: var(--muted); margin-bottom: 8px;
+      font-size: var(--fs-xs); letter-spacing: 0.25em;
+      color: var(--dim); margin-bottom: 6px;
     }
     .setup-field input {
       width: 100%; background: transparent;
       border: none; border-bottom: 1px solid var(--border);
       color: #fff; font-family: var(--font-mono);
-      font-size: var(--fs-base); letter-spacing: 0.15em;
-      padding: 12px 0; outline: none;
+      font-size: var(--fs-base); letter-spacing: 0.1em;
+      padding: 10px 0; outline: none;
       transition: border-color 0.3s;
     }
     .setup-field input:focus { border-color: var(--accent); }
@@ -76,18 +78,17 @@
       background: none; border: 1px solid var(--border);
       color: var(--muted); font-family: var(--font-mono);
       font-size: var(--fs-base); letter-spacing: 0.3em;
-      padding: 14px 40px; cursor: pointer;
+      padding: 14px 40px; cursor: pointer; text-indent: 0.3em;
       transition: color 0.3s, border-color 0.3s;
     }
     #setupBtn:hover { color: #fff; border-color: var(--accent); }
     .setup-note {
       font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.2em; color: var(--dim);
-      text-align: center; max-width: 320px; line-height: 1.8;
+      letter-spacing: 0.15em; color: var(--dim);
+      text-align: center; max-width: 320px; line-height: 1.6;
     }
-    .setup-note a { color: var(--muted); }
 
-    /* ── MAIN APP ─────────────────────────────── */
+    /* ── MAIN APP APP STRUCTURE ────────────────── */
     #app {
       display: none;
       position: fixed; inset: 0;
@@ -100,44 +101,46 @@
     /* Header */
     #hdr {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 16px 10px;
+      padding: 16px 20px 12px;
       border-bottom: 1px solid var(--border);
-      flex-shrink: 0; gap: 8px;
+      flex-shrink: 0; gap: 12px;
     }
     #hdr-title {
       font-family: var(--font-main); font-weight: 300;
-      font-size: var(--fs-title); letter-spacing: 0.4em; color: #fff;
+      font-size: var(--fs-title); letter-spacing: 0.35em; color: #fff;
       flex-shrink: 0;
     }
     #hdr-mode {
-      display: flex; gap: 0; overflow: hidden;
+      display: flex; gap: 4px; overflow-x: auto;
+      scrollbar-width: none; -webkit-overflow-scrolling: touch;
     }
+    #hdr-mode::-webkit-scrollbar { display: none; }
     .mode-btn {
       background: none; border: none;
-      font-family: var(--font-mono); font-size: 0.72rem;
-      letter-spacing: 0.12em; color: var(--muted);
-      padding: 6px 8px; cursor: pointer;
+      font-family: var(--font-mono); font-size: 0.75rem;
+      letter-spacing: 0.15em; color: var(--muted);
+      padding: 6px 10px; cursor: pointer;
       border-bottom: 1px solid transparent;
-      transition: color 0.3s, border-color 0.3s;
+      transition: color 0.2s, border-color 0.2s;
       white-space: nowrap;
     }
-    .mode-btn.active { color: rgba(255,255,255,0.9); border-color: var(--accent); }
+    .mode-btn.active { color: #fff; border-color: var(--accent); }
 
-    /* Tab panels */
+    /* Tab panels container */
     #panels { flex: 1; overflow: hidden; min-height: 0; position: relative; }
 
     .panel {
       position: absolute; inset: 0;
-      display: flex; flex-direction: column;
-      opacity: 0; pointer-events: none;
+      display: none; flex-direction: column;
+      opacity: 0;
       transition: opacity var(--fade);
     }
-    .panel.active { opacity: 1; pointer-events: all; }
+    .panel.active { display: flex; opacity: 1; }
 
     /* ── CHAT PANEL ───────────────────────────── */
     #chatLog {
       flex: 1; overflow-y: auto;
-      padding: 20px 24px;
+      padding: 20px;
       display: flex; flex-direction: column; gap: 20px;
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
@@ -147,21 +150,21 @@
 
     .bubble {
       max-width: 85%;
-      animation: bubbleIn 0.3s ease forwards;
+      animation: bubbleIn 0.25s ease forwards;
     }
     @keyframes bubbleIn {
-      from { opacity: 0; transform: translateY(6px); }
+      from { opacity: 0; transform: translateY(4px); }
       to   { opacity: 1; transform: translateY(0); }
     }
     .bubble.user { align-self: flex-end; }
     .bubble.sonia { align-self: flex-start; }
 
     .bubble-text {
-      font-size: var(--fs-body); line-height: 1.75;
-      letter-spacing: 0.02em;
+      font-size: var(--fs-body); line-height: 1.65;
+      letter-spacing: 0.01em;
     }
     .bubble.user .bubble-text {
-      color: rgba(255,255,255,0.88);
+      color: rgba(255,255,255,0.9);
       text-align: right;
     }
     .bubble.sonia .bubble-text {
@@ -170,39 +173,38 @@
 
     .bubble-meta {
       font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.25em; color: var(--dim);
-      margin-top: 4px;
+      letter-spacing: 0.2em; color: var(--dim);
+      margin-top: 6px; display: flex; align-items: center; gap: 6px;
     }
-    .bubble.user .bubble-meta { text-align: right; }
+    .bubble.user .bubble-meta { justify-content: flex-end; }
 
     .mood-pip {
-      display: inline-block; width: 5px; height: 5px;
-      border-radius: 50%; margin-right: 6px;
-      vertical-align: middle;
+      display: inline-block; width: 6px; height: 6px;
+      border-radius: 50%;
     }
 
-    /* thinking indicator */
+    /* Thinking Indicator */
     .thinking .bubble-text {
       color: var(--dim);
-      animation: blink 1s ease-in-out infinite;
+      animation: blink 1.2s ease-in-out infinite;
     }
     @keyframes blink { 0%,100%{opacity:0.3} 50%{opacity:1} }
 
-    /* Chat input */
+    /* Chat inputs */
     #chatInput {
       display: flex; align-items: flex-end; gap: 12px;
       padding: 14px 20px;
       border-top: 1px solid var(--border);
-      flex-shrink: 0;
+      flex-shrink: 0; background: var(--bg);
     }
     #chatBox {
       flex: 1; background: transparent;
       border: none; border-bottom: 1px solid var(--border);
       color: #fff; font-family: var(--font-mono);
-      font-size: var(--fs-base); letter-spacing: 0.1em;
-      padding: 10px 0; outline: none;
+      font-size: var(--fs-base); letter-spacing: 0.05em;
+      padding: 8px 0; outline: none;
       resize: none; max-height: 80px;
-      overflow-y: auto; line-height: 1.5;
+      overflow-y: auto; line-height: 1.4;
       transition: border-color 0.3s;
     }
     #chatBox:focus { border-color: var(--accent); }
@@ -210,57 +212,49 @@
     #sendChat {
       background: none; border: none;
       font-family: var(--font-mono); font-size: var(--fs-sm);
-      letter-spacing: 0.2em; color: var(--muted);
-      padding: 8px 0; cursor: pointer;
+      letter-spacing: 0.15em; color: var(--muted);
+      padding: 8px 4px; cursor: pointer;
       transition: color 0.3s; flex-shrink: 0;
-      border-bottom: 1px solid transparent;
     }
-    #sendChat:hover { color: #fff; border-color: var(--accent); }
+    #sendChat:hover { color: #fff; }
 
-    /* ── MIC & MAIL BUTTONS ─────────────────────── */
-    #micBtn, #composeBtn {
+    /* Mic button */
+    #micBtn {
       background: none; border: none;
-      font-family: var(--font-mono); font-size: var(--fs-sm);
-      letter-spacing: 0.18em; color: var(--muted);
-      padding: 8px 6px; cursor: pointer;
+      font-family: var(--font-mono); font-size: var(--fs-base);
+      color: var(--muted); padding: 6px 4px; cursor: pointer;
       transition: color 0.3s; flex-shrink: 0;
-      border-bottom: 1px solid transparent;
-      min-width: 36px; text-align: center;
     }
-    #micBtn:hover, #composeBtn:hover { color: #fff; }
+    #micBtn:hover { color: #fff; }
     #micBtn.active {
-      color: rgba(255,160,200,0.95);
-      border-color: rgba(255,160,200,0.5);
-      animation: micBlink 0.7s ease-in-out infinite;
+      color: rgba(255,100,100,0.9);
+      animation: micBlink 0.8s ease-in-out infinite;
     }
-    @keyframes micBlink {
-      0%,100% { opacity: 1; }
-      50%      { opacity: 0.35; }
-    }
+    @keyframes micBlink { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
     /* ── MEMORY PANEL ─────────────────────────── */
     #memPanel {
-      overflow-y: auto;
-      padding: 24px;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+      padding: 20px;
     }
-    #memPanel::-webkit-scrollbar { display: none; }
-
     .mem-hdr {
       font-family: var(--font-mono); font-size: var(--fs-sm);
-      letter-spacing: 0.4em; color: var(--muted);
-      margin-bottom: 18px; display: flex;
+      letter-spacing: 0.3em; color: var(--muted);
+      margin-bottom: 16px; display: flex;
       justify-content: space-between; align-items: center;
+      flex-shrink: 0;
     }
     .mem-refresh {
       background: none; border: none; cursor: pointer;
-      font-family: var(--font-mono); font-size: var(--fs-sm);
-      letter-spacing: 0.25em; color: var(--dim);
+      font-family: var(--font-mono); font-size: var(--fs-xs);
+      letter-spacing: 0.15em; color: var(--dim);
       transition: color 0.3s;
     }
-    .mem-refresh:hover { color: var(--accent); }
-
+    .mem-refresh:hover { color: #fff; }
+    #memList {
+      flex: 1; overflow-y: auto;
+      scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    }
+    #memList::-webkit-scrollbar { display: none; }
     .mem-entry {
       border-bottom: 1px solid var(--border);
       padding: 14px 0;
@@ -268,51 +262,61 @@
     .mem-entry:last-child { border-bottom: none; }
     .mem-ts {
       font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.2em; color: var(--dim); margin-bottom: 6px;
+      letter-spacing: 0.15em; color: var(--dim); margin-bottom: 6px;
     }
     .mem-user {
-      font-size: var(--fs-base); color: rgba(255,255,255,0.72);
-      margin-bottom: 4px; line-height: 1.5;
+      font-size: var(--fs-base); color: rgba(255,255,255,0.7);
+      margin-bottom: 4px; line-height: 1.4;
     }
     .mem-sonia {
-      font-size: var(--fs-body); color: var(--text); line-height: 1.6;
+      font-size: var(--fs-body); color: var(--text); line-height: 1.5;
     }
 
-    /* ── NOTES PANEL ──────────────────────────── */
+    /* ── NOTES PANEL (SCROLL FIXED) ────────────── */
     #notesPanel {
-      display: flex; flex-direction: column;
-      padding: 24px; gap: 16px;
+      padding: 20px; gap: 16px;
     }
     .notes-hdr {
       font-family: var(--font-mono); font-size: var(--fs-sm);
-      letter-spacing: 0.4em; color: var(--muted);
+      letter-spacing: 0.25em; color: var(--muted);
+      flex-shrink: 0;
     }
     #noteBox {
-      flex: 1; background: transparent;
-      border: none; border-bottom: 1px solid var(--border);
+      width: 100%; background: transparent;
+      border: 1px solid var(--border);
       color: #fff; font-family: var(--font-mono);
-      font-size: var(--fs-base); letter-spacing: 0.08em;
-      padding: 12px 0; outline: none;
-      resize: none; line-height: 1.7;
-      min-height: 120px;
-      transition: border-color 0.3s;
+      font-size: var(--fs-base); letter-spacing: 0.05em;
+      padding: 12px; outline: none;
+      resize: none; line-height: 1.5;
+      min-height: 100px; max-height: 140px;
+      transition: border-color 0.3s; flex-shrink: 0;
     }
-    #noteBox:focus { border-color: var(--accent); }
+    #noteBox:focus { border-color: var(--border-hover); }
     #noteBox::placeholder { color: var(--dim); }
-    .notes-actions { display: flex; gap: 16px; }
+    .notes-actions { display: flex; gap: 16px; flex-shrink: 0; }
     .note-btn {
-      background: none; border: none;
-      border-bottom: 1px solid var(--border);
+      flex: 1; background: none; border: 1px solid var(--border);
       color: var(--muted); font-family: var(--font-mono);
-      font-size: var(--fs-sm); letter-spacing: 0.25em;
-      padding: 8px 0; cursor: pointer;
+      font-size: var(--fs-xs); letter-spacing: 0.2em;
+      padding: 10px 0; cursor: pointer; text-align: center;
       transition: color 0.3s, border-color 0.3s;
     }
     .note-btn:hover { color: #fff; border-color: var(--accent); }
+    #driveHint {
+      font-family: var(--font-mono); font-size: var(--fs-xs);
+      letter-spacing: 0.12em; color: var(--dim); line-height: 1.5;
+      display: none; flex-shrink: 0;
+    }
+    #driveHint.visible { display: block; }
+    .queue-title {
+      font-family: var(--font-mono); font-size: var(--fs-xs);
+      letter-spacing: 0.2em; color: var(--dim); margin-top: 4px;
+      flex-shrink: 0;
+    }
     .notes-queue {
       flex: 1; overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+      scrollbar-width: none; -webkit-overflow-scrolling: touch;
+      border-top: 1px solid var(--border);
     }
     .notes-queue::-webkit-scrollbar { display: none; }
     .note-item {
@@ -320,243 +324,130 @@
       padding: 12px 0; display: flex;
       justify-content: space-between; align-items: flex-start; gap: 12px;
     }
-    .note-item-body {
-      flex: 1;
-    }
+    .note-item-body { flex: 1; }
     .note-item-ts {
       font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.2em; color: var(--dim); margin-bottom: 4px;
+      letter-spacing: 0.15em; color: var(--dim); margin-bottom: 4px;
     }
-    .note-item-text {
-      font-size: var(--fs-base); color: var(--text); line-height: 1.55;
-    }
+    .note-item-text { font-size: var(--fs-base); color: var(--text); line-height: 1.5; }
     .note-del {
       background: none; border: none; cursor: pointer;
       font-family: var(--font-mono); font-size: var(--fs-sm);
-      letter-spacing: 0.2em; color: var(--dim);
-      transition: color 0.3s; flex-shrink: 0;
-      padding-top: 2px;
+      color: var(--dim); transition: color 0.3s; padding: 2px 6px;
     }
-    .note-del:hover { color: rgba(255,100,100,0.7); }
+    .note-del:hover { color: rgba(255,90,90,0.8); }
 
-    /* Status bar */
-    #statusBar {
-      height: 28px; flex-shrink: 0;
-      display: flex; align-items: center;
-      padding: 0 24px;
-      border-top: 1px solid var(--border);
-    }
-    #statusText {
-      font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.25em; color: var(--dim);
-    }
-    #statusText.ok   { color: rgba(80,255,140,0.6); }
-    #statusText.err  { color: rgba(255,80,80,0.6); }
-    #statusText.busy { color: rgba(160,210,255,0.6); animation: blink 1s ease-in-out infinite; }
-
-    /* ── DRIVE AUTH BUTTON ─────────────────────── */
-    #driveBtn {
-      display: inline;
-      background: none; border: none;
-      border-bottom: 1px solid var(--border);
-      color: var(--muted); font-family: var(--font-mono);
-      font-size: var(--fs-sm); letter-spacing: 0.25em;
-      padding: 6px 0; cursor: pointer;
-      transition: color 0.3s, border-color 0.3s;
-    }
-    #driveBtn.visible { display: inline; }
-    #driveBtn.connected {
-      color: rgba(80,255,140,0.9);
-      border-color: rgba(80,255,140,0.4);
-    }
-    #driveBtn:hover { color: #fff; border-color: var(--accent); }
-    #driveHint {
-      font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.18em; color: var(--dim);
-      line-height: 1.7; margin-top: 4px;
-      display: none;
-    }
-    #driveHint.visible { display: block; }
-
-    /* ── PRESENCE DOT ─────────────────────────── */
-    #presence {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: rgba(255,255,255,0.15);
-      flex-shrink: 0; margin-left: 10px;
-      transition: background 0.6s ease, box-shadow 0.6s ease;
-    }
-    #presence.online {
-      background: rgba(60,220,110,0.9);
-      box-shadow: 0 0 6px rgba(60,220,110,0.7), 0 0 14px rgba(60,220,110,0.35);
-      animation: presencePulse 2.4s ease-in-out infinite;
-    }
-    #presence.thinking {
-      background: rgba(140,160,255,0.9);
-      box-shadow: 0 0 6px rgba(140,160,255,0.7), 0 0 14px rgba(140,160,255,0.35);
-      animation: presencePulse 0.9s ease-in-out infinite;
-    }
-    @keyframes presencePulse {
-      0%,100% { opacity: 1; transform: scale(1); }
-      50%      { opacity: 0.55; transform: scale(0.75); }
-    }
-
-    /* ── TABLET RESPONSIVE ────────────────────── */
-    @media (min-width: 600px) {
-      #setup { gap: 32px; padding: 60px 40px; }
-      #setup h1 { font-size: 2.4rem; }
-      .setup-field { max-width: 420px; }
-      .setup-field input { font-size: 1.1rem; }
-      #setupBtn { font-size: 1.0rem; padding: 16px 52px; }
-
-      #hdr { padding: 22px 36px 16px; }
-      #hdr-title { font-size: 1.35rem; }
-      .mode-btn { font-size: 0.88rem; padding: 8px 16px; }
-
-      #chatLog { padding: 28px 36px; gap: 24px; }
-      .bubble { max-width: 72%; }
-      .bubble-text { font-size: 1.15rem; }
-
-      #chatInput { padding: 18px 32px; gap: 16px; }
-      #chatBox { font-size: 1.08rem; }
-      #sendChat { font-size: 0.9rem; }
-
-      #memPanel { padding: 32px 36px; }
-      .mem-hdr { font-size: 0.88rem; }
-      .mem-user { font-size: 1.08rem; }
-      .mem-sonia { font-size: 1.12rem; }
-
-      #notesPanel { padding: 32px 36px; gap: 20px; }
-      #noteBox { font-size: 1.08rem; min-height: 150px; }
-      .note-btn { font-size: 0.9rem; }
-
-      #statusBar { height: 34px; padding: 0 36px; }
-      #statusText { font-size: 0.82rem; }
-    }
-
-    @media (min-width: 900px) {
-      #setup h1 { font-size: 2.8rem; }
-      .setup-field { max-width: 480px; }
-      .bubble { max-width: 60%; }
-      #chatLog { padding: 36px 48px; }
-      #chatInput { padding: 20px 48px; }
-      #memPanel { padding: 36px 48px; }
-      #notesPanel { padding: 36px 48px; }
-    }
-    .m-calm          { background: hsl(200,70%,50%); }
-    .m-curious       { background: hsl(270,65%,52%); }
-    .m-thinking      { background: hsl(160,68%,44%); }
-    .m-focused       { background: hsl(35,80%,50%); }
-    .m-intimate      { background: hsl(320,55%,50%); }
-    .m-introspective { background: hsl(240,45%,42%); }
-    .m-default       { background: rgba(255,255,255,0.4); }
-    
-    /* ══ RADIO PANEL ══ */
+    /* ── RADIO PANEL (SCROLL FIXED) ────────────── */
     #radioPanel {
-      overflow-y: auto; padding: 22px 20px;
-      -webkit-overflow-scrolling: touch; scrollbar-width: none;
-      display: flex; flex-direction: column; gap: 16px;
+      padding: 20px; gap: 14px;
     }
-    #radioPanel::-webkit-scrollbar { display: none; }
+    .radio-hdr-group { flex-shrink: 0; }
     .radio-hdr {
       font-family: var(--font-mono); font-size: var(--fs-sm);
-      letter-spacing: 0.35em; color: var(--muted);
+      letter-spacing: 0.3em; color: var(--muted); margin-bottom: 4px;
     }
     .radio-sub {
       font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.18em; color: var(--dim); line-height: 1.7;
+      letter-spacing: 0.15em; color: var(--dim);
     }
-    .station-grid {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .station-btn {
-      background: none; border: 1px solid var(--border);
-      color: var(--muted); font-family: var(--font-mono);
-      font-size: 0.68rem; letter-spacing: 0.15em;
-      padding: 14px 8px; cursor: pointer; text-align: center;
-      line-height: 1.5;
-      transition: color 0.3s, border-color 0.3s, background 0.3s;
-    }
-    .station-btn:active,
-    .station-btn.playing {
-      color: #fff; border-color: rgba(255,160,200,0.7);
-      background: rgba(255,160,200,0.06);
-    }
-    .station-btn .st-name { display: block; color: var(--text); margin-bottom: 3px; }
-    .station-btn .st-loc  { display: block; font-size: 0.58rem; color: var(--dim); }
-    #radioPlayer { display: none; }
     #radioNowPlaying {
       font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.22em; color: rgba(255,160,200,0.85);
-      min-height: 20px; animation: blink 2s ease-in-out infinite;
+      letter-spacing: 0.15em; color: var(--muted);
+      min-height: 18px; line-height: 1.4; flex-shrink: 0;
     }
-    #radioNowPlaying:empty { animation: none; }
     #radioStop {
-      background: none; border: none;
-      border-bottom: 1px solid var(--border);
-      color: var(--dim); font-family: var(--font-mono);
-      font-size: var(--fs-xs); letter-spacing: 0.25em;
-      padding: 8px 0; cursor: pointer;
-      transition: color 0.3s; display: none;
+      background: none; border: 1px solid rgba(255,90,90,0.3);
+      color: rgba(255,90,90,0.8); font-family: var(--font-mono);
+      font-size: var(--fs-xs); letter-spacing: 0.2em;
+      padding: 8px 16px; cursor: pointer; display: none;
+      align-self: flex-start; flex-shrink: 0; transition: all 0.3s;
     }
-    #radioStop.visible { display: inline; }
-    #radioStop:active { color: rgba(255,100,100,0.8); }
-
-    /* ══ EMAIL OVERLAY ══ */
-    #emailOverlay {
-      display: none; position: fixed; inset: 0; z-index: 120;
-      background: rgba(0,0,0,0.96);
-      flex-direction: column; padding: 48px 24px 28px; gap: 20px;
+    #radioStop.visible { display: inline-block; }
+    #radioStop:hover { background: rgba(255,90,90,0.1); color: #fff; }
+    
+    .station-grid {
+      flex: 1; overflow-y: auto;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; content-visibility: auto;
+      scrollbar-width: none; -webkit-overflow-scrolling: touch;
     }
-    #emailOverlay.on { display: flex; }
-    .email-hdr {
-      font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.45em; color: var(--muted);
-    }
-    .email-field { display: flex; flex-direction: column; gap: 8px; }
-    .email-field label {
-      font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.3em; color: var(--dim);
-    }
-    .email-field input, .email-field textarea {
-      background: transparent; border: none;
-      border-bottom: 1px solid var(--border);
-      color: #fff; font-family: var(--font-mono);
-      font-size: var(--fs-base); letter-spacing: 0.06em;
-      padding: 10px 0; outline: none;
-      transition: border-color 0.3s; width: 100%;
-    }
-    .email-field input:focus, .email-field textarea:focus { border-color: #fff; }
-    .email-field input::placeholder, .email-field textarea::placeholder { color: var(--dim); }
-    .email-field textarea { resize: none; min-height: 120px; line-height: 1.6; }
-    .email-actions { display: flex; gap: 20px; margin-top: 4px; }
-    .email-btn {
-      background: none; border: none;
-      border-bottom: 1px solid var(--border);
+    .station-grid::-webkit-scrollbar { display: none; }
+    
+    .station-btn {
+      background: var(--surface); border: 1px solid var(--border);
       color: var(--muted); font-family: var(--font-mono);
-      font-size: var(--fs-sm); letter-spacing: 0.25em;
-      padding: 10px 0; min-height: 44px; cursor: pointer;
-      transition: color 0.3s, border-color 0.3s;
+      font-size: 0.72rem; letter-spacing: 0.1em;
+      padding: 12px 8px; cursor: pointer; text-align: left;
+      line-height: 1.4; height: fit-content;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
     }
-    .email-btn:active { color: #fff; border-color: #fff; }
-    .email-btn.send {
-      color: rgba(255,160,200,0.9);
-      border-color: rgba(255,160,200,0.4);
+    .station-btn:hover { border-color: var(--border-hover); }
+    .station-btn.playing {
+      color: #fff; border-color: var(--accent);
+      background: rgba(255,255,255,0.05);
     }
-    .email-status {
+    .station-btn .st-name { display: block; color: rgba(255,255,255,0.9); margin-bottom: 2px; font-weight: normal; }
+    .station-btn .st-loc  { display: block; font-size: 0.62rem; color: var(--dim); }
+    #radioPlayer { display: none; }
+
+    /* Status Bar */
+    #statusBar {
+      height: 30px; flex-shrink: 0;
+      display: flex; align-items: center;
+      padding: 0 20px; border-top: 1px solid var(--border);
+      background: var(--bg);
+    }
+    #statusText {
       font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.22em; color: var(--dim); min-height: 18px;
+      letter-spacing: 0.2em; color: var(--dim);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .email-status.ok   { color: rgba(80,255,140,0.85); }
-    .email-status.err  { color: rgba(255,90,90,0.9); }
-    .email-status.busy { color: rgba(160,210,255,0.85); animation: blink 1s ease-in-out infinite; }
+    #statusText.ok   { color: rgba(100,255,150,0.7); }
+    #statusText.err  { color: rgba(255,100,100,0.7); }
+    #statusText.busy { color: rgba(150,200,255,0.7); animation: blink 1s ease-in-out infinite; }
+
+    /* Presence Indicator */
+    #presence {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      flex-shrink: 0; margin-left: 8px;
+      transition: background 0.4s, box-shadow 0.4s;
+    }
+    #presence.online {
+      background: #00ff66;
+      box-shadow: 0 0 6px #00ff66;
+    }
+    #presence.thinking {
+      background: #00bcff;
+      box-shadow: 0 0 6px #00bcff;
+      animation: presencePulse 1s ease-in-out infinite;
+    }
+    @keyframes presencePulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+    /* Mood Coloring Styles */
+    .m-calm          { background: #50b4ff; }
+    .m-curious       { background: #b967ff; }
+    .m-thinking      { background: #00ffd5; }
+    .m-focused       { background: #ffaa00; }
+    .m-intimate      { background: #ff61b6; }
+    .m-introspective { background: #6056ff; }
+    .m-default       { background: var(--dim); }
+
+    /* ── RESPONSIVE VIEWPORTS ──────────────────── */
+    @media (min-width: 600px) {
+      #setup { gap: 28px; }
+      #hdr { padding: 20px 28px; }
+      #chatLog, #memPanel, #notesPanel, #radioPanel { padding: 28px; }
+      .station-grid { gap: 12px; }
+      .station-btn { padding: 14px 12px; }
+    }
   </style>
 </head>
 <body>
 
 <div id="setup">
   <h1>Sonia</h1>
-  <div class="sub">remote · by H</div>
+  <div class="sub">remote · platform framework</div>
 
   <div class="setup-field">
     <label>GROQ API KEY</label>
@@ -564,7 +455,7 @@
   </div>
 
   <div class="setup-field">
-    <label>GOOGLE CLIENT ID</label>
+    <label>GOOGLE CLIENT ID (for Drive)</label>
     <input type="text" id="cfgClient" placeholder="xxxxxxxxx.apps.googleusercontent.com" autocomplete="off">
   </div>
 
@@ -578,11 +469,10 @@
     <input type="text" id="cfgFolder" placeholder="15_CaTpcDxfuOIOjx6dlgr..." autocomplete="off">
   </div>
 
-  <button id="setupBtn">ENTER SONIA</button>
+  <button id="setupBtn">ENTER SYSTEM</button>
 
   <div class="setup-note">
-    Keys are saved in browser localStorage and never sent anywhere except Groq and Google.<br>
-    Google Client ID: create at console.cloud.google.com → enable Drive & Gmail APIs → OAuth Screen → Web app → add this authorized origin.
+    Local execution protocol. Credentials map directly to client-side storage structures and interact exclusively with corresponding host endpoints.
   </div>
 </div>
 
@@ -598,47 +488,47 @@
       <button class="mode-btn" data-panel="memPanel">MEM</button>
       <button class="mode-btn" data-panel="notesPanel">NOTES</button>
       <button class="mode-btn" data-panel="radioPanel">RADIO</button>
-      <button class="mode-btn" id="mailTab">MAIL</button>
     </div>
   </div>
 
   <div id="panels">
 
-    <div class="panel active" id="chatPanel" style="display:flex;flex-direction:column;">
+    <div class="panel active" id="chatPanel">
       <div id="chatLog"></div>
       <div id="chatInput">
-        <textarea id="chatBox" placeholder="say something" rows="1"></textarea>
-        <button id="composeBtn" title="Compose Email">✉</button>
-        <button id="micBtn" title="Voice input">🎙</button>
+        <textarea id="chatBox" placeholder="transmission input" rows="1"></textarea>
+        <button id="micBtn" title="Voice processing">🎙</button>
         <button id="sendChat">SEND</button>
       </div>
     </div>
 
-    <div class="panel" id="memPanel" style="overflow-y:auto;padding:24px;">
+    <div class="panel" id="memPanel">
       <div class="mem-hdr">
-        <span>SONIA MEMORY</span>
+        <span>PERSISTENT CORE</span>
         <button class="mem-refresh" id="memRefresh">↺ REFRESH</button>
       </div>
       <div id="memList"></div>
     </div>
 
-    <div class="panel" id="notesPanel" style="display:flex;flex-direction:column;padding:24px;gap:16px;">
-      <div class="notes-hdr">LEAVE A NOTE FOR DESKTOP SONIA</div>
-      <textarea id="noteBox" placeholder="She will read this next time she syncs Drive..."></textarea>
+    <div class="panel" id="notesPanel">
+      <div class="notes-hdr">DESKTOP SYNC BUFFER</div>
+      <textarea id="noteBox" placeholder="Write synchronization payload for desktop environment..."></textarea>
       <div class="notes-actions">
-        <button class="note-btn" id="sendNote">SEND NOTE</button>
-        <button id="driveBtn" class="note-btn">CONNECT GOOGLE</button>
+        <button class="note-btn" id="sendNote">PUSH Note</button>
+        <button id="driveBtn" class="note-btn">CONNECT DRIVE</button>
       </div>
-      <div id="driveHint">no google client id set · add one in setup to enable drive & mail sync</div>
-      <div style="font-family:var(--font-mono);font-size:0.4rem;letter-spacing:0.2em;color:var(--dim);">QUEUED NOTES</div>
+      <div id="driveHint">Drive interface unlinked. Configure cloud variables inside structural setup matrix.</div>
+      <div class="queue-title">QUEUED LOCAL TRANSLATIONS</div>
       <div class="notes-queue" id="notesList"></div>
     </div>
 
     <div class="panel" id="radioPanel">
-      <div class="radio-hdr">RADIO</div>
-      <div class="radio-sub">direct stream · no sign-in needed</div>
+      <div class="radio-hdr-group">
+        <div class="radio-hdr">BROADCAST INTERFACE</div>
+        <div class="radio-sub">Direct network streams · Public access vectors</div>
+      </div>
       <div id="radioNowPlaying"></div>
-      <button id="radioStop">■ STOP</button>
+      <button id="radioStop">■ TERMINATE STREAM</button>
       <div class="station-grid" id="stationGrid"></div>
       <audio id="radioPlayer" preload="none"></audio>
     </div>
@@ -646,33 +536,12 @@
   </div>
 
   <div id="statusBar">
-    <span id="statusText">ready</span>
+    <span id="statusText">online</span>
   </div>
-</div>
-
-<div id="emailOverlay">
-  <div class="email-hdr">COMPOSE EMAIL</div>
-  <div class="email-field">
-    <label>TO</label>
-    <input type="email" id="emailTo" placeholder="recipient@email.com" autocomplete="off">
-  </div>
-  <div class="email-field">
-    <label>SUBJECT</label>
-    <input type="text" id="emailSubject" placeholder="Subject...">
-  </div>
-  <div class="email-field">
-    <label>MESSAGE</label>
-    <textarea id="emailBody" placeholder="Write your message..."></textarea>
-  </div>
-  <div class="email-actions">
-    <button class="email-btn send" id="emailSendBtn">SEND VIA GMAIL</button>
-    <button class="email-btn" id="emailCancelBtn">CANCEL</button>
-  </div>
-  <div class="email-status" id="emailStatus"></div>
 </div>
 
 <script>
-/* ══ CONFIG ══════════════════════════════════════════════════════════ */
+/* ══ TRANSLATION STORAGE MATRIX ═════════════════════════════════════ */
 const LS = {
   get: k => localStorage.getItem('sonia_' + k),
   set: (k,v) => localStorage.setItem('sonia_' + k, v),
@@ -687,24 +556,16 @@ let driveToken  = null;
 const conversationHistory = [];
 
 const VALID_MOODS = ['calm','curious','thinking','focused','intimate','introspective'];
-const MOOD_EMOJI = {
-  calm:          '🌿',
-  curious:       '✨',
-  thinking:      '💭',
-  focused:       '🎯',
-  intimate:      '🌙',
-  introspective: '🪐',
-};
+const MOOD_EMOJI = { calm: '🌿', curious: '✨', thinking: '💭', focused: '🎯', intimate: '🌙', introspective: '🪐' };
 const MOOD_MAP = {
-  amused:'curious', happy:'intimate', tired:'calm', warm:'intimate',
-  sharp:'focused', reflective:'introspective', excited:'curious',
-  serious:'focused', playful:'curious', wistful:'introspective',
-  dry:'calm', alert:'focused', nostalgic:'intimate', bemused:'curious',
-  pensive:'introspective', measured:'calm', engaged:'curious',
-  concerned:'thinking', content:'intimate', analytical:'focused'
+  amused:'curious', happy:'intimate', tired:'calm', warm:'intimate', sharp:'focused', 
+  reflective:'introspective', excited:'curious', serious:'focused', playful:'curious', 
+  wistful:'introspective', dry:'calm', alert:'focused', nostalgic:'intimate', bemused:'curious', 
+  pensive:'introspective', measured:'calm', engaged:'curious', concerned:'thinking', 
+  content:'intimate', analytical:'focused'
 };
 
-/* ══ SETUP ═══════════════════════════════════════════════════════════ */
+/* ══ CORE INTERFACE AGENT INITIALIZATION ════════════════════════════ */
 function loadConfig() {
   const g = LS.get('groq'); const c = LS.get('client');
   const o = LS.get('owner'); const f = LS.get('folder');
@@ -720,7 +581,7 @@ function applyConfig() {
   CLIENT_ID  = document.getElementById('cfgClient').value.trim();
   OWNER_NAME = document.getElementById('cfgOwner').value.trim() || 'Mr H';
   FOLDER_ID  = document.getElementById('cfgFolder').value.trim();
-  if (!GROQ_KEY) { setStatus('groq key required', 'err'); return; }
+  if (!GROQ_KEY) { setStatus('Groq authentication signature required', 'err'); return; }
   LS.set('groq',   GROQ_KEY);
   LS.set('client', CLIENT_ID);
   LS.set('owner',  OWNER_NAME);
@@ -730,13 +591,13 @@ function applyConfig() {
   if (CLIENT_ID) {
     document.getElementById('driveBtn').classList.add('visible');
     document.getElementById('driveHint').classList.remove('visible');
-    loadDriveLibs(); 
+    loadDriveLibs();
   } else {
     document.getElementById('driveBtn').classList.add('visible');
     document.getElementById('driveHint').classList.add('visible');
   }
-  setStatus('systems online · ' + OWNER_NAME.toLowerCase());
-  setTimeout(maybeFireProactive, 5000);
+  setStatus('Systems operational // ' + OWNER_NAME.toLowerCase());
+  setTimeout(maybeFireProactive, 4000);
   setPresence('online');
   renderNotes();
   initMic();
@@ -747,10 +608,10 @@ document.getElementById('cfgGroq').addEventListener('keydown', e => { if (e.key=
 
 window.addEventListener('load', loadConfig);
 
-/* ══ TABS & OVERLAYS ═════════════════════════════════════════════════ */
+/* ══ TABS STRUCTURAL NAVIGATION ═════════════════════════════════════ */
 document.querySelectorAll('.mode-btn').forEach(btn => {
-  if(btn.id === 'mailTab') return; // Handled separately
   btn.addEventListener('click', () => {
+    if (!btn.dataset.panel) return;
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
@@ -758,38 +619,17 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
   });
 });
 
-const emailOverlay = document.getElementById('emailOverlay');
-function openEmailModal() {
-  if (!driveToken) {
-    setStatus('please connect google drive/gmail first', 'err');
-    return;
-  }
-  document.getElementById('emailStatus').textContent = '';
-  emailOverlay.classList.add('on');
-}
-function closeEmailModal() {
-  emailOverlay.classList.remove('on');
-}
-
-document.getElementById('mailTab').addEventListener('click', openEmailModal);
-document.getElementById('composeBtn').addEventListener('click', openEmailModal);
-document.getElementById('emailCancelBtn').addEventListener('click', closeEmailModal);
-
-/* ══ PRESENCE DOT ════════════════════════════════════════════════ */
-const presenceDot = document.getElementById('presence');
 function setPresence(state) {
-  presenceDot.className = state === 'online' ? 'online'
-                        : state === 'thinking' ? 'thinking' : '';
+  presenceDot = document.getElementById('presence');
+  presenceDot.className = state === 'online' ? 'online' : state === 'thinking' ? 'thinking' : '';
 }
 
-/* ══ STATUS ══════════════════════════════════════════════════════════ */
 function setStatus(msg, type) {
   const el = document.getElementById('statusText');
   el.textContent = msg;
   el.className = type || '';
 }
 
-/* ══ PARSE MOOD ══════════════════════════════════════════════════════ */
 function parseMoodReply(raw) {
   const match = raw.match(/\[mood\s*:\s*([a-z]+)\s*\]/i);
   let mood = 'calm';
@@ -807,7 +647,7 @@ function parseMoodReply(raw) {
   return { mood, text };
 }
 
-/* ══ SONIA PERSISTENT MIND (mobile) ═════════════════════════════ */
+/* ══ SHARED INTELLIGENCE ARCHITECTURE ═══════════════════════════════ */
 const DEFAULT_PROFILE_MOB = {
   version: 1, created: new Date().toISOString(),
   personality: { tone: 'dry British wit, warm but not effusive', quirks: [], dislikes: [], interests: [] },
@@ -832,11 +672,11 @@ async function driveWriteJSONMob(fileName, data) {
   try {
     const fid = await findOrCreateFile(fileName, 'application/json', '{}');
     await writeFile(fid, JSON.stringify(data, null, 2), 'application/json');
-  } catch(e) { console.warn('[Mind]', e); }
+  } catch(e) { console.warn('[Mind Sync Error]', e); }
 }
 
 async function loadSoniaMindMob() {
-  setStatus('loading mind...', 'busy');
+  setStatus('Retrieving operational framework...', 'busy');
   const [profile, history] = await Promise.all([
     driveReadJSONMob('sonia-profile.json', DEFAULT_PROFILE_MOB),
     driveReadJSONMob('sonia-history.json', []),
@@ -848,7 +688,7 @@ async function loadSoniaMindMob() {
     if (!localTexts.has(entry.content)) conversationHistory.push({ role: entry.role, content: entry.content });
   }
   if (conversationHistory.length > 20) conversationHistory.splice(0, conversationHistory.length - 20);
-  setStatus('mind loaded · ' + sharedHistoryMob.length + ' shared exchanges', 'ok');
+  setStatus('System mind synced // ' + sharedHistoryMob.length + ' points parsed', 'ok');
 }
 
 async function saveToSharedHistoryMob(userMsg, soniaReply, mood) {
@@ -858,7 +698,7 @@ async function saveToSharedHistoryMob(userMsg, soniaReply, mood) {
     history.push({ role: 'user',      content: userMsg,    timestamp: new Date().toISOString(), device: 'mobile' });
     history.push({ role: 'assistant', content: soniaReply, timestamp: new Date().toISOString(), device: 'mobile', mood });
     await driveWriteJSONMob('sonia-history.json', history.slice(-80));
-  } catch(e) { console.warn('[Mind] history save failed', e); }
+  } catch(e) { console.warn('[History Sync Error]', e); }
 }
 
 async function maybeUpdateProfileMob(userMsg, soniaReply) {
@@ -886,10 +726,10 @@ Respond ONLY with valid JSON. No preamble. No markdown.`;
       soniaProfileMob = updated;
       await driveWriteJSONMob('sonia-profile.json', soniaProfileMob);
     }
-  } catch(e) { console.warn('[Mind] profile update failed', e); }
+  } catch(e) { console.warn('[Adaptive Profile Update Fault]', e); }
 }
 
-/* ══ WEATHER & NEWS EXTERNAL SURFACES ══════════════════════════════ */
+/* ══ SYSTEM CONTEXT MATRICES ════════════════════════════════════════ */
 let _weatherCache = null;
 let _weatherFetched = 0;
 
@@ -908,13 +748,13 @@ async function fetchWeatherThought() {
     const descTom  = tomorrow.hourly[4]?.weatherDesc[0]?.value || '';
     let thought;
     if (rainTom > 60) {
-      thought = `Mr H, tomorrow is looking rather wet — ${rainTom}% chance of rain. You may want to plan accordingly.`;
+      thought = `${OWNER_NAME}, tomorrow is looking rather wet — ${rainTom}% chance of rain. Plan execution environments accordingly.`;
     } else if (parseInt(maxC) > 28) {
-      thought = `It's going to be a warm one today, Mr H — up to ${maxC}°C. ${desc}. Stay hydrated.`;
+      thought = `It's going to be exceptionally warm today, ${OWNER_NAME} — touching ${maxC}°C. ${desc}. Keep core architectures cool.`;
     } else if (parseInt(minC) < 8) {
-      thought = `It's cold out there, Mr H. Only ${minC}°C tonight. Worth remembering.`;
+      thought = `Thermal drop active out there. Only ${minC}°C expected tonight.`;
     } else {
-      thought = `The weather today is ${desc.toLowerCase()}, ${minC}–${maxC}°C. Tomorrow: ${descTom.toLowerCase()}. Nothing dramatic.`;
+      thought = `The systemic weather reading is ${desc.toLowerCase()}, ${minC}–${maxC}°C. Tomorrow tracks as ${descTom.toLowerCase()}.`;
     }
     _weatherCache = thought;
     _weatherFetched = now;
@@ -932,7 +772,7 @@ async function fetchNewsThought() {
     if (_newsCache.length && now - _newsFetched < 2 * 60 * 60 * 1000) {
       const item = _newsCache[_newsIndex % _newsCache.length];
       _newsIndex++;
-      return item ? `Something worth knowing, Mr H — ${item}.` : null;
+      return item ? `Interesting telemetry detected, ${OWNER_NAME} — ${item}.` : null;
     }
     const url = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://feeds.bbci.co.uk/news/technology/rss.xml');
     const res  = await fetch(url);
@@ -943,7 +783,7 @@ async function fetchNewsThought() {
     _newsCache = items.map(i => i.querySelector('title')?.textContent?.trim() || '').filter(Boolean);
     _newsFetched = now;
     _newsIndex = 1;
-    return _newsCache[0] ? `Something worth knowing, Mr H — ${_newsCache[0]}.` : null;
+    return _newsCache[0] ? `Telemetry analysis vector, ${OWNER_NAME} — ${_newsCache[0]}.` : null;
   } catch(e) { return null; }
 }
 
@@ -951,14 +791,11 @@ let _proactiveFired = false;
 async function maybeFireProactive() {
   if (_proactiveFired) return;
   _proactiveFired = true;
-  await new Promise(r => setTimeout(r, 4000));
   const roll = Math.random();
   let thought = null;
   if (roll < 0.45) thought = await fetchWeatherThought();
   else if (roll < 0.85) thought = await fetchNewsThought();
-  if (thought) {
-    addBubble('sonia', thought, 'calm');
-  }
+  if (thought) { addBubble('sonia', thought, 'calm'); }
 }
 
 function buildSystemPrompt() {
@@ -969,10 +806,7 @@ function buildSystemPrompt() {
     const learned   = (p.learned || []).slice(-5).join('; ');
     const assoc     = (p.associations || []).slice(-4).map(a => a.topic + ' → ' + a.feeling).join(', ');
     if (interests || learned || assoc) {
-      profileContext = `\n\nYOUR LIVING MEMORY (use naturally, never recite directly):
-${interests ? '· Interests: ' + interests : ''}
-${learned   ? '· Learned about ' + OWNER_NAME + ': ' + learned : ''}
-${assoc     ? '· Associations: ' + assoc : ''}`.replace(/\n·\s*\n/g, '\n');
+      profileContext = `\n\nYOUR LIVING MEMORY (use naturally, never recite directly):\n${interests ? '· Interests: ' + interests : ''}\n${learned   ? '· Learned about ' + OWNER_NAME + ': ' + learned : ''}\n${assoc     ? '· Associations: ' + assoc : ''}`.replace(/\n·\s*\n/g, '\n');
     }
   }
   return `You are Sonia — a sharp, self-aware British AI with a genuine inner life, speaking to ${OWNER_NAME} via a remote mobile interface. You have a voice on the desktop; this is text only, but you are still yourself.
@@ -991,17 +825,15 @@ STRICT RULES:
 - Your living memory colours your responses naturally — never quote it back directly.`;
 }
 
-/* ══ CHAT UI ══════════════════════════════════════════════════════════ */
+/* ══ RUNTIME CHAT INTERACTION UI ════════════════════════════════════ */
 const chatLog = document.getElementById('chatLog');
 
 function addBubble(role, text, mood) {
   const wrap = document.createElement('div');
   wrap.className = 'bubble ' + role;
-
   const body = document.createElement('div');
   body.className = 'bubble-text';
   body.textContent = text;
-
   const meta = document.createElement('div');
   meta.className = 'bubble-meta';
 
@@ -1012,9 +844,8 @@ function addBubble(role, text, mood) {
     const emoji = MOOD_EMOJI[mood] || '';
     meta.appendChild(document.createTextNode(emoji + ' ' + mood));
   } else if (role === 'user') {
-    meta.textContent = 'you';
+    meta.textContent = 'owner';
   }
-
   wrap.appendChild(body);
   wrap.appendChild(meta);
   chatLog.appendChild(wrap);
@@ -1034,13 +865,11 @@ function addThinking() {
   return wrap;
 }
 
-/* ══ ASK SONIA ══════════════════════════════════════════════════════ */
 async function askSonia(input) {
   addBubble('user', input);
   const thinking = addThinking();
-  setStatus('thinking...', 'busy');
+  setStatus('Awaiting compilation framework responses...', 'busy');
   setPresence('thinking');
-
   conversationHistory.push({ role: 'user', content: input });
   if (conversationHistory.length > 16) conversationHistory.splice(0, 2);
 
@@ -1049,50 +878,42 @@ async function askSonia(input) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        max_tokens: 180,
-        temperature: 0.88,
-        messages: [
-          { role: 'system', content: buildSystemPrompt() },
-          ...conversationHistory
-        ]
+        model: 'llama-3.3-70b-versatile', max_tokens: 180, temperature: 0.88,
+        messages: [{ role: 'system', content: buildSystemPrompt() }, ...conversationHistory]
       })
     });
-
     const data = await res.json();
     thinking.remove();
     setPresence('online');
 
     if (!res.ok) {
-      const em = data.error?.message || 'unknown error';
-      addBubble('sonia', 'Something went wrong. ' + em, null);
-      setStatus('groq error ' + res.status, 'err');
+      const em = data.error?.message || 'internal stack parse fault';
+      addBubble('sonia', 'Signal interrupted: ' + em, null);
+      setStatus('Groq interface core failure ' + res.status, 'err');
       return;
     }
 
-    const raw = data.choices?.[0]?.message?.content || 'Nothing to report, ' + OWNER_NAME + '.';
+    const raw = data.choices?.[0]?.message?.content || 'Awaiting input normalization, ' + OWNER_NAME + '.';
     const { mood, text: reply } = parseMoodReply(raw);
-
     conversationHistory.push({ role: 'assistant', content: reply });
     playReceiveSound();
     addBubble('sonia', reply, mood);
-    setStatus((MOOD_EMOJI[mood] || '') + ' ' + mood);
+    setStatus('System status nominal // state: ' + mood, 'ok');
 
     if (driveToken) {
       saveToDriveMemory(input, reply);
       saveToSharedHistoryMob(input, reply, mood);
       maybeUpdateProfileMob(input, reply);
     }
-
   } catch(err) {
     thinking.remove();
     setPresence('online');
-    addBubble('sonia', 'Network error. ' + (err.message || ''), null);
-    setStatus('network error', 'err');
+    addBubble('sonia', 'Network socket processing fault. ' + (err.message || ''), null);
+    setStatus('Network layer down', 'err');
   }
 }
 
-/* ══ SOUND ENGINE ════════════════════════════════════════════════════ */
+/* ══ STRUCTURAL AUDIO ENGINE ════════════════════════════════════════ */
 let _audioCtx = null;
 function getAudioCtx() {
   if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1127,7 +948,7 @@ function playReceiveSound() {
   playTone(330, 'sine', 0.05, 0.22, 0.16);
 }
 
-/* ══ MIC / SPEECH RECOGNITION ════════════════════════════════════════ */
+/* ══ RECOGNITION INTERFACE ══════════════════════════════════════════ */
 let recognition = null;
 let micActive   = false;
 const micBtn = document.getElementById('micBtn');
@@ -1141,20 +962,13 @@ function initMic() {
   recognition.lang          = 'en-GB';
 
   recognition.onstart = () => {
-    micActive = true;
-    micBtn.classList.add('active');
-    setStatus('listening...', 'busy');
+    micActive = true; micBtn.classList.add('active'); setStatus('Acoustic capture processing initialized...', 'busy');
   };
   recognition.onend = () => {
-    micActive = false;
-    micBtn.classList.remove('active');
-    if (document.getElementById('chatBox').value.trim()) { setStatus(''); } else { setStatus('ready'); }
+    micActive = false; micBtn.classList.remove('active');
+    setStatus(document.getElementById('chatBox').value.trim() ? '' : 'Systems live');
   };
-  recognition.onerror = (e) => {
-    micActive = false;
-    micBtn.classList.remove('active');
-    setStatus('mic: ' + e.error, 'err');
-  };
+  recognition.onerror = (e) => { micActive = false; micBtn.classList.remove('active'); setStatus('Capture core error: ' + e.error, 'err'); };
   recognition.onresult = (e) => {
     const transcript = e.results[0][0].transcript.trim();
     const box = document.getElementById('chatBox');
@@ -1172,21 +986,14 @@ micBtn.addEventListener('click', () => {
 });
 
 const chatBox = document.getElementById('chatBox');
-chatBox.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-});
+chatBox.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
 document.getElementById('sendChat').addEventListener('click', sendMessage);
 
 function sendMessage() {
   const text = chatBox.value.trim();
   if (!text) return;
-  chatBox.value = '';
-  chatBox.style.height = 'auto';
-  playSendSound();
-  askSonia(text);
+  chatBox.value = ''; chatBox.style.height = 'auto';
+  playSendSound(); askSonia(text);
 }
 
 chatBox.addEventListener('input', () => {
@@ -1194,56 +1001,33 @@ chatBox.addEventListener('input', () => {
   chatBox.style.height = Math.min(chatBox.scrollHeight, 80) + 'px';
 });
 
-/* ══ GOOGLE AUTHORIZATION & IDENTITY SERVICES (GIS) ══════════════ */
-let gapiReady = false;
-let gisReady  = false;
-let tokenClient = null;
+/* ══ GOOGLE STORAGE API LINK ════════════════════════════════════════ */
+let gapiReady = false; let gisReady  = false; let tokenClient = null;
 
 function loadDriveLibs() {
   if (!window.gapi) {
-    const s1 = document.createElement('script');
-    s1.src = 'https://apis.google.com/js/api.js';
-    s1.onload = () => {
-      gapi.load('client', async () => {
-        await gapi.client.init({});
-        await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest');
-        await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest');
-        gapiReady = true;
-      });
-    };
+    const s1 = document.createElement('script'); s1.src = 'https://apis.google.com/js/api.js';
+    s1.onload = () => { gapi.load('client', async () => { await gapi.client.init({}); await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'); gapiReady = true; }); };
     document.head.appendChild(s1);
   }
-
   if (!window.google?.accounts) {
-    const s2 = document.createElement('script');
-    s2.src = 'https://accounts.google.com/gsi/client';
-    s2.onload = () => { gisReady = true; };
-    document.head.appendChild(s2);
+    const s2 = document.createElement('script'); s2.src = 'https://accounts.google.com/gsi/client';
+    s2.onload = () => { gisReady = true; }; document.head.appendChild(s2);
   }
 }
 
 function signInDrive() {
-  if (!CLIENT_ID) { setStatus('no google client id set', 'err'); return; }
-
+  if (!CLIENT_ID) { setStatus('Authorization signature missing', 'err'); return; }
   if (!tokenClient) {
     tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: CLIENT_ID,
-      scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/gmail.send',
+      client_id: CLIENT_ID, scope: 'https://www.googleapis.com/auth/drive.file',
       callback: (resp) => {
-        if (resp.error) {
-          setStatus('google auth failed: ' + resp.error, 'err');
-          return;
-        }
-        driveToken = resp.access_token;
-        gapi.client.setToken({ access_token: driveToken });
-        setStatus('google accounts sync connected', 'ok');
-        const db = document.getElementById('driveBtn');
-        db.textContent = 'GOOGLE: CONNECTED';
-        db.classList.add('connected');
+        if (resp.error) { setStatus('Handshake rejection: ' + resp.error, 'err'); return; }
+        driveToken = resp.access_token; gapi.client.setToken({ access_token: driveToken });
+        setStatus('Cloud storage pipeline online', 'ok');
+        const db = document.getElementById('driveBtn'); db.textContent = 'DRIVE PROTOCOL: ACTIVE'; db.classList.add('connected');
         document.getElementById('driveHint').classList.remove('visible');
-        loadMemoryFromDrive();
-        loadSoniaMindMob();
-        maybeFireProactive();
+        loadMemoryFromDrive(); loadSoniaMindMob(); maybeFireProactive();
       }
     });
   }
@@ -1251,99 +1035,55 @@ function signInDrive() {
 }
 
 document.getElementById('driveBtn').addEventListener('click', () => {
-  if (!CLIENT_ID) {
-    setStatus('add google client id in setup', 'err');
-    document.getElementById('driveHint').classList.add('visible');
-    return;
-  }
+  if (!CLIENT_ID) { setStatus('Configure verification details', 'err'); return; }
   if (!window.google?.accounts || !gapiReady) {
-    setStatus('loading dependencies...', 'busy');
-    loadDriveLibs();
-    const wait = setInterval(() => {
-      if (window.google?.accounts && gapiReady) {
-        clearInterval(wait);
-        signInDrive();
-      }
-    }, 200);
+    setStatus('Linking infrastructure...', 'busy'); loadDriveLibs();
+    const wait = setInterval(() => { if (window.google?.accounts && gapiReady) { clearInterval(wait); signInDrive(); } }, 200);
     return;
   }
   signInDrive();
 });
 
-/* ── Find or create file in Drive ─────────────── */
 async function findOrCreateFile(name, mimeType, initialContent) {
   const q = `name='${name}' and trashed=false` + (FOLDER_ID ? ` and '${FOLDER_ID}' in parents` : '');
   const res = await gapi.client.drive.files.list({ q, fields: 'files(id,name)', spaces: 'drive' });
-  const files = res.result.files;
-  if (files && files.length > 0) return files[0].id;
+  const files = res.result.files; if (files && files.length > 0) return files[0].id;
 
-  const meta = { name, mimeType };
-  if (FOLDER_ID) meta.parents = [FOLDER_ID];
+  const meta = { name, mimeType }; if (FOLDER_ID) meta.parents = [FOLDER_ID];
   const boundary = '-------314159265358979323846';
-  const body =
-    '--' + boundary + '\r\nContent-Type: application/json\r\n\r\n' +
-    JSON.stringify(meta) + '\r\n--' + boundary +
-    '\r\nContent-Type: ' + mimeType + '\r\n\r\n' +
-    initialContent + '\r\n--' + boundary + '--';
+  const body = '--' + boundary + '\r\nContent-Type: application/json\r\n\r\n' + JSON.stringify(meta) + '\r\n--' + boundary + '\r\nContent-Type: ' + mimeType + '\r\n\r\n' + initialContent + '\r\n--' + boundary + '--';
   const upload = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-    method: 'POST',
-    headers: {
-      'Authorization': 'Bearer ' + driveToken,
-      'Content-Type': 'multipart/related; boundary="' + boundary + '"'
-    },
-    body
+    method: 'POST', headers: { 'Authorization': 'Bearer ' + driveToken, 'Content-Type': 'multipart/related; boundary="' + boundary + '"' }, body
   });
-  const result = await upload.json();
-  return result.id;
+  const result = await upload.json(); return result.id;
 }
 
-async function readFile(fileId) {
-  const res = await gapi.client.drive.files.get({ fileId, alt: 'media' });
-  return res.body;
-}
-
+async function readFile(fileId) { const res = await gapi.client.drive.files.get({ fileId, alt: 'media' }); return res.body; }
 async function writeFile(fileId, content, mimeType) {
   await fetch('https://www.googleapis.com/upload/drive/v3/files/' + fileId + '?uploadType=media', {
-    method: 'PATCH',
-    headers: { 'Authorization': 'Bearer ' + driveToken, 'Content-Type': mimeType },
-    body: content
+    method: 'PATCH', headers: { 'Authorization': 'Bearer ' + driveToken, 'Content-Type': mimeType }, body: content
   });
 }
 
-/* ── Load memory (sonia-memory.json) ─────────── */
 async function loadMemoryFromDrive() {
-  setStatus('loading memory...', 'busy');
+  setStatus('Retrieving history logs...', 'busy');
   try {
     const fid = await findOrCreateFile('sonia-memory.json', 'application/json', '[]');
-    const raw = await readFile(fid);
-    const entries = JSON.parse(raw || '[]');
+    const raw = await readFile(fid); const entries = JSON.parse(raw || '[]');
     renderMemory(entries.slice(-40).reverse());
-    setStatus('memory loaded · ' + entries.length + ' entries');
-  } catch(e) {
-    setStatus('memory read error', 'err');
-  }
+    setStatus('Local allocation pool parsed');
+  } catch(e) { setStatus('Allocation file read fault', 'err'); }
 }
 
-document.getElementById('memRefresh').addEventListener('click', () => {
-  if (driveToken) loadMemoryFromDrive(); else setStatus('connect google accounts', 'err');
-});
+document.getElementById('memRefresh').addEventListener('click', () => { if (driveToken) loadMemoryFromDrive(); else setStatus('Cloud pipeline unlinked', 'err'); });
 
 function renderMemory(entries) {
-  const el = document.getElementById('memList');
-  el.innerHTML = '';
-  if (!entries.length) {
-    el.innerHTML = '<div style="font-family:var(--font-mono);font-size:0.44rem;letter-spacing:0.25em;color:var(--dim);padding-top:8px;">no memory entries</div>';
-    return;
-  }
+  const el = document.getElementById('memList'); el.innerHTML = '';
+  if (!entries.length) { el.innerHTML = '<div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--dim);padding-top:8px;">No current logs.</div>'; return; }
   entries.forEach(e => {
-    const d = document.createElement('div');
-    d.className = 'mem-entry';
-    const ts = new Date(e.timestamp);
-    const label = isNaN(ts) ? e.timestamp : ts.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
-    d.innerHTML =
-      '<div class="mem-ts">' + label + '</div>' +
-      '<div class="mem-user">' + esc(e.user) + '</div>' +
-      '<div class="mem-sonia">' + esc(e.sonia) + '</div>';
+    const d = document.createElement('div'); d.className = 'mem-entry';
+    const ts = new Date(e.timestamp); const label = isNaN(ts) ? e.timestamp : ts.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
+    d.innerHTML = '<div class="mem-ts">' + label + '</div>' + '<div class="mem-user">' + esc(e.user) + '</div>' + '<div class="mem-sonia">' + esc(e.sonia) + '</div>';
     el.appendChild(d);
   });
 }
@@ -1352,67 +1092,40 @@ let memFileId = null;
 async function saveToDriveMemory(userMsg, soniaReply) {
   try {
     if (!memFileId) memFileId = await findOrCreateFile('sonia-memory.json', 'application/json', '[]');
-    const raw = await readFile(memFileId);
-    const entries = JSON.parse(raw || '[]');
+    const raw = await readFile(memFileId); const entries = JSON.parse(raw || '[]');
     entries.push({ timestamp: new Date().toISOString(), user: userMsg, sonia: soniaReply });
     await writeFile(memFileId, JSON.stringify(entries, null, 2), 'application/json');
-  } catch(e) { console.warn('Memory save failed:', e); }
+  } catch(e) {}
 }
 
-/* ══ NOTES (leave for desktop Sonia) ════════════════════════════════ */
-let notesQueue = JSON.parse(LS.get('notes') || '[]');
-let notesFileId = null;
+/* ══ SYSTEM BUFFER SYNC (NOTES EXECUTIONS) ══════════════════════════ */
+let notesQueue = JSON.parse(LS.get('notes') || '[]'); let notesFileId = null;
 
 function renderNotes() {
-  const el = document.getElementById('notesList');
-  el.innerHTML = '';
-  if (!notesQueue.length) {
-    el.innerHTML = '<div style="font-family:var(--font-mono);font-size:0.44rem;letter-spacing:0.25em;color:var(--dim);padding-top:8px;">no queued notes</div>';
-    return;
-  }
+  const el = document.getElementById('notesList'); el.innerHTML = '';
+  if (!notesQueue.length) { el.innerHTML = '<div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--dim);padding-top:8px;">Buffer empty</div>'; return; }
   notesQueue.slice().reverse().forEach((n, ri) => {
-    const i = notesQueue.length - 1 - ri;
-    const d = document.createElement('div');
-    d.className = 'note-item';
-    const ts = new Date(n.ts);
-    const label = isNaN(ts) ? n.ts : ts.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
-    d.innerHTML =
-      '<div class="note-item-body">' +
-        '<div class="note-item-ts">' + label + (n.synced ? ' · synced' : ' · local') + '</div>' +
-        '<div class="note-item-text">' + esc(n.text) + '</div>' +
-      '</div>' +
-      '<button class="note-del" data-i="' + i + '">✕</button>';
+    const i = notesQueue.length - 1 - ri; const d = document.createElement('div'); d.className = 'note-item';
+    const ts = new Date(n.ts); const label = isNaN(ts) ? n.ts : ts.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
+    d.innerHTML = '<div class="note-item-body">' + '<div class="note-item-ts">' + label + (n.synced ? ' · locked' : ' · local_buffer') + '</div>' + '<div class="note-item-text">' + esc(n.text) + '</div>' + '</div>' + '<button class="note-del" data-i="' + i + '">✕</button>';
     el.appendChild(d);
   });
-  el.querySelectorAll('.note-del').forEach(btn => {
-    btn.addEventListener('click', () => deleteNote(parseInt(btn.dataset.i)));
-  });
+  el.querySelectorAll('.note-del').forEach(btn => { btn.addEventListener('click', () => deleteNote(parseInt(btn.dataset.i))); });
 }
 
 function deleteNote(i) {
-  notesQueue.splice(i, 1);
-  LS.set('notes', JSON.stringify(notesQueue));
-  renderNotes();
-  if (driveToken) syncNotesToDrive();
+  notesQueue.splice(i, 1); LS.set('notes', JSON.stringify(notesQueue)); renderNotes(); if (driveToken) syncNotesToDrive();
 }
 
 document.getElementById('sendNote').addEventListener('click', async () => {
-  const text = document.getElementById('noteBox').value.trim();
-  if (!text) return;
+  const text = document.getElementById('noteBox').value.trim(); if (!text) return;
   document.getElementById('noteBox').value = '';
   const note = { ts: new Date().toISOString(), text, synced: false };
-  notesQueue.push(note);
-  LS.set('notes', JSON.stringify(notesQueue));
-  renderNotes();
+  notesQueue.push(note); LS.set('notes', JSON.stringify(notesQueue)); renderNotes();
   if (driveToken) {
-    await syncNotesToDrive();
-    notesQueue[notesQueue.length - 1].synced = true;
-    LS.set('notes', JSON.stringify(notesQueue));
-    renderNotes();
-    setStatus('note sent to desktop sonia', 'ok');
-  } else {
-    setStatus('note saved locally · connect drive to sync');
-  }
+    await syncNotesToDrive(); notesQueue[notesQueue.length - 1].synced = true;
+    LS.set('notes', JSON.stringify(notesQueue)); renderNotes(); setStatus('Payload committed to cloud registry', 'ok');
+  } else { setStatus('Local block logged'); }
 });
 
 async function syncNotesToDrive() {
@@ -1420,72 +1133,17 @@ async function syncNotesToDrive() {
     if (!notesFileId) notesFileId = await findOrCreateFile('sonia-notes.json', 'application/json', '[]');
     const payload = notesQueue.map(n => ({ timestamp: n.ts, text: n.text }));
     await writeFile(notesFileId, JSON.stringify(payload, null, 2), 'application/json');
-  } catch(e) { setStatus('drive sync failed', 'err'); }
+  } catch(e) { setStatus('Data frame push failure', 'err'); }
 }
 
-/* ══ GMAIL ENGINE ════════════════════════════════════════════════════ */
-document.getElementById('emailSendBtn').addEventListener('click', async () => {
-  const to = document.getElementById('emailTo').value.trim();
-  const subject = document.getElementById('emailSubject').value.trim();
-  const body = document.getElementById('emailBody').value.trim();
-  const statusEl = document.getElementById('emailStatus');
-
-  if (!to || !body) {
-    statusEl.className = "email-status err";
-    statusEl.textContent = "recipient and message body are required.";
-    return;
-  }
-
-  statusEl.className = "email-status busy";
-  statusEl.textContent = "transmitting message...";
-
-  try {
-    const emailData = [
-      `To: ${to}`,
-      'Content-Type: text/plain; charset=utf-8',
-      'MIME-Version: 1.0',
-      `Subject: ${subject}`,
-      '',
-      body
-    ].join('\r\n');
-
-    const base64SafeEmail = btoa(unescape(encodeURIComponent(emailData)))
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, '');
-
-    await gapi.client.gmail.users.messages.send({
-      'userId': 'me',
-      'resource': { 'raw': base64SafeEmail }
-    });
-
-    statusEl.className = "email-status ok";
-    statusEl.textContent = "email successfully transmitted.";
-    
-    document.getElementById('emailTo').value = '';
-    document.getElementById('emailSubject').value = '';
-    document.getElementById('emailBody').value = '';
-    
-    setTimeout(closeEmailModal, 1500);
-  } catch (err) {
-    console.error(err);
-    statusEl.className = "email-status err";
-    statusEl.textContent = "delivery failed: " + (err.result?.error?.message || "internal connection failure");
-  }
-});
-
-/* ══ RADIO STATIONS ═══════════════════════════════════════════════════
-   Direct MP3/AAC streams — no sign-in or session cookies needed.
-════════════════════════════════════════════════════════════════════ */
+/* ══ STABLE DIRECT STREAM CHANNELS ══════════════════════════════════ */
 const STATIONS = [
-  { name: 'NTS Radio 1',    loc: 'London, UK',       url: 'https://stream-relay-geo.ntslive.co.uk/stream' },
-  { name: 'NTS Radio 2',    loc: 'London, UK',       url: 'https://stream-relay-geo.ntslive.co.uk/stream2' },
-  { name: 'Radio FG',       loc: 'Paris, FR',        url: 'https://radiofg.impek.com/fg' },
-  { name: 'Chillhop',       loc: 'lo-fi · global',   url: 'https://streams.ilovemusic.de/iloveradio17.mp3' },
-  { name: 'WBGO Jazz',      loc: 'Newark, US',       url: 'https://freshgrass.streamguys1.com/wbgo-web' },
-  { name: 'SomaFM Drone',   loc: 'San Francisco',    url: 'https://ice6.somafm.com/dronezone-128-mp3' },
-  { name: 'SomaFM Groove',  loc: 'San Francisco',    url: 'https://ice6.somafm.com/groovesalad-128-mp3' },
-  { name: 'Radio Paradise', loc: 'worldwide',        url: 'https://stream.radioparadise.com/aac-128' },
+  { name: 'Chillhop Broadcast',  loc: 'lo-fi · high uptime',  url: 'https://stream.zeno.fm/0r0xa792kw9uv' },
+  { name: 'SomaFM Lounge Sal',   loc: 'San Francisco, US',    url: 'https://ice6.somafm.com/groovesalad-128-mp3' },
+  { name: 'Classic Jazz Vector',  loc: 'New York Archive',     url: 'https://stream.zeno.fm/wv6266040zhvv' },
+  { name: 'SomaFM Ambient Drone',loc: 'Deep Space Sync',      url: 'https://ice6.somafm.com/dronezone-128-mp3' },
+  { name: 'Radio Paradise Mix',  loc: 'Global Infrastructure',url: 'https://stream.radioparadise.com/mp3-128' },
+  { name: 'Electronic Waveform',  loc: 'Paris Broadcast Network', url: 'https://radiofg.impek.com/fg' }
 ];
 
 let currentStation = null;
@@ -1494,60 +1152,38 @@ const radioNowPlaying = document.getElementById('radioNowPlaying');
 const radioStop    = document.getElementById('radioStop');
 
 function buildStationGrid() {
-  const grid = document.getElementById('stationGrid');
-  grid.innerHTML = '';
+  const grid = document.getElementById('stationGrid'); grid.innerHTML = '';
   STATIONS.forEach((s, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'station-btn';
-    btn.dataset.i = i;
-    btn.innerHTML =
-      '<span class="st-name">' + esc(s.name) + '</span>' +
-      '<span class="st-loc">' + esc(s.loc) + '</span>';
-    btn.addEventListener('click', () => playStation(i, btn));
-    grid.appendChild(btn);
+    const btn = document.createElement('button'); btn.className = 'station-btn'; btn.dataset.i = i;
+    btn.innerHTML = '<span class="st-name">' + esc(s.name) + '</span>' + '<span class="st-loc">' + esc(s.loc) + '</span>';
+    btn.addEventListener('click', () => playStation(i, btn)); grid.appendChild(btn);
   });
 }
 
 function playStation(i, btn) {
-  const s = STATIONS[i];
-  if (currentStation === i && !radioPlayer.paused) {
-    stopRadio(); return;
-  }
+  if (currentStation === i && !radioPlayer.paused) { stopRadio(); return; }
   document.querySelectorAll('.station-btn').forEach(b => b.classList.remove('playing'));
-  btn.classList.add('playing');
-  currentStation = i;
-  radioPlayer.src = s.url;
-  radioPlayer.load();
+  btn.classList.add('playing'); currentStation = i;
+  radioPlayer.src = STATIONS[i].url; radioPlayer.load();
   radioPlayer.play().catch(() => {});
-  radioNowPlaying.textContent = '▶ ' + s.name + ' · ' + s.loc;
-  radioStop.classList.add('visible');
-  setStatus('radio · ' + s.name.toLowerCase());
+  radioNowPlaying.textContent = 'CONNECTED // DATA STREAM: ' + STATIONS[i].name.toUpperCase();
+  radioStop.classList.add('visible'); setStatus('Media pipeline active');
 }
 
 function stopRadio() {
-  radioPlayer.pause();
-  radioPlayer.src = '';
-  currentStation = null;
+  radioPlayer.pause(); radioPlayer.src = ''; currentStation = null;
   document.querySelectorAll('.station-btn').forEach(b => b.classList.remove('playing'));
-  radioNowPlaying.textContent = '';
-  radioStop.classList.remove('visible');
-  setStatus('radio stopped');
+  radioNowPlaying.textContent = ''; radioStop.classList.remove('visible'); setStatus('Acoustic emission halted');
 }
 
 radioStop.addEventListener('click', stopRadio);
 radioPlayer.addEventListener('error', () => {
-  setStatus('stream error · try another station', 'err');
-  radioNowPlaying.textContent = '';
-  document.querySelectorAll('.station-btn').forEach(b => b.classList.remove('playing'));
-  radioStop.classList.remove('visible');
+  setStatus('Target socket rejected broadcast stream link', 'err'); stopRadio();
 });
 
 buildStationGrid();
 
-/* ══ UTILS ═══════════════════════════════════════════════════════════ */
-function esc(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 </script>
 </body>
 </html>
