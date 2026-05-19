@@ -214,6 +214,27 @@
     }
     #sendChat:hover { color: #fff; border-color: var(--accent); }
 
+    /* ── MIC BUTTON ───────────────────────────── */
+    #micBtn {
+      background: none; border: none;
+      font-family: var(--font-mono); font-size: var(--fs-sm);
+      letter-spacing: 0.18em; color: var(--muted);
+      padding: 8px 6px; cursor: pointer;
+      transition: color 0.3s; flex-shrink: 0;
+      border-bottom: 1px solid transparent;
+      min-width: 36px; text-align: center;
+    }
+    #micBtn:hover { color: #fff; }
+    #micBtn.active {
+      color: rgba(255,160,200,0.95);
+      border-color: rgba(255,160,200,0.5);
+      animation: micBlink 0.7s ease-in-out infinite;
+    }
+    @keyframes micBlink {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.35; }
+    }
+
     /* ── MEMORY PANEL ─────────────────────────── */
     #memPanel {
       overflow-y: auto;
@@ -484,6 +505,7 @@
       <div id="chatLog"></div>
       <div id="chatInput">
         <textarea id="chatBox" placeholder="say something" rows="1"></textarea>
+        <button id="micBtn" title="Voice input">🎙</button>
         <button id="sendChat">SEND</button>
       </div>
     </div>
@@ -586,6 +608,7 @@ function applyConfig() {
   setTimeout(maybeFireProactive, 5000);
   setPresence('online');
   renderNotes();
+  initMic();
 }
 
 document.getElementById('setupBtn').addEventListener('click', applyConfig);
@@ -919,6 +942,7 @@ async function askSonia(input) {
     const { mood, text: reply } = parseMoodReply(raw);
 
     conversationHistory.push({ role: 'assistant', content: reply });
+    playReceiveSound();
     addBubble('sonia', reply, mood);
     setStatus((MOOD_EMOJI[mood] || '') + ' ' + mood);
 
@@ -937,7 +961,103 @@ async function askSonia(input) {
   }
 }
 
-/* ── Send on Enter (no shift) or button ─────────── */
+/* ══ SOUND ENGINE ════════════════════════════════════════════════════
+   Soft pink tones — send (ascending) · receive (warm chord)
+   Uses Web Audio API, no external files needed.
+════════════════════════════════════════════════════════════════════ */
+let _audioCtx = null;
+function getAudioCtx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return _audioCtx;
+}
+
+function playTone(freq, type, gainVal, duration, startDelay) {
+  try {
+    const ctx  = getAudioCtx();
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + startDelay);
+    gain.gain.setValueAtTime(0, ctx.currentTime + startDelay);
+    gain.gain.linearRampToValueAtTime(gainVal, ctx.currentTime + startDelay + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + startDelay + duration);
+    osc.start(ctx.currentTime + startDelay);
+    osc.stop(ctx.currentTime + startDelay + duration + 0.05);
+  } catch(e) {}
+}
+
+function playSendSound() {
+  // Ascending pink pair — soft sine
+  playTone(660, 'sine', 0.12, 0.18, 0);
+  playTone(880, 'sine', 0.09, 0.18, 0.1);
+}
+
+function playReceiveSound() {
+  // Warm descending chord — intimate feel
+  playTone(520, 'sine', 0.10, 0.22, 0);
+  playTone(440, 'sine', 0.07, 0.22, 0.08);
+  playTone(330, 'sine', 0.05, 0.22, 0.16);
+}
+
+/* ══ MIC / SPEECH RECOGNITION ════════════════════════════════════════ */
+let recognition = null;
+let micActive   = false;
+
+const micBtn = document.getElementById('micBtn');
+
+function initMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { micBtn.style.display = 'none'; return; }
+  recognition = new SR();
+  recognition.continuous    = false;
+  recognition.interimResults = false;
+  recognition.lang          = 'en-GB';
+
+  recognition.onstart = () => {
+    micActive = true;
+    micBtn.classList.add('active');
+    micBtn.textContent = '🎙';
+    setStatus('listening...', 'busy');
+  };
+  recognition.onend = () => {
+    micActive = false;
+    micBtn.classList.remove('active');
+    micBtn.textContent = '🎙';
+    if (document.getElementById('chatBox').value.trim()) {
+      setStatus('');
+    } else {
+      setStatus('ready');
+    }
+  };
+  recognition.onerror = (e) => {
+    micActive = false;
+    micBtn.classList.remove('active');
+    setStatus('mic: ' + e.error, 'err');
+  };
+  recognition.onresult = (e) => {
+    const transcript = e.results[0][0].transcript.trim();
+    const box = document.getElementById('chatBox');
+    box.value = transcript;
+    box.style.height = 'auto';
+    box.style.height = Math.min(box.scrollHeight, 80) + 'px';
+    // Auto-send after voice
+    setTimeout(sendMessage, 300);
+  };
+}
+
+micBtn.addEventListener('click', () => {
+  if (!recognition) { initMic(); }
+  if (!recognition) return;
+  if (micActive) {
+    recognition.stop();
+  } else {
+    try { recognition.start(); } catch(e) {}
+  }
+});
+
+// ── Send on Enter (no shift) or button ─────────────
 const chatBox = document.getElementById('chatBox');
 chatBox.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) {
@@ -952,6 +1072,7 @@ function sendMessage() {
   if (!text) return;
   chatBox.value = '';
   chatBox.style.height = 'auto';
+  playSendSound();
   askSonia(text);
 }
 
