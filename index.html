@@ -42,8 +42,9 @@
       position: fixed; inset: 0; z-index: 100;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      gap: 28px; padding: 40px 32px;
+      gap: 24px; padding: 40px 32px;
       background: var(--bg);
+      overflow-y: auto;
     }
     #setup h1 {
       font-family: var(--font-main); font-weight: 300;
@@ -216,8 +217,8 @@
     }
     #sendChat:hover { color: #fff; border-color: var(--accent); }
 
-    /* ── MIC BUTTON ───────────────────────────── */
-    #micBtn {
+    /* ── MIC & MAIL BUTTONS ─────────────────────── */
+    #micBtn, #composeBtn {
       background: none; border: none;
       font-family: var(--font-mono); font-size: var(--fs-sm);
       letter-spacing: 0.18em; color: var(--muted);
@@ -226,7 +227,7 @@
       border-bottom: 1px solid transparent;
       min-width: 36px; text-align: center;
     }
-    #micBtn:hover { color: #fff; }
+    #micBtn:hover, #composeBtn:hover { color: #fff; }
     #micBtn.active {
       color: rgba(255,160,200,0.95);
       border-color: rgba(255,160,200,0.5);
@@ -448,6 +449,7 @@
     .m-intimate      { background: hsl(320,55%,50%); }
     .m-introspective { background: hsl(240,45%,42%); }
     .m-default       { background: rgba(255,255,255,0.4); }
+    
     /* ══ RADIO PANEL ══ */
     #radioPanel {
       overflow-y: auto; padding: 22px 20px;
@@ -499,11 +501,59 @@
     }
     #radioStop.visible { display: inline; }
     #radioStop:active { color: rgba(255,100,100,0.8); }
+
+    /* ══ EMAIL OVERLAY ══ */
+    #emailOverlay {
+      display: none; position: fixed; inset: 0; z-index: 120;
+      background: rgba(0,0,0,0.96);
+      flex-direction: column; padding: 48px 24px 28px; gap: 20px;
+    }
+    #emailOverlay.on { display: flex; }
+    .email-hdr {
+      font-family: var(--font-mono); font-size: var(--fs-xs);
+      letter-spacing: 0.45em; color: var(--muted);
+    }
+    .email-field { display: flex; flex-direction: column; gap: 8px; }
+    .email-field label {
+      font-family: var(--font-mono); font-size: var(--fs-xs);
+      letter-spacing: 0.3em; color: var(--dim);
+    }
+    .email-field input, .email-field textarea {
+      background: transparent; border: none;
+      border-bottom: 1px solid var(--border);
+      color: #fff; font-family: var(--font-mono);
+      font-size: var(--fs-base); letter-spacing: 0.06em;
+      padding: 10px 0; outline: none;
+      transition: border-color 0.3s; width: 100%;
+    }
+    .email-field input:focus, .email-field textarea:focus { border-color: #fff; }
+    .email-field input::placeholder, .email-field textarea::placeholder { color: var(--dim); }
+    .email-field textarea { resize: none; min-height: 120px; line-height: 1.6; }
+    .email-actions { display: flex; gap: 20px; margin-top: 4px; }
+    .email-btn {
+      background: none; border: none;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted); font-family: var(--font-mono);
+      font-size: var(--fs-sm); letter-spacing: 0.25em;
+      padding: 10px 0; min-height: 44px; cursor: pointer;
+      transition: color 0.3s, border-color 0.3s;
+    }
+    .email-btn:active { color: #fff; border-color: #fff; }
+    .email-btn.send {
+      color: rgba(255,160,200,0.9);
+      border-color: rgba(255,160,200,0.4);
+    }
+    .email-status {
+      font-family: var(--font-mono); font-size: var(--fs-xs);
+      letter-spacing: 0.22em; color: var(--dim); min-height: 18px;
+    }
+    .email-status.ok   { color: rgba(80,255,140,0.85); }
+    .email-status.err  { color: rgba(255,90,90,0.9); }
+    .email-status.busy { color: rgba(160,210,255,0.85); animation: blink 1s ease-in-out infinite; }
   </style>
 </head>
 <body>
 
-<!-- ── SETUP SCREEN ───────────────────────────────── -->
 <div id="setup">
   <h1>Sonia</h1>
   <div class="sub">remote · by H</div>
@@ -514,7 +564,7 @@
   </div>
 
   <div class="setup-field">
-    <label>GOOGLE CLIENT ID (for Drive)</label>
+    <label>GOOGLE CLIENT ID</label>
     <input type="text" id="cfgClient" placeholder="xxxxxxxxx.apps.googleusercontent.com" autocomplete="off">
   </div>
 
@@ -532,11 +582,10 @@
 
   <div class="setup-note">
     Keys are saved in browser localStorage and never sent anywhere except Groq and Google.<br>
-    Google Client ID: create at console.cloud.google.com → enable Drive API → OAuth → Web app → add this page URL as authorised origin.
+    Google Client ID: create at console.cloud.google.com → enable Drive & Gmail APIs → OAuth Screen → Web app → add this authorized origin.
   </div>
 </div>
 
-<!-- ── MAIN APP ──────────────────────────────────── -->
 <div id="app">
 
   <div id="hdr">
@@ -546,25 +595,25 @@
     </div>
     <div id="hdr-mode">
       <button class="mode-btn active" data-panel="chatPanel">CHAT</button>
-      <button class="mode-btn" data-panel="memPanel">MEMORY</button>
+      <button class="mode-btn" data-panel="memPanel">MEM</button>
       <button class="mode-btn" data-panel="notesPanel">NOTES</button>
       <button class="mode-btn" data-panel="radioPanel">RADIO</button>
+      <button class="mode-btn" id="mailTab">MAIL</button>
     </div>
   </div>
 
   <div id="panels">
 
-    <!-- CHAT -->
     <div class="panel active" id="chatPanel" style="display:flex;flex-direction:column;">
       <div id="chatLog"></div>
       <div id="chatInput">
         <textarea id="chatBox" placeholder="say something" rows="1"></textarea>
+        <button id="composeBtn" title="Compose Email">✉</button>
         <button id="micBtn" title="Voice input">🎙</button>
         <button id="sendChat">SEND</button>
       </div>
     </div>
 
-    <!-- MEMORY -->
     <div class="panel" id="memPanel" style="overflow-y:auto;padding:24px;">
       <div class="mem-hdr">
         <span>SONIA MEMORY</span>
@@ -573,20 +622,18 @@
       <div id="memList"></div>
     </div>
 
-    <!-- NOTES TO DESKTOP -->
     <div class="panel" id="notesPanel" style="display:flex;flex-direction:column;padding:24px;gap:16px;">
       <div class="notes-hdr">LEAVE A NOTE FOR DESKTOP SONIA</div>
       <textarea id="noteBox" placeholder="She will read this next time she syncs Drive..."></textarea>
       <div class="notes-actions">
         <button class="note-btn" id="sendNote">SEND NOTE</button>
-        <button id="driveBtn" class="note-btn">CONNECT DRIVE</button>
+        <button id="driveBtn" class="note-btn">CONNECT GOOGLE</button>
       </div>
-      <div id="driveHint">no google client id set · add one in setup to enable drive sync</div>
+      <div id="driveHint">no google client id set · add one in setup to enable drive & mail sync</div>
       <div style="font-family:var(--font-mono);font-size:0.4rem;letter-spacing:0.2em;color:var(--dim);">QUEUED NOTES</div>
       <div class="notes-queue" id="notesList"></div>
     </div>
 
-    <!-- RADIO -->
     <div class="panel" id="radioPanel">
       <div class="radio-hdr">RADIO</div>
       <div class="radio-sub">direct stream · no sign-in needed</div>
@@ -601,6 +648,27 @@
   <div id="statusBar">
     <span id="statusText">ready</span>
   </div>
+</div>
+
+<div id="emailOverlay">
+  <div class="email-hdr">COMPOSE EMAIL</div>
+  <div class="email-field">
+    <label>TO</label>
+    <input type="email" id="emailTo" placeholder="recipient@email.com" autocomplete="off">
+  </div>
+  <div class="email-field">
+    <label>SUBJECT</label>
+    <input type="text" id="emailSubject" placeholder="Subject...">
+  </div>
+  <div class="email-field">
+    <label>MESSAGE</label>
+    <textarea id="emailBody" placeholder="Write your message..."></textarea>
+  </div>
+  <div class="email-actions">
+    <button class="email-btn send" id="emailSendBtn">SEND VIA GMAIL</button>
+    <button class="email-btn" id="emailCancelBtn">CANCEL</button>
+  </div>
+  <div class="email-status" id="emailStatus"></div>
 </div>
 
 <script>
@@ -662,13 +730,12 @@ function applyConfig() {
   if (CLIENT_ID) {
     document.getElementById('driveBtn').classList.add('visible');
     document.getElementById('driveHint').classList.remove('visible');
-    loadDriveLibs(); // pre-load GIS + gapi silently so button tap is instant
+    loadDriveLibs(); 
   } else {
     document.getElementById('driveBtn').classList.add('visible');
     document.getElementById('driveHint').classList.add('visible');
   }
   setStatus('systems online · ' + OWNER_NAME.toLowerCase());
-  // Fire proactive check even without Drive — weather works without auth
   setTimeout(maybeFireProactive, 5000);
   setPresence('online');
   renderNotes();
@@ -680,8 +747,9 @@ document.getElementById('cfgGroq').addEventListener('keydown', e => { if (e.key=
 
 window.addEventListener('load', loadConfig);
 
-/* ══ TABS ════════════════════════════════════════════════════════════ */
+/* ══ TABS & OVERLAYS ═════════════════════════════════════════════════ */
 document.querySelectorAll('.mode-btn').forEach(btn => {
+  if(btn.id === 'mailTab') return; // Handled separately
   btn.addEventListener('click', () => {
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -690,10 +758,26 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
   });
 });
 
+const emailOverlay = document.getElementById('emailOverlay');
+function openEmailModal() {
+  if (!driveToken) {
+    setStatus('please connect google drive/gmail first', 'err');
+    return;
+  }
+  document.getElementById('emailStatus').textContent = '';
+  emailOverlay.classList.add('on');
+}
+function closeEmailModal() {
+  emailOverlay.classList.remove('on');
+}
+
+document.getElementById('mailTab').addEventListener('click', openEmailModal);
+document.getElementById('composeBtn').addEventListener('click', openEmailModal);
+document.getElementById('emailCancelBtn').addEventListener('click', closeEmailModal);
+
 /* ══ PRESENCE DOT ════════════════════════════════════════════════ */
 const presenceDot = document.getElementById('presence');
 function setPresence(state) {
-  // state: 'offline' | 'online' | 'thinking'
   presenceDot.className = state === 'online' ? 'online'
                         : state === 'thinking' ? 'thinking' : '';
 }
@@ -723,11 +807,7 @@ function parseMoodReply(raw) {
   return { mood, text };
 }
 
-/* ══ SONIA PERSISTENT MIND (mobile) ═════════════════════════════
-   Reads sonia-profile.json and sonia-history.json from Drive.
-   Injects profile into system prompt. Saves exchanges to shared history.
-   Profile updates every 5 exchanges — same guardrails as desktop.
-══════════════════════════════════════════════════════════════════ */
+/* ══ SONIA PERSISTENT MIND (mobile) ═════════════════════════════ */
 const DEFAULT_PROFILE_MOB = {
   version: 1, created: new Date().toISOString(),
   personality: { tone: 'dry British wit, warm but not effusive', quirks: [], dislikes: [], interests: [] },
@@ -763,14 +843,12 @@ async function loadSoniaMindMob() {
   ]);
   soniaProfileMob  = profile;
   sharedHistoryMob = Array.isArray(history) ? history.slice(-40) : [];
-  // Merge recent shared history into local conversation context
   const localTexts = new Set(conversationHistory.map(m => m.content));
   for (const entry of sharedHistoryMob.slice(-16)) {
     if (!localTexts.has(entry.content)) conversationHistory.push({ role: entry.role, content: entry.content });
   }
   if (conversationHistory.length > 20) conversationHistory.splice(0, conversationHistory.length - 20);
   setStatus('mind loaded · ' + sharedHistoryMob.length + ' shared exchanges', 'ok');
-  console.log('[Sonia Mobile Mind] Loaded. Exchanges:', sharedHistoryMob.length);
 }
 
 async function saveToSharedHistoryMob(userMsg, soniaReply, mood) {
@@ -811,9 +889,7 @@ Respond ONLY with valid JSON. No preamble. No markdown.`;
   } catch(e) { console.warn('[Mind] profile update failed', e); }
 }
 
-/* ══ SYSTEM PROMPT ═══════════════════════════════════════════════════ */
-
-/* ══ WEATHER — wttr.in, no key needed ══════════════════════════════ */
+/* ══ WEATHER & NEWS EXTERNAL SURFACES ══════════════════════════════ */
 let _weatherCache = null;
 let _weatherFetched = 0;
 
@@ -846,7 +922,6 @@ async function fetchWeatherThought() {
   } catch(e) { return null; }
 }
 
-/* ══ NEWS — BBC Tech RSS, no key needed ════════════════════════════ */
 let _newsCache  = [];
 let _newsFetched = 0;
 let _newsIndex  = 0;
@@ -872,15 +947,11 @@ async function fetchNewsThought() {
   } catch(e) { return null; }
 }
 
-/* ── Proactive surface: weather or news bubble on load ─────────────
-   Fires once after Drive connects, quietly drops a bubble into chat.
-   Never more than once per session. Feels like she noticed something.
-────────────────────────────────────────────────────────────────── */
 let _proactiveFired = false;
 async function maybeFireProactive() {
   if (_proactiveFired) return;
   _proactiveFired = true;
-  await new Promise(r => setTimeout(r, 4000)); // let the UI settle
+  await new Promise(r => setTimeout(r, 4000));
   const roll = Math.random();
   let thought = null;
   if (roll < 0.45) thought = await fetchWeatherThought();
@@ -976,10 +1047,7 @@ async function askSonia(input) {
   try {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + GROQ_KEY
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         max_tokens: 180,
@@ -1010,7 +1078,6 @@ async function askSonia(input) {
     addBubble('sonia', reply, mood);
     setStatus((MOOD_EMOJI[mood] || '') + ' ' + mood);
 
-    // Persistent mind updates (background)
     if (driveToken) {
       saveToDriveMemory(input, reply);
       saveToSharedHistoryMob(input, reply, mood);
@@ -1025,10 +1092,7 @@ async function askSonia(input) {
   }
 }
 
-/* ══ SOUND ENGINE ════════════════════════════════════════════════════
-   Soft pink tones — send (ascending) · receive (warm chord)
-   Uses Web Audio API, no external files needed.
-════════════════════════════════════════════════════════════════════ */
+/* ══ SOUND ENGINE ════════════════════════════════════════════════════ */
 let _audioCtx = null;
 function getAudioCtx() {
   if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1053,13 +1117,11 @@ function playTone(freq, type, gainVal, duration, startDelay) {
 }
 
 function playSendSound() {
-  // Ascending pink pair — soft sine
   playTone(660, 'sine', 0.12, 0.18, 0);
   playTone(880, 'sine', 0.09, 0.18, 0.1);
 }
 
 function playReceiveSound() {
-  // Warm descending chord — intimate feel
   playTone(520, 'sine', 0.10, 0.22, 0);
   playTone(440, 'sine', 0.07, 0.22, 0.08);
   playTone(330, 'sine', 0.05, 0.22, 0.16);
@@ -1068,7 +1130,6 @@ function playReceiveSound() {
 /* ══ MIC / SPEECH RECOGNITION ════════════════════════════════════════ */
 let recognition = null;
 let micActive   = false;
-
 const micBtn = document.getElementById('micBtn');
 
 function initMic() {
@@ -1082,18 +1143,12 @@ function initMic() {
   recognition.onstart = () => {
     micActive = true;
     micBtn.classList.add('active');
-    micBtn.textContent = '🎙';
     setStatus('listening...', 'busy');
   };
   recognition.onend = () => {
     micActive = false;
     micBtn.classList.remove('active');
-    micBtn.textContent = '🎙';
-    if (document.getElementById('chatBox').value.trim()) {
-      setStatus('');
-    } else {
-      setStatus('ready');
-    }
+    if (document.getElementById('chatBox').value.trim()) { setStatus(''); } else { setStatus('ready'); }
   };
   recognition.onerror = (e) => {
     micActive = false;
@@ -1106,7 +1161,6 @@ function initMic() {
     box.value = transcript;
     box.style.height = 'auto';
     box.style.height = Math.min(box.scrollHeight, 80) + 'px';
-    // Auto-send after voice
     setTimeout(sendMessage, 300);
   };
 }
@@ -1114,14 +1168,9 @@ function initMic() {
 micBtn.addEventListener('click', () => {
   if (!recognition) { initMic(); }
   if (!recognition) return;
-  if (micActive) {
-    recognition.stop();
-  } else {
-    try { recognition.start(); } catch(e) {}
-  }
+  if (micActive) { recognition.stop(); } else { try { recognition.start(); } catch(e) {} }
 });
 
-// ── Send on Enter (no shift) or button ─────────────
 const chatBox = document.getElementById('chatBox');
 chatBox.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) {
@@ -1140,22 +1189,17 @@ function sendMessage() {
   askSonia(text);
 }
 
-// Auto-resize textarea
 chatBox.addEventListener('input', () => {
   chatBox.style.height = 'auto';
   chatBox.style.height = Math.min(chatBox.scrollHeight, 80) + 'px';
 });
 
-/* ══ GOOGLE DRIVE API — Google Identity Services (GIS) ══════════════
-   Uses the modern GIS + gapi.client approach.
-   Works on mobile — no popups, no deprecated auth2.
-════════════════════════════════════════════════════════════════════ */
+/* ══ GOOGLE AUTHORIZATION & IDENTITY SERVICES (GIS) ══════════════ */
 let gapiReady = false;
 let gisReady  = false;
 let tokenClient = null;
 
 function loadDriveLibs() {
-  // Load gapi (for Drive REST calls)
   if (!window.gapi) {
     const s1 = document.createElement('script');
     s1.src = 'https://apis.google.com/js/api.js';
@@ -1163,13 +1207,13 @@ function loadDriveLibs() {
       gapi.load('client', async () => {
         await gapi.client.init({});
         await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest');
+        await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest');
         gapiReady = true;
       });
     };
     document.head.appendChild(s1);
   }
 
-  // Load GIS (for OAuth token)
   if (!window.google?.accounts) {
     const s2 = document.createElement('script');
     s2.src = 'https://accounts.google.com/gsi/client';
@@ -1181,23 +1225,20 @@ function loadDriveLibs() {
 function signInDrive() {
   if (!CLIENT_ID) { setStatus('no google client id set', 'err'); return; }
 
-  // Build token client if not yet done
   if (!tokenClient) {
     tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: CLIENT_ID,
-      scope: 'https://www.googleapis.com/auth/drive.file',
+      scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/gmail.send',
       callback: (resp) => {
         if (resp.error) {
-          setStatus('drive auth failed: ' + resp.error, 'err');
-          console.warn('GIS error:', resp);
+          setStatus('google auth failed: ' + resp.error, 'err');
           return;
         }
         driveToken = resp.access_token;
-        // Also set on gapi.client so REST calls work
         gapi.client.setToken({ access_token: driveToken });
-        setStatus('drive connected', 'ok');
+        setStatus('google accounts sync connected', 'ok');
         const db = document.getElementById('driveBtn');
-        db.textContent = 'DRIVE: ON';
+        db.textContent = 'GOOGLE: CONNECTED';
         db.classList.add('connected');
         document.getElementById('driveHint').classList.remove('visible');
         loadMemoryFromDrive();
@@ -1211,13 +1252,12 @@ function signInDrive() {
 
 document.getElementById('driveBtn').addEventListener('click', () => {
   if (!CLIENT_ID) {
-    setStatus('add google client id in setup to use drive', 'err');
+    setStatus('add google client id in setup', 'err');
     document.getElementById('driveHint').classList.add('visible');
     return;
   }
-  // If libs not loaded yet, load them then wait briefly
   if (!window.google?.accounts || !gapiReady) {
-    setStatus('loading drive...', 'busy');
+    setStatus('loading dependencies...', 'busy');
     loadDriveLibs();
     const wait = setInterval(() => {
       if (window.google?.accounts && gapiReady) {
@@ -1233,13 +1273,10 @@ document.getElementById('driveBtn').addEventListener('click', () => {
 /* ── Find or create file in Drive ─────────────── */
 async function findOrCreateFile(name, mimeType, initialContent) {
   const q = `name='${name}' and trashed=false` + (FOLDER_ID ? ` and '${FOLDER_ID}' in parents` : '');
-  const res = await gapi.client.drive.files.list({
-    q, fields: 'files(id,name)', spaces: 'drive'
-  });
+  const res = await gapi.client.drive.files.list({ q, fields: 'files(id,name)', spaces: 'drive' });
   const files = res.result.files;
   if (files && files.length > 0) return files[0].id;
 
-  // Create new
   const meta = { name, mimeType };
   if (FOLDER_ID) meta.parents = [FOLDER_ID];
   const boundary = '-------314159265358979323846';
@@ -1268,10 +1305,7 @@ async function readFile(fileId) {
 async function writeFile(fileId, content, mimeType) {
   await fetch('https://www.googleapis.com/upload/drive/v3/files/' + fileId + '?uploadType=media', {
     method: 'PATCH',
-    headers: {
-      'Authorization': 'Bearer ' + driveToken,
-      'Content-Type': mimeType
-    },
+    headers: { 'Authorization': 'Bearer ' + driveToken, 'Content-Type': mimeType },
     body: content
   });
 }
@@ -1287,13 +1321,11 @@ async function loadMemoryFromDrive() {
     setStatus('memory loaded · ' + entries.length + ' entries');
   } catch(e) {
     setStatus('memory read error', 'err');
-    console.warn(e);
   }
 }
 
 document.getElementById('memRefresh').addEventListener('click', () => {
-  if (driveToken) loadMemoryFromDrive();
-  else setStatus('connect drive to load memory', 'err');
+  if (driveToken) loadMemoryFromDrive(); else setStatus('connect google accounts', 'err');
 });
 
 function renderMemory(entries) {
@@ -1316,7 +1348,6 @@ function renderMemory(entries) {
   });
 }
 
-/* ── Save memory entry ────────────────────────── */
 let memFileId = null;
 async function saveToDriveMemory(userMsg, soniaReply) {
   try {
@@ -1325,13 +1356,10 @@ async function saveToDriveMemory(userMsg, soniaReply) {
     const entries = JSON.parse(raw || '[]');
     entries.push({ timestamp: new Date().toISOString(), user: userMsg, sonia: soniaReply });
     await writeFile(memFileId, JSON.stringify(entries, null, 2), 'application/json');
-  } catch(e) {
-    console.warn('Memory save failed:', e);
-  }
+  } catch(e) { console.warn('Memory save failed:', e); }
 }
 
 /* ══ NOTES (leave for desktop Sonia) ════════════════════════════════ */
-// Notes are stored locally and also written to Drive as sonia-notes.json
 let notesQueue = JSON.parse(LS.get('notes') || '[]');
 let notesFileId = null;
 
@@ -1392,22 +1420,69 @@ async function syncNotesToDrive() {
     if (!notesFileId) notesFileId = await findOrCreateFile('sonia-notes.json', 'application/json', '[]');
     const payload = notesQueue.map(n => ({ timestamp: n.ts, text: n.text }));
     await writeFile(notesFileId, JSON.stringify(payload, null, 2), 'application/json');
-  } catch(e) {
-    setStatus('drive sync failed', 'err');
-    console.warn(e);
-  }
+  } catch(e) { setStatus('drive sync failed', 'err'); }
 }
 
-/* ══ RADIO ════════════════════════════════════════════════════════════
-   Direct MP3/AAC streams — no iframes, no sign-in, works on mobile.
-   Sourced from public broadcaster endpoints.
+/* ══ GMAIL ENGINE ════════════════════════════════════════════════════ */
+document.getElementById('emailSendBtn').addEventListener('click', async () => {
+  const to = document.getElementById('emailTo').value.trim();
+  const subject = document.getElementById('emailSubject').value.trim();
+  const body = document.getElementById('emailBody').value.trim();
+  const statusEl = document.getElementById('emailStatus');
+
+  if (!to || !body) {
+    statusEl.className = "email-status err";
+    statusEl.textContent = "recipient and message body are required.";
+    return;
+  }
+
+  statusEl.className = "email-status busy";
+  statusEl.textContent = "transmitting message...";
+
+  try {
+    const emailData = [
+      `To: ${to}`,
+      'Content-Type: text/plain; charset=utf-8',
+      'MIME-Version: 1.0',
+      `Subject: ${subject}`,
+      '',
+      body
+    ].join('\r\n');
+
+    const base64SafeEmail = btoa(unescape(encodeURIComponent(emailData)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+
+    await gapi.client.gmail.users.messages.send({
+      'userId': 'me',
+      'resource': { 'raw': base64SafeEmail }
+    });
+
+    statusEl.className = "email-status ok";
+    statusEl.textContent = "email successfully transmitted.";
+    
+    document.getElementById('emailTo').value = '';
+    document.getElementById('emailSubject').value = '';
+    document.getElementById('emailBody').value = '';
+    
+    setTimeout(closeEmailModal, 1500);
+  } catch (err) {
+    console.error(err);
+    statusEl.className = "email-status err";
+    statusEl.textContent = "delivery failed: " + (err.result?.error?.message || "internal connection failure");
+  }
+});
+
+/* ══ RADIO STATIONS ═══════════════════════════════════════════════════
+   Direct MP3/AAC streams — no sign-in or session cookies needed.
 ════════════════════════════════════════════════════════════════════ */
 const STATIONS = [
-  { name: 'BBC Radio 6',    loc: 'London, UK',       url: 'https://stream.live.vc.bbcmedia.co.uk/bbc_6music' },
-  { name: 'BBC World Svc',  loc: 'London, UK',       url: 'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service' },
+  { name: 'NTS Radio 1',    loc: 'London, UK',       url: 'https://stream-relay-geo.ntslive.co.uk/stream' },
+  { name: 'NTS Radio 2',    loc: 'London, UK',       url: 'https://stream-relay-geo.ntslive.co.uk/stream2' },
   { name: 'Radio FG',       loc: 'Paris, FR',        url: 'https://radiofg.impek.com/fg' },
   { name: 'Chillhop',       loc: 'lo-fi · global',   url: 'https://streams.ilovemusic.de/iloveradio17.mp3' },
-  { name: 'Jazz24',         loc: 'Seattle, US',      url: 'https://live.wostreaming.net/direct/ppm-jazz24aac-ibc1' },
+  { name: 'WBGO Jazz',      loc: 'Newark, US',       url: 'https://freshgrass.streamguys1.com/wbgo-web' },
   { name: 'SomaFM Drone',   loc: 'San Francisco',    url: 'https://ice6.somafm.com/dronezone-128-mp3' },
   { name: 'SomaFM Groove',  loc: 'San Francisco',    url: 'https://ice6.somafm.com/groovesalad-128-mp3' },
   { name: 'Radio Paradise', loc: 'worldwide',        url: 'https://stream.radioparadise.com/aac-128' },
@@ -1435,11 +1510,9 @@ function buildStationGrid() {
 
 function playStation(i, btn) {
   const s = STATIONS[i];
-  // Toggle off if already playing
   if (currentStation === i && !radioPlayer.paused) {
     stopRadio(); return;
   }
-  // Clear previous active
   document.querySelectorAll('.station-btn').forEach(b => b.classList.remove('playing'));
   btn.classList.add('playing');
   currentStation = i;
