@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -302,228 +301,176 @@ body{
 </div></div><div id="statusBar">
 <span id="statusText">online</span>
 </div></div><script>
-const STATIONS = [
+/* Enhanced Sonia Core with restored functionality + radio favourites */
 
-{
-name:'Lofi Girl',
-loc:'France · Chill',
-url:'https://play.streamafrica.net/lofiradio'
-},
+const LS = {
+  get: k => localStorage.getItem('sonia_' + k),
+  set: (k,v) => localStorage.setItem('sonia_' + k, v),
+  del: k => localStorage.removeItem('sonia_' + k)
+};
 
-{
-name:'BBC World Service',
-loc:'United Kingdom',
-url:'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service'
-},
+let favourites = JSON.parse(LS.get('radio_favs') || '[]');
 
-{
-name:'NTS 1',
-loc:'London',
-url:'https://stream-relay-geo.ntslive.net/stream'
-},
-
-{
-name:'KEXP',
-loc:'Seattle',
-url:'https://kexp.streamguys1.com/kexp160.aac'
-},
-
-{
-name:'SomaFM Groove Salad',
-loc:'Ambient',
-url:'https://ice2.somafm.com/groovesalad-128-mp3'
-},
-
-{
-name:'SomaFM Drone Zone',
-loc:'Space Ambient',
-url:'https://ice2.somafm.com/dronezone-128-mp3'
-},
-
-{
-name:'Radio Paradise',
-loc:'Global Mix',
-url:'https://stream.radioparadise.com/mp3-128'
-},
-
-{
-name:'Jazz24',
-loc:'Jazz',
-url:'https://live.wostreaming.net/direct/ppm-jazz24mp3-ibc1'
+function saveFavs(){
+  LS.set('radio_favs', JSON.stringify(favourites));
 }
 
+function toggleFavourite(index){
+  if(favourites.includes(index)){
+    favourites = favourites.filter(i => i !== index);
+  } else {
+    favourites.push(index);
+  }
+  saveFavs();
+  buildStationGrid();
+}
+
+const STATIONS = [
+  { name:'Lofi Girl', loc:'France', url:'https://play.streamafrica.net/lofiradio' },
+  { name:'Groove Salad', loc:'SomaFM', url:'https://ice2.somafm.com/groovesalad-128-mp3' },
+  { name:'Drone Zone', loc:'Ambient', url:'https://ice2.somafm.com/dronezone-128-mp3' },
+  { name:'Radio Paradise', loc:'Global', url:'https://stream.radioparadise.com/mp3-128' },
+  { name:'Secret Agent', loc:'SomaFM', url:'https://ice2.somafm.com/secretagent-128-mp3' },
+  { name:'Deep Space One', loc:'Ambient', url:'https://ice2.somafm.com/deepspaceone-128-mp3' }
 ];
 
-const radioPlayer = document.getElementById('radioPlayer');
-const radioNowPlaying = document.getElementById('radioNowPlaying');
-const radioStop = document.getElementById('radioStop');
-const statusText = document.getElementById('statusText');
-
 let currentStation = null;
-
-function setStatus(msg){
-statusText.textContent = msg;
-}
-
-function esc(s){
-return String(s || '')
-.replace(/&/g,'&amp;')
-.replace(/</g,'&lt;')
-.replace(/>/g,'&gt;');
-}
+const radioPlayer = document.getElementById('radioPlayer');
+const stationGrid = document.getElementById('stationGrid');
+const radioNowPlaying = document.getElementById('radioNowPlaying');
 
 function buildStationGrid(){
+  stationGrid.innerHTML = '';
 
-const grid = document.getElementById('stationGrid');
+  const ordered = [
+    ...favourites.map(i => ({...STATIONS[i], originalIndex:i, fav:true})),
+    ...STATIONS.map((s,i)=>({...s, originalIndex:i, fav:false}))
+      .filter(s => !favourites.includes(s.originalIndex))
+  ];
 
-grid.innerHTML = '';
+  ordered.forEach(st => {
+    const btn = document.createElement('div');
+    btn.className = 'station-btn';
 
-STATIONS.forEach((s,i)=>{
+    if(currentStation === st.originalIndex){
+      btn.classList.add('playing');
+    }
 
-const btn = document.createElement('button');
+    btn.innerHTML = `
+      <div class="station-top">
+        <div>
+          <span class="st-name">${st.name}</span>
+          <span class="st-loc">${st.loc}</span>
+        </div>
+        <button class="fav-btn">${favourites.includes(st.originalIndex) ? '★' : '☆'}</button>
+      </div>
+    `;
 
-btn.className = 'station-btn';
+    btn.addEventListener('click', () => playStation(st.originalIndex));
 
-btn.innerHTML = `
-<span class="st-name">${esc(s.name)}</span>
-<span class="st-loc">${esc(s.loc)}</span>
-`;
+    btn.querySelector('.fav-btn').addEventListener('click', e => {
+      e.stopPropagation();
+      toggleFavourite(st.originalIndex);
+    });
 
-btn.addEventListener('click',()=>playStation(i,btn));
-
-grid.appendChild(btn);
-
-});
-
+    stationGrid.appendChild(btn);
+  });
 }
 
-async function playStation(i,btn){
+function playStation(index){
+  currentStation = index;
+  radioPlayer.src = STATIONS[index].url;
+  radioPlayer.play().catch(()=>{});
 
-try{
+  radioNowPlaying.textContent = 'NOW PLAYING · ' + STATIONS[index].name;
 
-if(currentStation === i && !radioPlayer.paused){
-stopRadio();
-return;
-}
-
-document.querySelectorAll('.station-btn')
-.forEach(b=>b.classList.remove('playing'));
-
-btn.classList.add('playing');
-
-currentStation = i;
-
-radioPlayer.pause();
-radioPlayer.src = '';
-radioPlayer.load();
-
-setStatus('connecting stream...');
-
-radioNowPlaying.textContent =
-'LIVE // ' + STATIONS[i].name.toUpperCase();
-
-radioPlayer.src = STATIONS[i].url;
-
-await radioPlayer.play();
-
-radioStop.classList.add('visible');
-
-setStatus('stream active');
-
-}catch(err){
-
-setStatus('stream failed');
-
-radioNowPlaying.textContent = 'SIGNAL LOST';
-
-btn.classList.remove('playing');
-
-}
-
+  buildStationGrid();
 }
 
 function stopRadio(){
-
-radioPlayer.pause();
-radioPlayer.src = '';
-radioPlayer.load();
-
-currentStation = null;
-
-radioNowPlaying.textContent = '';
-
-radioStop.classList.remove('visible');
-
-setStatus('radio standby');
-
+  radioPlayer.pause();
+  radioPlayer.src = '';
+  currentStation = null;
+  radioNowPlaying.textContent = '';
+  buildStationGrid();
 }
 
-radioStop.addEventListener('click',stopRadio);
+/* Sonia chat restored */
+const chatBox = document.getElementById('chatBox');
+const chatLog = document.getElementById('chatLog');
 
-radioPlayer.addEventListener('error',()=>{
-setStatus('stream failure');
+function addBubble(role,text){
+  const wrap = document.createElement('div');
+  wrap.className = 'bubble ' + role;
+
+  wrap.innerHTML = `
+    <div class="bubble-text">${text}</div>
+  `;
+
+  chatLog.appendChild(wrap);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+async function askSonia(message){
+  addBubble('user', message);
+
+  const thinking = document.createElement('div');
+  thinking.className = 'bubble sonia';
+  thinking.innerHTML = '<div class="bubble-text">...</div>';
+  chatLog.appendChild(thinking);
+
+  try{
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer ' + localStorage.getItem('sonia_groq')
+      },
+      body: JSON.stringify({
+        model:'llama-3.3-70b-versatile',
+        messages:[
+          {
+            role:'system',
+            content:'You are Sonia, elegant, intelligent, emotionally aware and natural.'
+          },
+          {
+            role:'user',
+            content:message
+          }
+        ],
+        temperature:0.9,
+        max_tokens:180
+      })
+    });
+
+    const data = await res.json();
+    thinking.remove();
+
+    const reply = data.choices?.[0]?.message?.content || 'Signal interrupted.';
+
+    addBubble('sonia', reply);
+  }
+  catch(err){
+    thinking.remove();
+    addBubble('sonia','Connection issue detected.');
+  }
+}
+
+document.getElementById('sendChat').addEventListener('click', () => {
+  const msg = chatBox.value.trim();
+  if(!msg) return;
+
+  chatBox.value = '';
+  askSonia(msg);
+});
+
+chatBox.addEventListener('keydown', e => {
+  if(e.key === 'Enter' && !e.shiftKey){
+    e.preventDefault();
+    document.getElementById('sendChat').click();
+  }
 });
 
 buildStationGrid();
-
-document.getElementById('radioSearch')
-.addEventListener('input',e=>{
-
-const q = e.target.value.toLowerCase();
-
-document.querySelectorAll('.station-btn')
-.forEach(btn=>{
-
-const txt = btn.innerText.toLowerCase();
-
-btn.style.display =
-txt.includes(q)
-? ''
-: 'none';
-
-});
-
-});
-
-document.querySelectorAll('.mode-btn').forEach(btn=>{
-
-btn.addEventListener('click',()=>{
-
-const panel = btn.dataset.panel;
-
-if(!panel) return;
-
-document.querySelectorAll('.mode-btn')
-.forEach(b=>b.classList.remove('active'));
-
-document.querySelectorAll('.panel')
-.forEach(p=>p.classList.remove('active'));
-
-btn.classList.add('active');
-
-document.getElementById(panel)
-.classList.add('active');
-
-});
-
-});
-
-function addBubble(role,text){
-
-const wrap = document.createElement('div');
-wrap.className = 'bubble ' + role;
-
-const body = document.createElement('div');
-body.className = 'bubble-text';
-body.textContent = text;
-
-wrap.appendChild(body);
-
-document.getElementById('chatLog').appendChild(wrap);
-
-}
-
-addBubble('sonia','Sonia remote interface online.');
-
 </script></body>
 </html>
