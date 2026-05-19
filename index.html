@@ -125,18 +125,18 @@
 
     /* ── Mode tabs — BIGGER touch targets ── */
     #hdr-mode {
-      display: flex; gap: 2px;
+      display: flex; gap: 0;
     }
     .mode-btn {
       background: none; border: none;
       font-family: var(--font-mono); font-size: var(--fs-sm);
-      letter-spacing: 0.22em; color: var(--muted);
-      /* min 44 px tall per HIG / Material guidelines */
-      padding: 12px 14px;
-      min-height: 44px; min-width: 44px;
+      letter-spacing: 0.08em; color: var(--muted);
+      padding: 12px 10px;
+      min-height: 44px;
       cursor: pointer;
       border-bottom: 2px solid transparent;
       transition: color 0.3s, border-color 0.3s;
+      white-space: nowrap;
     }
     .mode-btn.active {
       color: #fff;
