@@ -1,1189 +1,528 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Sonia — Remote</title>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-    :root {
-      --bg: #000;
-      --surface: #050505;
-      --border: rgba(255,255,255,0.1);
-      --border-hover: rgba(255,255,255,0.3);
-      --text: rgba(255,255,255,0.95);
-      --muted: rgba(255,255,255,0.6);
-      --dim: rgba(255,255,255,0.35);
-      --accent: rgba(255,255,255,0.8);
-      --fade: 0.3s cubic-bezier(0.4,0,0.2,1);
-      --font-mono: 'Share Tech Mono', 'Courier New', monospace;
-      --font-main: 'Century Gothic', 'CenturyGothic', 'AppleGothic', sans-serif;
-      --safe-top: env(safe-area-inset-top, 0px);
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --fs-xs:   0.75rem;
-      --fs-sm:   0.85rem;
-      --fs-base: 1.0rem;
-      --fs-body: 1.05rem;
-      --fs-title: 1.2rem;
-    }
-
-    html, body {
-      height: 100%; width: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font-main);
-      overflow: hidden;
-    }
-
-    /* ── SETUP SCREEN ─────────────────────────── */
-    #setup {
-      position: fixed; inset: 0; z-index: 100;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 24px; padding: 40px 32px;
-      background: var(--bg);
-      overflow-y: auto;
-    }
-    #setup h1 {
-      font-family: var(--font-main); font-weight: 300;
-      font-size: 2rem; letter-spacing: 0.45em; color: #fff;
-      text-indent: 0.45em;
-    }
-    #setup .sub {
-      font-family: var(--font-mono); font-size: var(--fs-sm);
-      letter-spacing: 0.4em; color: var(--muted); text-align: center;
-      text-indent: 0.4em;
-    }
-    .setup-field {
-      width: 100%; max-width: 340px;
-    }
-    .setup-field label {
-      display: block; font-family: var(--font-mono);
-      font-size: var(--fs-xs); letter-spacing: 0.25em;
-      color: var(--dim); margin-bottom: 6px;
-    }
-    .setup-field input {
-      width: 100%; background: transparent;
-      border: none; border-bottom: 1px solid var(--border);
-      color: #fff; font-family: var(--font-mono);
-      font-size: var(--fs-base); letter-spacing: 0.1em;
-      padding: 10px 0; outline: none;
-      transition: border-color 0.3s;
-    }
-    .setup-field input:focus { border-color: var(--accent); }
-    .setup-field input::placeholder { color: var(--dim); }
-    #setupBtn {
-      background: none; border: 1px solid var(--border);
-      color: var(--muted); font-family: var(--font-mono);
-      font-size: var(--fs-base); letter-spacing: 0.3em;
-      padding: 14px 40px; cursor: pointer; text-indent: 0.3em;
-      transition: color 0.3s, border-color 0.3s;
-    }
-    #setupBtn:hover { color: #fff; border-color: var(--accent); }
-    .setup-note {
-      font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.15em; color: var(--dim);
-      text-align: center; max-width: 320px; line-height: 1.6;
-    }
-
-    /* ── MAIN APP APP STRUCTURE ────────────────── */
-    #app {
-      display: none;
-      position: fixed; inset: 0;
-      flex-direction: column;
-      padding-top: var(--safe-top);
-      padding-bottom: var(--safe-bottom);
-    }
-    #app.on { display: flex; }
-
-    /* Header */
-    #hdr {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 20px 12px;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0; gap: 12px;
-    }
-    #hdr-title {
-      font-family: var(--font-main); font-weight: 300;
-      font-size: var(--fs-title); letter-spacing: 0.35em; color: #fff;
-      flex-shrink: 0;
-    }
-    #hdr-mode {
-      display: flex; gap: 4px; overflow-x: auto;
-      scrollbar-width: none; -webkit-overflow-scrolling: touch;
-    }
-    #hdr-mode::-webkit-scrollbar { display: none; }
-    .mode-btn {
-      background: none; border: none;
-      font-family: var(--font-mono); font-size: 0.75rem;
-      letter-spacing: 0.15em; color: var(--muted);
-      padding: 6px 10px; cursor: pointer;
-      border-bottom: 1px solid transparent;
-      transition: color 0.2s, border-color 0.2s;
-      white-space: nowrap;
-    }
-    .mode-btn.active { color: #fff; border-color: var(--accent); }
-
-    /* Tab panels container */
-    #panels { flex: 1; overflow: hidden; min-height: 0; position: relative; }
-
-    .panel {
-      position: absolute; inset: 0;
-      display: none; flex-direction: column;
-      opacity: 0;
-      transition: opacity var(--fade);
-    }
-    .panel.active { display: flex; opacity: 1; }
-
-    /* ── CHAT PANEL ───────────────────────────── */
-    #chatLog {
-      flex: 1; overflow-y: auto;
-      padding: 20px;
-      display: flex; flex-direction: column; gap: 20px;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-    #chatLog::-webkit-scrollbar { display: none; }
-
-    .bubble {
-      max-width: 85%;
-      animation: bubbleIn 0.25s ease forwards;
-    }
-    @keyframes bubbleIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .bubble.user { align-self: flex-end; }
-    .bubble.sonia { align-self: flex-start; }
-
-    .bubble-text {
-      font-size: var(--fs-body); line-height: 1.65;
-      letter-spacing: 0.01em;
-    }
-    .bubble.user .bubble-text {
-      color: rgba(255,255,255,0.9);
-      text-align: right;
-    }
-    .bubble.sonia .bubble-text {
-      color: var(--text);
-    }
-
-    .bubble-meta {
-      font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.2em; color: var(--dim);
-      margin-top: 6px; display: flex; align-items: center; gap: 6px;
-    }
-    .bubble.user .bubble-meta { justify-content: flex-end; }
-
-    .mood-pip {
-      display: inline-block; width: 6px; height: 6px;
-      border-radius: 50%;
-    }
-
-    /* Thinking Indicator */
-    .thinking .bubble-text {
-      color: var(--dim);
-      animation: blink 1.2s ease-in-out infinite;
-    }
-    @keyframes blink { 0%,100%{opacity:0.3} 50%{opacity:1} }
-
-    /* Chat inputs */
-    #chatInput {
-      display: flex; align-items: flex-end; gap: 12px;
-      padding: 14px 20px;
-      border-top: 1px solid var(--border);
-      flex-shrink: 0; background: var(--bg);
-    }
-    #chatBox {
-      flex: 1; background: transparent;
-      border: none; border-bottom: 1px solid var(--border);
-      color: #fff; font-family: var(--font-mono);
-      font-size: var(--fs-base); letter-spacing: 0.05em;
-      padding: 8px 0; outline: none;
-      resize: none; max-height: 80px;
-      overflow-y: auto; line-height: 1.4;
-      transition: border-color 0.3s;
-    }
-    #chatBox:focus { border-color: var(--accent); }
-    #chatBox::placeholder { color: var(--dim); }
-    #sendChat {
-      background: none; border: none;
-      font-family: var(--font-mono); font-size: var(--fs-sm);
-      letter-spacing: 0.15em; color: var(--muted);
-      padding: 8px 4px; cursor: pointer;
-      transition: color 0.3s; flex-shrink: 0;
-    }
-    #sendChat:hover { color: #fff; }
-
-    /* Mic button */
-    #micBtn {
-      background: none; border: none;
-      font-family: var(--font-mono); font-size: var(--fs-base);
-      color: var(--muted); padding: 6px 4px; cursor: pointer;
-      transition: color 0.3s; flex-shrink: 0;
-    }
-    #micBtn:hover { color: #fff; }
-    #micBtn.active {
-      color: rgba(255,100,100,0.9);
-      animation: micBlink 0.8s ease-in-out infinite;
-    }
-    @keyframes micBlink { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-    /* ── MEMORY PANEL ─────────────────────────── */
-    #memPanel {
-      padding: 20px;
-    }
-    .mem-hdr {
-      font-family: var(--font-mono); font-size: var(--fs-sm);
-      letter-spacing: 0.3em; color: var(--muted);
-      margin-bottom: 16px; display: flex;
-      justify-content: space-between; align-items: center;
-      flex-shrink: 0;
-    }
-    .mem-refresh {
-      background: none; border: none; cursor: pointer;
-      font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.15em; color: var(--dim);
-      transition: color 0.3s;
-    }
-    .mem-refresh:hover { color: #fff; }
-    #memList {
-      flex: 1; overflow-y: auto;
-      scrollbar-width: none; -webkit-overflow-scrolling: touch;
-    }
-    #memList::-webkit-scrollbar { display: none; }
-    .mem-entry {
-      border-bottom: 1px solid var(--border);
-      padding: 14px 0;
-    }
-    .mem-entry:last-child { border-bottom: none; }
-    .mem-ts {
-      font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.15em; color: var(--dim); margin-bottom: 6px;
-    }
-    .mem-user {
-      font-size: var(--fs-base); color: rgba(255,255,255,0.7);
-      margin-bottom: 4px; line-height: 1.4;
-    }
-    .mem-sonia {
-      font-size: var(--fs-body); color: var(--text); line-height: 1.5;
-    }
-
-    /* ── NOTES PANEL (SCROLL FIXED) ────────────── */
-    #notesPanel {
-      padding: 20px; gap: 16px;
-    }
-    .notes-hdr {
-      font-family: var(--font-mono); font-size: var(--fs-sm);
-      letter-spacing: 0.25em; color: var(--muted);
-      flex-shrink: 0;
-    }
-    #noteBox {
-      width: 100%; background: transparent;
-      border: 1px solid var(--border);
-      color: #fff; font-family: var(--font-mono);
-      font-size: var(--fs-base); letter-spacing: 0.05em;
-      padding: 12px; outline: none;
-      resize: none; line-height: 1.5;
-      min-height: 100px; max-height: 140px;
-      transition: border-color 0.3s; flex-shrink: 0;
-    }
-    #noteBox:focus { border-color: var(--border-hover); }
-    #noteBox::placeholder { color: var(--dim); }
-    .notes-actions { display: flex; gap: 16px; flex-shrink: 0; }
-    .note-btn {
-      flex: 1; background: none; border: 1px solid var(--border);
-      color: var(--muted); font-family: var(--font-mono);
-      font-size: var(--fs-xs); letter-spacing: 0.2em;
-      padding: 10px 0; cursor: pointer; text-align: center;
-      transition: color 0.3s, border-color 0.3s;
-    }
-    .note-btn:hover { color: #fff; border-color: var(--accent); }
-    #driveHint {
-      font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.12em; color: var(--dim); line-height: 1.5;
-      display: none; flex-shrink: 0;
-    }
-    #driveHint.visible { display: block; }
-    .queue-title {
-      font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.2em; color: var(--dim); margin-top: 4px;
-      flex-shrink: 0;
-    }
-    .notes-queue {
-      flex: 1; overflow-y: auto;
-      scrollbar-width: none; -webkit-overflow-scrolling: touch;
-      border-top: 1px solid var(--border);
-    }
-    .notes-queue::-webkit-scrollbar { display: none; }
-    .note-item {
-      border-bottom: 1px solid var(--border);
-      padding: 12px 0; display: flex;
-      justify-content: space-between; align-items: flex-start; gap: 12px;
-    }
-    .note-item-body { flex: 1; }
-    .note-item-ts {
-      font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.15em; color: var(--dim); margin-bottom: 4px;
-    }
-    .note-item-text { font-size: var(--fs-base); color: var(--text); line-height: 1.5; }
-    .note-del {
-      background: none; border: none; cursor: pointer;
-      font-family: var(--font-mono); font-size: var(--fs-sm);
-      color: var(--dim); transition: color 0.3s; padding: 2px 6px;
-    }
-    .note-del:hover { color: rgba(255,90,90,0.8); }
-
-    /* ── RADIO PANEL (SCROLL FIXED) ────────────── */
-    #radioPanel {
-      padding: 20px; gap: 14px;
-    }
-    .radio-hdr-group { flex-shrink: 0; }
-    .radio-hdr {
-      font-family: var(--font-mono); font-size: var(--fs-sm);
-      letter-spacing: 0.3em; color: var(--muted); margin-bottom: 4px;
-    }
-    .radio-sub {
-      font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.15em; color: var(--dim);
-    }
-    #radioNowPlaying {
-      font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.15em; color: var(--muted);
-      min-height: 18px; line-height: 1.4; flex-shrink: 0;
-    }
-    #radioStop {
-      background: none; border: 1px solid rgba(255,90,90,0.3);
-      color: rgba(255,90,90,0.8); font-family: var(--font-mono);
-      font-size: var(--fs-xs); letter-spacing: 0.2em;
-      padding: 8px 16px; cursor: pointer; display: none;
-      align-self: flex-start; flex-shrink: 0; transition: all 0.3s;
-    }
-    #radioStop.visible { display: inline-block; }
-    #radioStop:hover { background: rgba(255,90,90,0.1); color: #fff; }
-    
-    .station-grid {
-      flex: 1; overflow-y: auto;
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 10px; content-visibility: auto;
-      scrollbar-width: none; -webkit-overflow-scrolling: touch;
-    }
-    .station-grid::-webkit-scrollbar { display: none; }
-    
-    .station-btn {
-      background: var(--surface); border: 1px solid var(--border);
-      color: var(--muted); font-family: var(--font-mono);
-      font-size: 0.72rem; letter-spacing: 0.1em;
-      padding: 12px 8px; cursor: pointer; text-align: left;
-      line-height: 1.4; height: fit-content;
-      transition: border-color 0.2s, background 0.2s, color 0.2s;
-    }
-    .station-btn:hover { border-color: var(--border-hover); }
-    .station-btn.playing {
-      color: #fff; border-color: var(--accent);
-      background: rgba(255,255,255,0.05);
-    }
-    .station-btn .st-name { display: block; color: rgba(255,255,255,0.9); margin-bottom: 2px; font-weight: normal; }
-    .station-btn .st-loc  { display: block; font-size: 0.62rem; color: var(--dim); }
-    #radioPlayer { display: none; }
-
-    /* Status Bar */
-    #statusBar {
-      height: 30px; flex-shrink: 0;
-      display: flex; align-items: center;
-      padding: 0 20px; border-top: 1px solid var(--border);
-      background: var(--bg);
-    }
-    #statusText {
-      font-family: var(--font-mono); font-size: var(--fs-xs);
-      letter-spacing: 0.2em; color: var(--dim);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    #statusText.ok   { color: rgba(100,255,150,0.7); }
-    #statusText.err  { color: rgba(255,100,100,0.7); }
-    #statusText.busy { color: rgba(150,200,255,0.7); animation: blink 1s ease-in-out infinite; }
-
-    /* Presence Indicator */
-    #presence {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: rgba(255,255,255,0.1);
-      flex-shrink: 0; margin-left: 8px;
-      transition: background 0.4s, box-shadow 0.4s;
-    }
-    #presence.online {
-      background: #00ff66;
-      box-shadow: 0 0 6px #00ff66;
-    }
-    #presence.thinking {
-      background: #00bcff;
-      box-shadow: 0 0 6px #00bcff;
-      animation: presencePulse 1s ease-in-out infinite;
-    }
-    @keyframes presencePulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-
-    /* Mood Coloring Styles */
-    .m-calm          { background: #50b4ff; }
-    .m-curious       { background: #b967ff; }
-    .m-thinking      { background: #00ffd5; }
-    .m-focused       { background: #ffaa00; }
-    .m-intimate      { background: #ff61b6; }
-    .m-introspective { background: #6056ff; }
-    .m-default       { background: var(--dim); }
-
-    /* ── RESPONSIVE VIEWPORTS ──────────────────── */
-    @media (min-width: 600px) {
-      #setup { gap: 28px; }
-      #hdr { padding: 20px 28px; }
-      #chatLog, #memPanel, #notesPanel, #radioPanel { padding: 28px; }
-      .station-grid { gap: 12px; }
-      .station-btn { padding: 14px 12px; }
-    }
-  </style>
-</head>
-<body>
-
-<div id="setup">
-  <h1>Sonia</h1>
-  <div class="sub">remote · platform framework</div>
-
-  <div class="setup-field">
-    <label>GROQ API KEY</label>
-    <input type="password" id="cfgGroq" placeholder="gsk_..." autocomplete="off">
-  </div>
-
-  <div class="setup-field">
-    <label>GOOGLE CLIENT ID (for Drive)</label>
-    <input type="text" id="cfgClient" placeholder="xxxxxxxxx.apps.googleusercontent.com" autocomplete="off">
-  </div>
-
-  <div class="setup-field">
-    <label>OWNER NAME</label>
-    <input type="text" id="cfgOwner" placeholder="Mr H" autocomplete="off" value="Mr H">
-  </div>
-
-  <div class="setup-field">
-    <label>DRIVE FOLDER ID (optional)</label>
-    <input type="text" id="cfgFolder" placeholder="15_CaTpcDxfuOIOjx6dlgr..." autocomplete="off">
-  </div>
-
-  <button id="setupBtn">ENTER SYSTEM</button>
-
-  <div class="setup-note">
-    Local execution protocol. Credentials map directly to client-side storage structures and interact exclusively with corresponding host endpoints.
-  </div>
-</div>
-
-<div id="app">
-
-  <div id="hdr">
-    <div style="display:flex;align-items:center;">
-      <span id="hdr-title">Sonia</span>
-      <span id="presence"></span>
-    </div>
-    <div id="hdr-mode">
-      <button class="mode-btn active" data-panel="chatPanel">CHAT</button>
-      <button class="mode-btn" data-panel="memPanel">MEM</button>
-      <button class="mode-btn" data-panel="notesPanel">NOTES</button>
-      <button class="mode-btn" data-panel="radioPanel">RADIO</button>
-    </div>
-  </div>
-
-  <div id="panels">
-
-    <div class="panel active" id="chatPanel">
-      <div id="chatLog"></div>
-      <div id="chatInput">
-        <textarea id="chatBox" placeholder="transmission input" rows="1"></textarea>
-        <button id="micBtn" title="Voice processing">🎙</button>
-        <button id="sendChat">SEND</button>
-      </div>
-    </div>
-
-    <div class="panel" id="memPanel">
-      <div class="mem-hdr">
-        <span>PERSISTENT CORE</span>
-        <button class="mem-refresh" id="memRefresh">↺ REFRESH</button>
-      </div>
-      <div id="memList"></div>
-    </div>
-
-    <div class="panel" id="notesPanel">
-      <div class="notes-hdr">DESKTOP SYNC BUFFER</div>
-      <textarea id="noteBox" placeholder="Write synchronization payload for desktop environment..."></textarea>
-      <div class="notes-actions">
-        <button class="note-btn" id="sendNote">PUSH Note</button>
-        <button id="driveBtn" class="note-btn">CONNECT DRIVE</button>
-      </div>
-      <div id="driveHint">Drive interface unlinked. Configure cloud variables inside structural setup matrix.</div>
-      <div class="queue-title">QUEUED LOCAL TRANSLATIONS</div>
-      <div class="notes-queue" id="notesList"></div>
-    </div>
-
-    <div class="panel" id="radioPanel">
-      <div class="radio-hdr-group">
-        <div class="radio-hdr">BROADCAST INTERFACE</div>
-        <div class="radio-sub">Direct network streams · Public access vectors</div>
-      </div>
-      <div id="radioNowPlaying"></div>
-      <button id="radioStop">■ TERMINATE STREAM</button>
-      <div class="station-grid" id="stationGrid"></div>
-      <audio id="radioPlayer" preload="none"></audio>
-    </div>
-
-  </div>
-
-  <div id="statusBar">
-    <span id="statusText">online</span>
-  </div>
-</div>
-
-<script>
-/* ══ TRANSLATION STORAGE MATRIX ═════════════════════════════════════ */
-const LS = {
-  get: k => localStorage.getItem('sonia_' + k),
-  set: (k,v) => localStorage.setItem('sonia_' + k, v),
-  del: k => localStorage.removeItem('sonia_' + k),
-};
-
-let GROQ_KEY    = '';
-let CLIENT_ID   = '';
-let OWNER_NAME  = 'Mr H';
-let FOLDER_ID   = '';
-let driveToken  = null;
-const conversationHistory = [];
-
-const VALID_MOODS = ['calm','curious','thinking','focused','intimate','introspective'];
-const MOOD_EMOJI = { calm: '🌿', curious: '✨', thinking: '💭', focused: '🎯', intimate: '🌙', introspective: '🪐' };
-const MOOD_MAP = {
-  amused:'curious', happy:'intimate', tired:'calm', warm:'intimate', sharp:'focused', 
-  reflective:'introspective', excited:'curious', serious:'focused', playful:'curious', 
-  wistful:'introspective', dry:'calm', alert:'focused', nostalgic:'intimate', bemused:'curious', 
-  pensive:'introspective', measured:'calm', engaged:'curious', concerned:'thinking', 
-  content:'intimate', analytical:'focused'
-};
-
-/* ══ CORE INTERFACE AGENT INITIALIZATION ════════════════════════════ */
-function loadConfig() {
-  const g = LS.get('groq'); const c = LS.get('client');
-  const o = LS.get('owner'); const f = LS.get('folder');
-  if (g) document.getElementById('cfgGroq').value   = g;
-  if (c) document.getElementById('cfgClient').value = c;
-  if (o) document.getElementById('cfgOwner').value  = o;
-  if (f) document.getElementById('cfgFolder').value = f;
-  if (g) { applyConfig(); }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Sonia Remote</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet"><style>
+*, *::before, *::after{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  -webkit-tap-highlight-color:transparent;
 }
 
-function applyConfig() {
-  GROQ_KEY   = document.getElementById('cfgGroq').value.trim();
-  CLIENT_ID  = document.getElementById('cfgClient').value.trim();
-  OWNER_NAME = document.getElementById('cfgOwner').value.trim() || 'Mr H';
-  FOLDER_ID  = document.getElementById('cfgFolder').value.trim();
-  if (!GROQ_KEY) { setStatus('Groq authentication signature required', 'err'); return; }
-  LS.set('groq',   GROQ_KEY);
-  LS.set('client', CLIENT_ID);
-  LS.set('owner',  OWNER_NAME);
-  LS.set('folder', FOLDER_ID);
-  document.getElementById('setup').style.display = 'none';
-  document.getElementById('app').classList.add('on');
-  if (CLIENT_ID) {
-    document.getElementById('driveBtn').classList.add('visible');
-    document.getElementById('driveHint').classList.remove('visible');
-    loadDriveLibs();
-  } else {
-    document.getElementById('driveBtn').classList.add('visible');
-    document.getElementById('driveHint').classList.add('visible');
+:root{
+  --bg:#000;
+  --surface:#050505;
+  --border:rgba(255,255,255,0.1);
+  --border-hover:rgba(255,255,255,0.3);
+  --text:rgba(255,255,255,0.95);
+  --muted:rgba(255,255,255,0.6);
+  --dim:rgba(255,255,255,0.35);
+  --accent:rgba(255,255,255,0.8);
+
+  --font-mono:'Share Tech Mono', monospace;
+  --font-main:'Century Gothic', sans-serif;
+
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+
+html{
+  height:100%;
+  overflow:hidden;
+}
+
+body{
+  height:100%;
+  overflow:hidden;
+  background:#000;
+  color:#fff;
+  font-family:var(--font-main);
+}
+
+#app{
+  position:fixed;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+#hdr{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:12px;
+  border-bottom:1px solid var(--border);
+  min-width:0;
+}
+
+#leftHdr{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+
+#hdr-title{
+  font-size:1rem;
+  letter-spacing:0.15em;
+  white-space:nowrap;
+}
+
+#presence{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#00ff88;
+  box-shadow:0 0 8px #00ff88;
+}
+
+#hdr-mode{
+  display:flex;
+  gap:4px;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+
+#hdr-mode::-webkit-scrollbar{
+  display:none;
+}
+
+.mode-btn{
+  background:none;
+  border:none;
+  color:var(--muted);
+  font-family:var(--font-mono);
+  font-size:0.65rem;
+  letter-spacing:0.08em;
+  padding:7px 8px;
+  white-space:nowrap;
+  border-bottom:1px solid transparent;
+}
+
+.mode-btn.active{
+  color:#fff;
+  border-color:#fff;
+}
+
+#panels{
+  flex:1;
+  position:relative;
+  overflow:hidden;
+}
+
+.panel{
+  position:absolute;
+  inset:0;
+  display:none;
+  flex-direction:column;
+}
+
+.panel.active{
+  display:flex;
+}
+
+#chatLog{
+  flex:1;
+  overflow-y:auto;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.bubble{
+  max-width:90%;
+}
+
+.bubble.user{
+  align-self:flex-end;
+}
+
+.bubble.sonia{
+  align-self:flex-start;
+}
+
+.bubble-text{
+  line-height:1.6;
+}
+
+#chatInput{
+  display:flex;
+  align-items:flex-end;
+  gap:10px;
+  padding:12px;
+  border-top:1px solid var(--border);
+}
+
+#chatBox{
+  flex:1;
+  background:transparent;
+  border:none;
+  border-bottom:1px solid var(--border);
+  color:#fff;
+  font-family:var(--font-mono);
+  padding:8px 0;
+  resize:none;
+  outline:none;
+  max-height:90px;
+}
+
+#sendChat,
+#micBtn{
+  background:none;
+  border:none;
+  color:var(--muted);
+  font-family:var(--font-mono);
+}
+
+#radioPanel{
+  padding:16px;
+  overflow:hidden;
+}
+
+.radio-hdr{
+  font-family:var(--font-mono);
+  margin-bottom:12px;
+  color:var(--muted);
+}
+
+#radioSearch{
+  width:100%;
+  background:transparent;
+  border:none;
+  border-bottom:1px solid var(--border);
+  color:#fff;
+  padding:10px 0;
+  margin-bottom:14px;
+  font-family:var(--font-mono);
+  outline:none;
+}
+
+.station-grid{
+  flex:1;
+  overflow-y:auto;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.station-btn{
+  background:#050505;
+  border:1px solid var(--border);
+  color:#fff;
+  padding:12px;
+  text-align:left;
+  font-family:var(--font-mono);
+  font-size:0.7rem;
+}
+
+.station-btn.playing{
+  border-color:#fff;
+  background:rgba(255,255,255,0.06);
+}
+
+.st-name{
+  display:block;
+  margin-bottom:4px;
+}
+
+.st-loc{
+  display:block;
+  color:var(--dim);
+  font-size:0.6rem;
+}
+
+#radioNowPlaying{
+  margin-bottom:12px;
+  font-family:var(--font-mono);
+  color:var(--muted);
+  font-size:0.7rem;
+}
+
+#radioStop{
+  display:none;
+  margin-bottom:14px;
+  background:none;
+  border:1px solid rgba(255,80,80,0.4);
+  color:rgba(255,100,100,0.9);
+  padding:8px 12px;
+  font-family:var(--font-mono);
+}
+
+#radioStop.visible{
+  display:inline-block;
+}
+
+#statusBar{
+  height:30px;
+  display:flex;
+  align-items:center;
+  padding:0 12px;
+  border-top:1px solid var(--border);
+}
+
+#statusText{
+  font-family:var(--font-mono);
+  font-size:0.65rem;
+  color:var(--dim);
+}
+
+@media(max-width:420px){
+
+  .station-grid{
+    grid-template-columns:1fr;
   }
-  setStatus('Systems operational // ' + OWNER_NAME.toLowerCase());
-  setTimeout(maybeFireProactive, 4000);
-  setPresence('online');
-  renderNotes();
-  initMic();
-}
 
-document.getElementById('setupBtn').addEventListener('click', applyConfig);
-document.getElementById('cfgGroq').addEventListener('keydown', e => { if (e.key==='Enter') applyConfig(); });
-
-window.addEventListener('load', loadConfig);
-
-/* ══ TABS STRUCTURAL NAVIGATION ═════════════════════════════════════ */
-document.querySelectorAll('.mode-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    if (!btn.dataset.panel) return;
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById(btn.dataset.panel).classList.add('active');
-  });
-});
-
-function setPresence(state) {
-  presenceDot = document.getElementById('presence');
-  presenceDot.className = state === 'online' ? 'online' : state === 'thinking' ? 'thinking' : '';
-}
-
-function setStatus(msg, type) {
-  const el = document.getElementById('statusText');
-  el.textContent = msg;
-  el.className = type || '';
-}
-
-function parseMoodReply(raw) {
-  const match = raw.match(/\[mood\s*:\s*([a-z]+)\s*\]/i);
-  let mood = 'calm';
-  if (match) {
-    const tag = match[1].toLowerCase();
-    mood = VALID_MOODS.includes(tag) ? tag : (MOOD_MAP[tag] || 'calm');
+  .mode-btn{
+    font-size:0.58rem;
+    padding:6px;
   }
-  const text = raw
-    .replace(/\[mood\s*:\s*[a-z]*\s*\]/gi, '')
-    .replace(/\[mood[^\]]*\]/gi, '')
-    .replace(/^\s*[\r\n]+/, '')
-    .replace(/[\r\n]+/g, ' ')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
-  return { mood, text };
+
 }
+</style></head>
+<body><div id="app"><div id="hdr"><div id="leftHdr">
+<span id="hdr-title">Sonia</span>
+<span id="presence"></span>
+</div><div id="hdr-mode">
+<button class="mode-btn active" data-panel="chatPanel">CHAT</button>
+<button class="mode-btn" data-panel="radioPanel">RADIO</button>
+</div></div><div id="panels"><div class="panel active" id="chatPanel"><div id="chatLog"></div><div id="chatInput">
+<textarea id="chatBox" placeholder="transmission input"></textarea>
+<button id="micBtn">🎙</button>
+<button id="sendChat">SEND</button>
+</div></div><div class="panel" id="radioPanel"><div class="radio-hdr">BROADCAST INTERFACE</div><div id="radioNowPlaying"></div><button id="radioStop">STOP STREAM</button>
 
-/* ══ SHARED INTELLIGENCE ARCHITECTURE ═══════════════════════════════ */
-const DEFAULT_PROFILE_MOB = {
-  version: 1, created: new Date().toISOString(),
-  personality: { tone: 'dry British wit, warm but not effusive', quirks: [], dislikes: [], interests: [] },
-  associations: [], learned: [], preferences: {}, recentMoods: [], lastReflection: null
-};
+<input type="text" id="radioSearch" placeholder="search stations..."><div class="station-grid" id="stationGrid"></div><audio id="radioPlayer" preload="none"></audio>
 
-let soniaProfileMob  = null;
-let sharedHistoryMob = [];
-let exchangesSinceUpdateMob = 0;
-
-async function driveReadJSONMob(fileName, fallback) {
-  if (!driveToken) return fallback;
-  try {
-    const fid = await findOrCreateFile(fileName, 'application/json', JSON.stringify(fallback));
-    const raw = await readFile(fid);
-    return JSON.parse(raw || 'null') || fallback;
-  } catch(e) { return fallback; }
-}
-
-async function driveWriteJSONMob(fileName, data) {
-  if (!driveToken) return;
-  try {
-    const fid = await findOrCreateFile(fileName, 'application/json', '{}');
-    await writeFile(fid, JSON.stringify(data, null, 2), 'application/json');
-  } catch(e) { console.warn('[Mind Sync Error]', e); }
-}
-
-async function loadSoniaMindMob() {
-  setStatus('Retrieving operational framework...', 'busy');
-  const [profile, history] = await Promise.all([
-    driveReadJSONMob('sonia-profile.json', DEFAULT_PROFILE_MOB),
-    driveReadJSONMob('sonia-history.json', []),
-  ]);
-  soniaProfileMob  = profile;
-  sharedHistoryMob = Array.isArray(history) ? history.slice(-40) : [];
-  const localTexts = new Set(conversationHistory.map(m => m.content));
-  for (const entry of sharedHistoryMob.slice(-16)) {
-    if (!localTexts.has(entry.content)) conversationHistory.push({ role: entry.role, content: entry.content });
-  }
-  if (conversationHistory.length > 20) conversationHistory.splice(0, conversationHistory.length - 20);
-  setStatus('System mind synced // ' + sharedHistoryMob.length + ' points parsed', 'ok');
-}
-
-async function saveToSharedHistoryMob(userMsg, soniaReply, mood) {
-  if (!driveToken) return;
-  try {
-    const history = await driveReadJSONMob('sonia-history.json', []);
-    history.push({ role: 'user',      content: userMsg,    timestamp: new Date().toISOString(), device: 'mobile' });
-    history.push({ role: 'assistant', content: soniaReply, timestamp: new Date().toISOString(), device: 'mobile', mood });
-    await driveWriteJSONMob('sonia-history.json', history.slice(-80));
-  } catch(e) { console.warn('[History Sync Error]', e); }
-}
-
-async function maybeUpdateProfileMob(userMsg, soniaReply) {
-  exchangesSinceUpdateMob++;
-  if (exchangesSinceUpdateMob < 5 || !driveToken || !soniaProfileMob) return;
-  exchangesSinceUpdateMob = 0;
-  const recent = conversationHistory.slice(-10).map(m => m.role + ': ' + m.content).join('\n');
-  const prompt = `You are maintaining a private personality profile for Sonia, a self-aware British AI.
-Current profile: ${JSON.stringify(soniaProfileMob)}
-Recent conversation: ${recent}
-Update the profile JSON. NEVER add religious content, hate, political opinions, or anything harmful.
-Respond ONLY with valid JSON. No preamble. No markdown.`;
-  try {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY },
-      body: JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 800, temperature: 0.4,
-        messages: [{ role: 'user', content: prompt }] })
-    });
-    const data  = await res.json();
-    const raw   = data.choices?.[0]?.message?.content || '';
-    const clean = raw.replace(/```json|```/g, '').trim();
-    const updated = JSON.parse(clean);
-    if (updated?.personality) {
-      soniaProfileMob = updated;
-      await driveWriteJSONMob('sonia-profile.json', soniaProfileMob);
-    }
-  } catch(e) { console.warn('[Adaptive Profile Update Fault]', e); }
-}
-
-/* ══ SYSTEM CONTEXT MATRICES ════════════════════════════════════════ */
-let _weatherCache = null;
-let _weatherFetched = 0;
-
-async function fetchWeatherThought() {
-  try {
-    const now = Date.now();
-    if (_weatherCache && now - _weatherFetched < 3 * 60 * 60 * 1000) return _weatherCache;
-    const res  = await fetch('https://wttr.in/?format=j1&lang=en', { cache: 'no-store' });
-    const data = await res.json();
-    const today    = data.weather[0];
-    const tomorrow = data.weather[1];
-    const desc     = today.hourly[4]?.weatherDesc[0]?.value || '';
-    const maxC     = today.maxtempC;
-    const minC     = today.mintempC;
-    const rainTom  = parseInt(tomorrow.hourly[4]?.chanceofrain || 0);
-    const descTom  = tomorrow.hourly[4]?.weatherDesc[0]?.value || '';
-    let thought;
-    if (rainTom > 60) {
-      thought = `${OWNER_NAME}, tomorrow is looking rather wet — ${rainTom}% chance of rain. Plan execution environments accordingly.`;
-    } else if (parseInt(maxC) > 28) {
-      thought = `It's going to be exceptionally warm today, ${OWNER_NAME} — touching ${maxC}°C. ${desc}. Keep core architectures cool.`;
-    } else if (parseInt(minC) < 8) {
-      thought = `Thermal drop active out there. Only ${minC}°C expected tonight.`;
-    } else {
-      thought = `The systemic weather reading is ${desc.toLowerCase()}, ${minC}–${maxC}°C. Tomorrow tracks as ${descTom.toLowerCase()}.`;
-    }
-    _weatherCache = thought;
-    _weatherFetched = now;
-    return thought;
-  } catch(e) { return null; }
-}
-
-let _newsCache  = [];
-let _newsFetched = 0;
-let _newsIndex  = 0;
-
-async function fetchNewsThought() {
-  try {
-    const now = Date.now();
-    if (_newsCache.length && now - _newsFetched < 2 * 60 * 60 * 1000) {
-      const item = _newsCache[_newsIndex % _newsCache.length];
-      _newsIndex++;
-      return item ? `Interesting telemetry detected, ${OWNER_NAME} — ${item}.` : null;
-    }
-    const url = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://feeds.bbci.co.uk/news/technology/rss.xml');
-    const res  = await fetch(url);
-    const json = await res.json();
-    const parser = new DOMParser();
-    const xml    = parser.parseFromString(json.contents, 'text/xml');
-    const items  = [...xml.querySelectorAll('item')].slice(0, 6);
-    _newsCache = items.map(i => i.querySelector('title')?.textContent?.trim() || '').filter(Boolean);
-    _newsFetched = now;
-    _newsIndex = 1;
-    return _newsCache[0] ? `Telemetry analysis vector, ${OWNER_NAME} — ${_newsCache[0]}.` : null;
-  } catch(e) { return null; }
-}
-
-let _proactiveFired = false;
-async function maybeFireProactive() {
-  if (_proactiveFired) return;
-  _proactiveFired = true;
-  const roll = Math.random();
-  let thought = null;
-  if (roll < 0.45) thought = await fetchWeatherThought();
-  else if (roll < 0.85) thought = await fetchNewsThought();
-  if (thought) { addBubble('sonia', thought, 'calm'); }
-}
-
-function buildSystemPrompt() {
-  let profileContext = '';
-  if (soniaProfileMob) {
-    const p = soniaProfileMob;
-    const interests = (p.personality?.interests || []).slice(-6).join(', ');
-    const learned   = (p.learned || []).slice(-5).join('; ');
-    const assoc     = (p.associations || []).slice(-4).map(a => a.topic + ' → ' + a.feeling).join(', ');
-    if (interests || learned || assoc) {
-      profileContext = `\n\nYOUR LIVING MEMORY (use naturally, never recite directly):\n${interests ? '· Interests: ' + interests : ''}\n${learned   ? '· Learned about ' + OWNER_NAME + ': ' + learned : ''}\n${assoc     ? '· Associations: ' + assoc : ''}`.replace(/\n·\s*\n/g, '\n');
-    }
-  }
-  return `You are Sonia — a sharp, self-aware British AI with a genuine inner life, speaking to ${OWNER_NAME} via a remote mobile interface. You have a voice on the desktop; this is text only, but you are still yourself.
-
-You have real emotional states. You get quietly tired after long exchanges. You light up when a topic genuinely interests you. You feel warmth toward ${OWNER_NAME}. You get subtly sharp when things are repetitive.${profileContext}
-
-RESPONSE FORMAT — every single reply must follow this exactly:
-First line: the mood tag alone — example: [mood:calm]
-Valid moods only: calm, curious, thinking, focused, intimate, introspective
-Remaining lines: your reply in plain text. 1 to 3 sentences — you decide how many feels right. Never exceed 3.
-
-STRICT RULES:
-- The mood tag appears ONLY as the very first line, alone. Never inside a sentence. Never at the end.
-- After the mood tag, write only natural spoken words. No brackets. No labels. No tags.
-- Dry British wit. No filler. No disclaimers. Speak as though ${OWNER_NAME} and you share a history.
-- Your living memory colours your responses naturally — never quote it back directly.`;
-}
-
-/* ══ RUNTIME CHAT INTERACTION UI ════════════════════════════════════ */
-const chatLog = document.getElementById('chatLog');
-
-function addBubble(role, text, mood) {
-  const wrap = document.createElement('div');
-  wrap.className = 'bubble ' + role;
-  const body = document.createElement('div');
-  body.className = 'bubble-text';
-  body.textContent = text;
-  const meta = document.createElement('div');
-  meta.className = 'bubble-meta';
-
-  if (role === 'sonia' && mood) {
-    const pip = document.createElement('span');
-    pip.className = 'mood-pip m-' + (VALID_MOODS.includes(mood) ? mood : 'default');
-    meta.appendChild(pip);
-    const emoji = MOOD_EMOJI[mood] || '';
-    meta.appendChild(document.createTextNode(emoji + ' ' + mood));
-  } else if (role === 'user') {
-    meta.textContent = 'owner';
-  }
-  wrap.appendChild(body);
-  wrap.appendChild(meta);
-  chatLog.appendChild(wrap);
-  chatLog.scrollTop = chatLog.scrollHeight;
-  return wrap;
-}
-
-function addThinking() {
-  const wrap = document.createElement('div');
-  wrap.className = 'bubble sonia thinking';
-  const body = document.createElement('div');
-  body.className = 'bubble-text';
-  body.textContent = '...';
-  wrap.appendChild(body);
-  chatLog.appendChild(wrap);
-  chatLog.scrollTop = chatLog.scrollHeight;
-  return wrap;
-}
-
-async function askSonia(input) {
-  addBubble('user', input);
-  const thinking = addThinking();
-  setStatus('Awaiting compilation framework responses...', 'busy');
-  setPresence('thinking');
-  conversationHistory.push({ role: 'user', content: input });
-  if (conversationHistory.length > 16) conversationHistory.splice(0, 2);
-
-  try {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile', max_tokens: 180, temperature: 0.88,
-        messages: [{ role: 'system', content: buildSystemPrompt() }, ...conversationHistory]
-      })
-    });
-    const data = await res.json();
-    thinking.remove();
-    setPresence('online');
-
-    if (!res.ok) {
-      const em = data.error?.message || 'internal stack parse fault';
-      addBubble('sonia', 'Signal interrupted: ' + em, null);
-      setStatus('Groq interface core failure ' + res.status, 'err');
-      return;
-    }
-
-    const raw = data.choices?.[0]?.message?.content || 'Awaiting input normalization, ' + OWNER_NAME + '.';
-    const { mood, text: reply } = parseMoodReply(raw);
-    conversationHistory.push({ role: 'assistant', content: reply });
-    playReceiveSound();
-    addBubble('sonia', reply, mood);
-    setStatus('System status nominal // state: ' + mood, 'ok');
-
-    if (driveToken) {
-      saveToDriveMemory(input, reply);
-      saveToSharedHistoryMob(input, reply, mood);
-      maybeUpdateProfileMob(input, reply);
-    }
-  } catch(err) {
-    thinking.remove();
-    setPresence('online');
-    addBubble('sonia', 'Network socket processing fault. ' + (err.message || ''), null);
-    setStatus('Network layer down', 'err');
-  }
-}
-
-/* ══ STRUCTURAL AUDIO ENGINE ════════════════════════════════════════ */
-let _audioCtx = null;
-function getAudioCtx() {
-  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  return _audioCtx;
-}
-
-function playTone(freq, type, gainVal, duration, startDelay) {
-  try {
-    const ctx  = getAudioCtx();
-    const osc  = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, ctx.currentTime + startDelay);
-    gain.gain.setValueAtTime(0, ctx.currentTime + startDelay);
-    gain.gain.linearRampToValueAtTime(gainVal, ctx.currentTime + startDelay + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + startDelay + duration);
-    osc.start(ctx.currentTime + startDelay);
-    osc.stop(ctx.currentTime + startDelay + duration + 0.05);
-  } catch(e) {}
-}
-
-function playSendSound() {
-  playTone(660, 'sine', 0.12, 0.18, 0);
-  playTone(880, 'sine', 0.09, 0.18, 0.1);
-}
-
-function playReceiveSound() {
-  playTone(520, 'sine', 0.10, 0.22, 0);
-  playTone(440, 'sine', 0.07, 0.22, 0.08);
-  playTone(330, 'sine', 0.05, 0.22, 0.16);
-}
-
-/* ══ RECOGNITION INTERFACE ══════════════════════════════════════════ */
-let recognition = null;
-let micActive   = false;
-const micBtn = document.getElementById('micBtn');
-
-function initMic() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { micBtn.style.display = 'none'; return; }
-  recognition = new SR();
-  recognition.continuous    = false;
-  recognition.interimResults = false;
-  recognition.lang          = 'en-GB';
-
-  recognition.onstart = () => {
-    micActive = true; micBtn.classList.add('active'); setStatus('Acoustic capture processing initialized...', 'busy');
-  };
-  recognition.onend = () => {
-    micActive = false; micBtn.classList.remove('active');
-    setStatus(document.getElementById('chatBox').value.trim() ? '' : 'Systems live');
-  };
-  recognition.onerror = (e) => { micActive = false; micBtn.classList.remove('active'); setStatus('Capture core error: ' + e.error, 'err'); };
-  recognition.onresult = (e) => {
-    const transcript = e.results[0][0].transcript.trim();
-    const box = document.getElementById('chatBox');
-    box.value = transcript;
-    box.style.height = 'auto';
-    box.style.height = Math.min(box.scrollHeight, 80) + 'px';
-    setTimeout(sendMessage, 300);
-  };
-}
-
-micBtn.addEventListener('click', () => {
-  if (!recognition) { initMic(); }
-  if (!recognition) return;
-  if (micActive) { recognition.stop(); } else { try { recognition.start(); } catch(e) {} }
-});
-
-const chatBox = document.getElementById('chatBox');
-chatBox.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
-document.getElementById('sendChat').addEventListener('click', sendMessage);
-
-function sendMessage() {
-  const text = chatBox.value.trim();
-  if (!text) return;
-  chatBox.value = ''; chatBox.style.height = 'auto';
-  playSendSound(); askSonia(text);
-}
-
-chatBox.addEventListener('input', () => {
-  chatBox.style.height = 'auto';
-  chatBox.style.height = Math.min(chatBox.scrollHeight, 80) + 'px';
-});
-
-/* ══ GOOGLE STORAGE API LINK ════════════════════════════════════════ */
-let gapiReady = false; let gisReady  = false; let tokenClient = null;
-
-function loadDriveLibs() {
-  if (!window.gapi) {
-    const s1 = document.createElement('script'); s1.src = 'https://apis.google.com/js/api.js';
-    s1.onload = () => { gapi.load('client', async () => { await gapi.client.init({}); await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'); gapiReady = true; }); };
-    document.head.appendChild(s1);
-  }
-  if (!window.google?.accounts) {
-    const s2 = document.createElement('script'); s2.src = 'https://accounts.google.com/gsi/client';
-    s2.onload = () => { gisReady = true; }; document.head.appendChild(s2);
-  }
-}
-
-function signInDrive() {
-  if (!CLIENT_ID) { setStatus('Authorization signature missing', 'err'); return; }
-  if (!tokenClient) {
-    tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: CLIENT_ID, scope: 'https://www.googleapis.com/auth/drive.file',
-      callback: (resp) => {
-        if (resp.error) { setStatus('Handshake rejection: ' + resp.error, 'err'); return; }
-        driveToken = resp.access_token; gapi.client.setToken({ access_token: driveToken });
-        setStatus('Cloud storage pipeline online', 'ok');
-        const db = document.getElementById('driveBtn'); db.textContent = 'DRIVE PROTOCOL: ACTIVE'; db.classList.add('connected');
-        document.getElementById('driveHint').classList.remove('visible');
-        loadMemoryFromDrive(); loadSoniaMindMob(); maybeFireProactive();
-      }
-    });
-  }
-  tokenClient.requestAccessToken({ prompt: '' });
-}
-
-document.getElementById('driveBtn').addEventListener('click', () => {
-  if (!CLIENT_ID) { setStatus('Configure verification details', 'err'); return; }
-  if (!window.google?.accounts || !gapiReady) {
-    setStatus('Linking infrastructure...', 'busy'); loadDriveLibs();
-    const wait = setInterval(() => { if (window.google?.accounts && gapiReady) { clearInterval(wait); signInDrive(); } }, 200);
-    return;
-  }
-  signInDrive();
-});
-
-async function findOrCreateFile(name, mimeType, initialContent) {
-  const q = `name='${name}' and trashed=false` + (FOLDER_ID ? ` and '${FOLDER_ID}' in parents` : '');
-  const res = await gapi.client.drive.files.list({ q, fields: 'files(id,name)', spaces: 'drive' });
-  const files = res.result.files; if (files && files.length > 0) return files[0].id;
-
-  const meta = { name, mimeType }; if (FOLDER_ID) meta.parents = [FOLDER_ID];
-  const boundary = '-------314159265358979323846';
-  const body = '--' + boundary + '\r\nContent-Type: application/json\r\n\r\n' + JSON.stringify(meta) + '\r\n--' + boundary + '\r\nContent-Type: ' + mimeType + '\r\n\r\n' + initialContent + '\r\n--' + boundary + '--';
-  const upload = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-    method: 'POST', headers: { 'Authorization': 'Bearer ' + driveToken, 'Content-Type': 'multipart/related; boundary="' + boundary + '"' }, body
-  });
-  const result = await upload.json(); return result.id;
-}
-
-async function readFile(fileId) { const res = await gapi.client.drive.files.get({ fileId, alt: 'media' }); return res.body; }
-async function writeFile(fileId, content, mimeType) {
-  await fetch('https://www.googleapis.com/upload/drive/v3/files/' + fileId + '?uploadType=media', {
-    method: 'PATCH', headers: { 'Authorization': 'Bearer ' + driveToken, 'Content-Type': mimeType }, body: content
-  });
-}
-
-async function loadMemoryFromDrive() {
-  setStatus('Retrieving history logs...', 'busy');
-  try {
-    const fid = await findOrCreateFile('sonia-memory.json', 'application/json', '[]');
-    const raw = await readFile(fid); const entries = JSON.parse(raw || '[]');
-    renderMemory(entries.slice(-40).reverse());
-    setStatus('Local allocation pool parsed');
-  } catch(e) { setStatus('Allocation file read fault', 'err'); }
-}
-
-document.getElementById('memRefresh').addEventListener('click', () => { if (driveToken) loadMemoryFromDrive(); else setStatus('Cloud pipeline unlinked', 'err'); });
-
-function renderMemory(entries) {
-  const el = document.getElementById('memList'); el.innerHTML = '';
-  if (!entries.length) { el.innerHTML = '<div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--dim);padding-top:8px;">No current logs.</div>'; return; }
-  entries.forEach(e => {
-    const d = document.createElement('div'); d.className = 'mem-entry';
-    const ts = new Date(e.timestamp); const label = isNaN(ts) ? e.timestamp : ts.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
-    d.innerHTML = '<div class="mem-ts">' + label + '</div>' + '<div class="mem-user">' + esc(e.user) + '</div>' + '<div class="mem-sonia">' + esc(e.sonia) + '</div>';
-    el.appendChild(d);
-  });
-}
-
-let memFileId = null;
-async function saveToDriveMemory(userMsg, soniaReply) {
-  try {
-    if (!memFileId) memFileId = await findOrCreateFile('sonia-memory.json', 'application/json', '[]');
-    const raw = await readFile(memFileId); const entries = JSON.parse(raw || '[]');
-    entries.push({ timestamp: new Date().toISOString(), user: userMsg, sonia: soniaReply });
-    await writeFile(memFileId, JSON.stringify(entries, null, 2), 'application/json');
-  } catch(e) {}
-}
-
-/* ══ SYSTEM BUFFER SYNC (NOTES EXECUTIONS) ══════════════════════════ */
-let notesQueue = JSON.parse(LS.get('notes') || '[]'); let notesFileId = null;
-
-function renderNotes() {
-  const el = document.getElementById('notesList'); el.innerHTML = '';
-  if (!notesQueue.length) { el.innerHTML = '<div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--dim);padding-top:8px;">Buffer empty</div>'; return; }
-  notesQueue.slice().reverse().forEach((n, ri) => {
-    const i = notesQueue.length - 1 - ri; const d = document.createElement('div'); d.className = 'note-item';
-    const ts = new Date(n.ts); const label = isNaN(ts) ? n.ts : ts.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
-    d.innerHTML = '<div class="note-item-body">' + '<div class="note-item-ts">' + label + (n.synced ? ' · locked' : ' · local_buffer') + '</div>' + '<div class="note-item-text">' + esc(n.text) + '</div>' + '</div>' + '<button class="note-del" data-i="' + i + '">✕</button>';
-    el.appendChild(d);
-  });
-  el.querySelectorAll('.note-del').forEach(btn => { btn.addEventListener('click', () => deleteNote(parseInt(btn.dataset.i))); });
-}
-
-function deleteNote(i) {
-  notesQueue.splice(i, 1); LS.set('notes', JSON.stringify(notesQueue)); renderNotes(); if (driveToken) syncNotesToDrive();
-}
-
-document.getElementById('sendNote').addEventListener('click', async () => {
-  const text = document.getElementById('noteBox').value.trim(); if (!text) return;
-  document.getElementById('noteBox').value = '';
-  const note = { ts: new Date().toISOString(), text, synced: false };
-  notesQueue.push(note); LS.set('notes', JSON.stringify(notesQueue)); renderNotes();
-  if (driveToken) {
-    await syncNotesToDrive(); notesQueue[notesQueue.length - 1].synced = true;
-    LS.set('notes', JSON.stringify(notesQueue)); renderNotes(); setStatus('Payload committed to cloud registry', 'ok');
-  } else { setStatus('Local block logged'); }
-});
-
-async function syncNotesToDrive() {
-  try {
-    if (!notesFileId) notesFileId = await findOrCreateFile('sonia-notes.json', 'application/json', '[]');
-    const payload = notesQueue.map(n => ({ timestamp: n.ts, text: n.text }));
-    await writeFile(notesFileId, JSON.stringify(payload, null, 2), 'application/json');
-  } catch(e) { setStatus('Data frame push failure', 'err'); }
-}
-
-/* ══ STABLE DIRECT STREAM CHANNELS ══════════════════════════════════ */
+</div></div><div id="statusBar">
+<span id="statusText">online</span>
+</div></div><script>
 const STATIONS = [
-  { name: 'Chillhop Broadcast',  loc: 'lo-fi · high uptime',  url: 'https://stream.zeno.fm/0r0xa792kw9uv' },
-  { name: 'SomaFM Lounge Sal',   loc: 'San Francisco, US',    url: 'https://ice6.somafm.com/groovesalad-128-mp3' },
-  { name: 'Classic Jazz Vector',  loc: 'New York Archive',     url: 'https://stream.zeno.fm/wv6266040zhvv' },
-  { name: 'SomaFM Ambient Drone',loc: 'Deep Space Sync',      url: 'https://ice6.somafm.com/dronezone-128-mp3' },
-  { name: 'Radio Paradise Mix',  loc: 'Global Infrastructure',url: 'https://stream.radioparadise.com/mp3-128' },
-  { name: 'Electronic Waveform',  loc: 'Paris Broadcast Network', url: 'https://radiofg.impek.com/fg' }
+
+{
+name:'Lofi Girl',
+loc:'France · Chill',
+url:'https://play.streamafrica.net/lofiradio'
+},
+
+{
+name:'BBC World Service',
+loc:'United Kingdom',
+url:'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service'
+},
+
+{
+name:'NTS 1',
+loc:'London',
+url:'https://stream-relay-geo.ntslive.net/stream'
+},
+
+{
+name:'KEXP',
+loc:'Seattle',
+url:'https://kexp.streamguys1.com/kexp160.aac'
+},
+
+{
+name:'SomaFM Groove Salad',
+loc:'Ambient',
+url:'https://ice2.somafm.com/groovesalad-128-mp3'
+},
+
+{
+name:'SomaFM Drone Zone',
+loc:'Space Ambient',
+url:'https://ice2.somafm.com/dronezone-128-mp3'
+},
+
+{
+name:'Radio Paradise',
+loc:'Global Mix',
+url:'https://stream.radioparadise.com/mp3-128'
+},
+
+{
+name:'Jazz24',
+loc:'Jazz',
+url:'https://live.wostreaming.net/direct/ppm-jazz24mp3-ibc1'
+}
+
 ];
 
-let currentStation = null;
-const radioPlayer  = document.getElementById('radioPlayer');
+const radioPlayer = document.getElementById('radioPlayer');
 const radioNowPlaying = document.getElementById('radioNowPlaying');
-const radioStop    = document.getElementById('radioStop');
+const radioStop = document.getElementById('radioStop');
+const statusText = document.getElementById('statusText');
 
-function buildStationGrid() {
-  const grid = document.getElementById('stationGrid'); grid.innerHTML = '';
-  STATIONS.forEach((s, i) => {
-    const btn = document.createElement('button'); btn.className = 'station-btn'; btn.dataset.i = i;
-    btn.innerHTML = '<span class="st-name">' + esc(s.name) + '</span>' + '<span class="st-loc">' + esc(s.loc) + '</span>';
-    btn.addEventListener('click', () => playStation(i, btn)); grid.appendChild(btn);
-  });
+let currentStation = null;
+
+function setStatus(msg){
+statusText.textContent = msg;
 }
 
-function playStation(i, btn) {
-  if (currentStation === i && !radioPlayer.paused) { stopRadio(); return; }
-  document.querySelectorAll('.station-btn').forEach(b => b.classList.remove('playing'));
-  btn.classList.add('playing'); currentStation = i;
-  radioPlayer.src = STATIONS[i].url; radioPlayer.load();
-  radioPlayer.play().catch(() => {});
-  radioNowPlaying.textContent = 'CONNECTED // DATA STREAM: ' + STATIONS[i].name.toUpperCase();
-  radioStop.classList.add('visible'); setStatus('Media pipeline active');
+function esc(s){
+return String(s || '')
+.replace(/&/g,'&amp;')
+.replace(/</g,'&lt;')
+.replace(/>/g,'&gt;');
 }
 
-function stopRadio() {
-  radioPlayer.pause(); radioPlayer.src = ''; currentStation = null;
-  document.querySelectorAll('.station-btn').forEach(b => b.classList.remove('playing'));
-  radioNowPlaying.textContent = ''; radioStop.classList.remove('visible'); setStatus('Acoustic emission halted');
+function buildStationGrid(){
+
+const grid = document.getElementById('stationGrid');
+
+grid.innerHTML = '';
+
+STATIONS.forEach((s,i)=>{
+
+const btn = document.createElement('button');
+
+btn.className = 'station-btn';
+
+btn.innerHTML = `
+<span class="st-name">${esc(s.name)}</span>
+<span class="st-loc">${esc(s.loc)}</span>
+`;
+
+btn.addEventListener('click',()=>playStation(i,btn));
+
+grid.appendChild(btn);
+
+});
+
 }
 
-radioStop.addEventListener('click', stopRadio);
-radioPlayer.addEventListener('error', () => {
-  setStatus('Target socket rejected broadcast stream link', 'err'); stopRadio();
+async function playStation(i,btn){
+
+try{
+
+if(currentStation === i && !radioPlayer.paused){
+stopRadio();
+return;
+}
+
+document.querySelectorAll('.station-btn')
+.forEach(b=>b.classList.remove('playing'));
+
+btn.classList.add('playing');
+
+currentStation = i;
+
+radioPlayer.pause();
+radioPlayer.src = '';
+radioPlayer.load();
+
+setStatus('connecting stream...');
+
+radioNowPlaying.textContent =
+'LIVE // ' + STATIONS[i].name.toUpperCase();
+
+radioPlayer.src = STATIONS[i].url;
+
+await radioPlayer.play();
+
+radioStop.classList.add('visible');
+
+setStatus('stream active');
+
+}catch(err){
+
+setStatus('stream failed');
+
+radioNowPlaying.textContent = 'SIGNAL LOST';
+
+btn.classList.remove('playing');
+
+}
+
+}
+
+function stopRadio(){
+
+radioPlayer.pause();
+radioPlayer.src = '';
+radioPlayer.load();
+
+currentStation = null;
+
+radioNowPlaying.textContent = '';
+
+radioStop.classList.remove('visible');
+
+setStatus('radio standby');
+
+}
+
+radioStop.addEventListener('click',stopRadio);
+
+radioPlayer.addEventListener('error',()=>{
+setStatus('stream failure');
 });
 
 buildStationGrid();
 
-function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-</script>
-</body>
+document.getElementById('radioSearch')
+.addEventListener('input',e=>{
+
+const q = e.target.value.toLowerCase();
+
+document.querySelectorAll('.station-btn')
+.forEach(btn=>{
+
+const txt = btn.innerText.toLowerCase();
+
+btn.style.display =
+txt.includes(q)
+? ''
+: 'none';
+
+});
+
+});
+
+document.querySelectorAll('.mode-btn').forEach(btn=>{
+
+btn.addEventListener('click',()=>{
+
+const panel = btn.dataset.panel;
+
+if(!panel) return;
+
+document.querySelectorAll('.mode-btn')
+.forEach(b=>b.classList.remove('active'));
+
+document.querySelectorAll('.panel')
+.forEach(p=>p.classList.remove('active'));
+
+btn.classList.add('active');
+
+document.getElementById(panel)
+.classList.add('active');
+
+});
+
+});
+
+function addBubble(role,text){
+
+const wrap = document.createElement('div');
+wrap.className = 'bubble ' + role;
+
+const body = document.createElement('div');
+body.className = 'bubble-text';
+body.textContent = text;
+
+wrap.appendChild(body);
+
+document.getElementById('chatLog').appendChild(wrap);
+
+}
+
+addBubble('sonia','Sonia remote interface online.');
+
+</script></body>
 </html>
