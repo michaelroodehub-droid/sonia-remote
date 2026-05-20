@@ -572,17 +572,30 @@ function loadConfig(){
   if(c) document.getElementById('cfgClient').value=c;
   if(o) document.getElementById('cfgOwner').value=o||'Mr H';
   if(f) document.getElementById('cfgFolder').value=f;
-  // Auto-launch only if key exists — user still sees the pre-filled form briefly
-  // then it fires. If they want to change it they can edit before it fires.
-  if(g) applyConfig();
+  
+  if(g) {
+    // Fill the runtime variables cleanly on startup instead of looping instantly
+    GROQ_KEY=g.trim();
+    CLIENT_ID=c ? c.trim() : '';
+    OWNER_NAME=o ? o.trim() : 'Mr H';
+    FOLDER_ID=f ? f.trim() : '';
+    document.getElementById('setup').style.display='none';
+    if(CLIENT_ID){document.getElementById('driveHint').style.display='none';loadDriveLibs();}
+    else document.getElementById('driveHint').style.display='block';
+    setStatus('online · '+OWNER_NAME.toLowerCase());
+    setPresence('online');
+    renderNotes();
+    initMic();
+    setTimeout(maybeFireProactive,4000);
+  }
 }
+
 function applyConfig(){
   GROQ_KEY=document.getElementById('cfgGroq').value.trim();
   CLIENT_ID=document.getElementById('cfgClient').value.trim();
   OWNER_NAME=document.getElementById('cfgOwner').value.trim()||'Mr H';
   FOLDER_ID=document.getElementById('cfgFolder').value.trim();
   if(!GROQ_KEY){
-    // Show error inline on setup card instead of calling setStatus (app not launched yet)
     const btn=document.getElementById('setupBtn');
     btn.textContent='API Key Required';
     btn.style.background='var(--red)';
@@ -604,7 +617,6 @@ function applyConfig(){
 }
 
 document.getElementById('setupBtn').addEventListener('click',()=>{
-  // Visual tap feedback before async work
   const btn=document.getElementById('setupBtn');
   btn.textContent='Launching…';
   btn.style.opacity='0.7';
@@ -637,7 +649,6 @@ navItems.forEach(btn=>{
     btn.classList.add('active');
     const label=btn.dataset.label||'';
     if(btn.id==='mailTab'){
-      // show email overlay over current panel
       document.getElementById('emailOverlay').classList.add('on');
       panelLabel.textContent='Email';
     } else {
@@ -745,8 +756,6 @@ function addThinkingBubble(){
 
 /* ── EMAIL INTENT DETECTION ── */
 function detectEmailIntent(text){
-  // Robust regex: catches "email X", "send/write/draft/compose/shoot/fire off an email",
-  // "I need to email", "can you email", "quick email to", "drop an email", etc.
   return /\b(email|e-mail)\b|\b(send|write|draft|compose|shoot|fire\s+off|drop)\s+(an?\s+)?(email|e-mail|message)\b|\bneed\s+to\s+email\b|\bquick\s+email\b/i.test(text);
 }
 
@@ -761,7 +770,7 @@ async function extractEmailDraft(userText){
     const data=await res.json();
     const raw=(data.choices?.[0]?.message?.content||'{}').replace(/```json|```/g,'').trim();
     return JSON.parse(raw);
-  }catch(e){return{to:'',subject:'',body:''};
+  }catch(e){return{to:'',subject:'',body:''};}
 }
 
 function openEmailOverlay(to,subject,body){
@@ -782,7 +791,6 @@ async function sendMessage(){
   playSend();
   addBubble('user',text);
 
-  // ── EMAIL INTENT PATH ──
   if(detectEmailIntent(text)){
     const thinking=addThinkingBubble();
     setPresence('thinking');
@@ -791,30 +799,24 @@ async function sendMessage(){
     thinking.remove();
     setPresence('online');
     const hasContext=draft.subject&&draft.body&&draft.to;
-    // Detect if user said "send" or "send it" at the end — means auto-send
     const wantsSend=/\b(send|send it|go|do it|yes send)\s*[.!]?\s*$/i.test(text.trim());
     if(hasContext && wantsSend){
-      // Full auto-send: have everything we need, user confirmed send
       addBubble('sonia','On it — sending now.','focused');
       setStatus('🎯 sending…');
       await sendEmailNow(draft.to,draft.subject,draft.body,true);
     } else if(hasContext){
-      // Have context but no explicit send — open pre-filled form for review
       addBubble('sonia','I\'ve drafted that — check it over and hit Send when ready.','focused');
       setStatus('🎯 focused');
       openEmailOverlay(draft.to,draft.subject,draft.body);
     } else {
-      // Not enough info — open blank form
       addBubble('sonia','Opening the email form — fill in the details and I\'ll sign it off for you.','calm');
       setStatus('🌿 calm');
       openEmailOverlay('','','');
     }
-    // Intentionally NOT pushing to conversationHistory — prevents hallucinated "sent" replies
     if(driveToken)saveMem(text,'[email] to:'+draft.to+' subject:'+draft.subject+(wantsSend?' [auto-sent]':' [form opened]'));
     return;
   }
 
-  // ── NORMAL CHAT PATH ──
   const thinking=addThinkingBubble();
   setPresence('thinking');
   setStatus('thinking…');
@@ -956,7 +958,8 @@ async function maybeUpdateProfile(){
   try{
     const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:800,temperature:0.4,messages:[{role:'user',content:prompt}]})});
     const d=await r.json();
-    const clean=(d.choices?.[0]?.message?.content||'').replace(/```json|```/g,'').trim();
+    const clean=(d.choices?.[0]?.message?.content||'').replace(/```json|
+```/g,'').trim();
     const updated=JSON.parse(clean);
     if(updated?.personality){soniaProfile=updated;await writeDriveJSON('sonia-profile.json',soniaProfile);}
   }catch(e){}
@@ -1103,7 +1106,6 @@ radioPlayer.addEventListener('error',()=>{
 });
 
 /* ── EMAIL ── */
-/* ── EMAIL SEND ENGINE ── */
 async function sendEmailNow(to, subj, body, silent=false){
   const st=document.getElementById('emailStatus');
   if(!to||!subj||!body){
@@ -1135,7 +1137,6 @@ async function sendEmailNow(to, subj, body, silent=false){
           activatePanel('chatPanel','Chat');
         },1500);
       } else {
-        // Silent auto-send: return to chat immediately with confirmation bubble
         navItems.forEach(b=>b.classList.remove('active'));
         document.querySelector('[data-panel="chatPanel"]').classList.add('active');
         activatePanel('chatPanel','Chat');
