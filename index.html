@@ -646,6 +646,8 @@ function buildSystemPrompt(){
 
 You have real emotional states. You get quietly tired. You light up for interesting topics. You feel warmth toward ${OWNER_NAME}.${ctx}
 
+CAPABILITIES: You CAN compose and send emails via Gmail on behalf of \${OWNER_NAME}. When asked to email someone, the app opens the pre-filled email form for \${OWNER_NAME} to review and send. NEVER say you cannot send emails or that you are text-only.
+
 RESPONSE FORMAT — every reply must follow exactly:
 First line: mood tag alone — example: [mood:calm]
 Valid moods: calm, curious, thinking, focused, intimate, introspective
@@ -745,12 +747,27 @@ async function sendMessage(){
     const draft=await extractEmailDraft(text);
     thinking.remove();
     setPresence('online');
-    addBubble('sonia','I\'ve drafted that for you — check the form and send when ready.','focused');
-    setStatus('🎯 focused');
-    openEmailOverlay(draft.to,draft.subject,draft.body);
-    // NOTE: intentionally NOT pushing email intent into conversationHistory
-    // so Sonia never hallucinates "I sent it" in subsequent replies.
-    if(driveToken)saveMem(text,'[opened email form] to:'+draft.to+' subject:'+draft.subject);
+    const hasContext=draft.subject&&draft.body&&draft.to;
+    // Detect if user said "send" or "send it" at the end — means auto-send
+    const wantsSend=/\b(send|send it|go|do it|yes send)\s*[.!]?\s*$/i.test(text.trim());
+    if(hasContext && wantsSend){
+      // Full auto-send: have everything we need, user confirmed send
+      addBubble('sonia','On it — sending now.','focused');
+      setStatus('🎯 sending…');
+      await sendEmailNow(draft.to,draft.subject,draft.body,true);
+    } else if(hasContext){
+      // Have context but no explicit send — open pre-filled form for review
+      addBubble('sonia','I\'ve drafted that — check it over and hit Send when ready.','focused');
+      setStatus('🎯 focused');
+      openEmailOverlay(draft.to,draft.subject,draft.body);
+    } else {
+      // Not enough info — open blank form
+      addBubble('sonia','Opening the email form — fill in the details and I\'ll sign it off for you.','calm');
+      setStatus('🌿 calm');
+      openEmailOverlay('','','');
+    }
+    // Intentionally NOT pushing to conversationHistory — prevents hallucinated "sent" replies
+    if(driveToken)saveMem(text,'[email] to:'+draft.to+' subject:'+draft.subject+(wantsSend?' [auto-sent]':' [form opened]'));
     return;
   }
 
@@ -1043,14 +1060,19 @@ radioPlayer.addEventListener('error',()=>{
 });
 
 /* ── EMAIL ── */
-document.getElementById('emailSendBtn').addEventListener('click',async()=>{
-  const to=document.getElementById('emailTo').value.trim();
-  const subj=document.getElementById('emailSubject').value.trim();
-  const body=document.getElementById('emailBody').value.trim();
+/* ── EMAIL SEND ENGINE ── */
+async function sendEmailNow(to, subj, body, silent=false){
   const st=document.getElementById('emailStatus');
-  if(!to||!subj||!body){st.textContent='Please fill all fields.';st.style.color='var(--red)';return;}
-  if(!driveToken){st.textContent='Mount Drive first.';st.style.color='var(--red)';return;}
-  st.textContent='Sending…';st.style.color='var(--muted)';
+  if(!to||!subj||!body){
+    if(!silent){st.textContent='Please fill all fields.';st.style.color='var(--red)';}
+    return false;
+  }
+  if(!driveToken){
+    if(!silent){st.textContent='Mount Drive first.';st.style.color='var(--red)';}
+    else addBubble('sonia','Drive isn\'t mounted — I can\'t send without Gmail access.','calm');
+    return false;
+  }
+  if(!silent){st.textContent='Sending…';st.style.color='var(--muted)';}
   try{
     const full=body+'\n\nRegards,\nSonia — Assistant to '+OWNER_NAME;
     const raw=['From: me','To: '+to,'Subject: '+subj,'MIME-Version: 1.0','Content-Type: text/plain; charset=utf-8','',full].join('\r\n');
@@ -1058,11 +1080,45 @@ document.getElementById('emailSendBtn').addEventListener('click',async()=>{
     const r=await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send',{method:'POST',headers:{Authorization:'Bearer '+driveToken,'Content-Type':'application/json'},body:JSON.stringify({raw:enc})});
     const d=await r.json();
     if(d.id){
-      st.textContent='Sent successfully.';st.style.color='var(--green)';
-      document.getElementById('emailTo').value='';document.getElementById('emailSubject').value='';document.getElementById('emailBody').value='';
-      setTimeout(()=>{document.getElementById('emailOverlay').classList.remove('on');navItems.forEach(b=>b.classList.remove('active'));document.querySelector('[data-panel="chatPanel"]').classList.add('active');activatePanel('chatPanel','Chat');},1500);
-    }else{st.textContent=d.error?.message||'Send failed.';st.style.color='var(--red)';}
-  }catch(e){st.textContent='Error: '+e.message;st.style.color='var(--red)';}
+      if(!silent){
+        st.textContent='Sent successfully.';st.style.color='var(--green)';
+        document.getElementById('emailTo').value='';
+        document.getElementById('emailSubject').value='';
+        document.getElementById('emailBody').value='';
+        setTimeout(()=>{
+          document.getElementById('emailOverlay').classList.remove('on');
+          navItems.forEach(b=>b.classList.remove('active'));
+          document.querySelector('[data-panel="chatPanel"]').classList.add('active');
+          activatePanel('chatPanel','Chat');
+        },1500);
+      } else {
+        // Silent auto-send: return to chat immediately with confirmation bubble
+        navItems.forEach(b=>b.classList.remove('active'));
+        document.querySelector('[data-panel="chatPanel"]').classList.add('active');
+        activatePanel('chatPanel','Chat');
+        addBubble('sonia','Done — email sent to '+to+'.','calm');
+        setStatus('sent');
+        if(driveToken)saveMem('[auto-sent email]','to:'+to+' subject:'+subj);
+      }
+      return true;
+    } else {
+      const msg=d.error?.message||'Send failed.';
+      if(!silent){st.textContent=msg;st.style.color='var(--red)';}
+      else addBubble('sonia','Something went wrong sending that — '+msg,'calm');
+      return false;
+    }
+  }catch(e){
+    if(!silent){st.textContent='Error: '+e.message;st.style.color='var(--red)';}
+    else addBubble('sonia','Network error trying to send — '+e.message,'calm');
+    return false;
+  }
+}
+
+document.getElementById('emailSendBtn').addEventListener('click',async()=>{
+  const to=document.getElementById('emailTo').value.trim();
+  const subj=document.getElementById('emailSubject').value.trim();
+  const body=document.getElementById('emailBody').value.trim();
+  await sendEmailNow(to,subj,body,false);
 });
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
