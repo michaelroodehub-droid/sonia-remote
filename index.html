@@ -700,25 +700,23 @@ function addThinkingBubble(){
 
 /* ── EMAIL INTENT DETECTION ── */
 function detectEmailIntent(text){
-  // Patterns: "email X about Y", "send an email to X", "draft an email", "message X about Y via email", etc.
-  const lower=text.toLowerCase();
-  const emailPhrases=['email ','send an email','draft an email','write an email','compose an email','send a message to','mail '];
-  return emailPhrases.some(p=>lower.includes(p));
+  // Robust regex: catches "email X", "send/write/draft/compose/shoot/fire off an email",
+  // "I need to email", "can you email", "quick email to", "drop an email", etc.
+  return /\b(email|e-mail)\b|\b(send|write|draft|compose|shoot|fire\s+off|drop)\s+(an?\s+)?(email|e-mail|message)\b|\bneed\s+to\s+email\b|\bquick\s+email\b/i.test(text);
 }
 
 async function extractEmailDraft(userText){
-  // Ask Sonia to extract To, Subject, Body from the user's intent
   try{
-    const prompt=`The user wants to send an email. Extract the recipient email (if stated, else leave blank), a subject line, and a draft message body from their request. Respond ONLY with valid JSON, no markdown, no preamble:\n{"to":"","subject":"","body":""}\n\nUser request: "${userText}"`;
+    const prompt=`Extract email fields from this request. Respond ONLY with raw JSON, no markdown, no explanation:\n{"to":"<email address if mentioned, else empty string>","subject":"<concise subject line>","body":"<full professional draft message body>"}\n\nRequest: "${userText}"`;
     const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
-      body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:300,temperature:0.3,messages:[{role:'user',content:prompt}]})
+      body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:400,temperature:0.2,messages:[{role:'user',content:prompt}]})
     });
     const data=await res.json();
     const raw=(data.choices?.[0]?.message?.content||'{}').replace(/```json|```/g,'').trim();
     return JSON.parse(raw);
-  }catch(e){return{to:'',subject:'',body:''};}
+  }catch(e){return{to:'',subject:'',body:''};
 }
 
 function openEmailOverlay(to,subject,body){
@@ -747,11 +745,11 @@ async function sendMessage(){
     const draft=await extractEmailDraft(text);
     thinking.remove();
     setPresence('online');
-    addBubble('sonia','I\'ve pre-filled the email form for you — check it over and send when ready.','focused');
+    addBubble('sonia','I\'ve drafted that for you — check the form and send when ready.','focused');
     setStatus('🎯 focused');
     openEmailOverlay(draft.to,draft.subject,draft.body);
-    conversationHistory.push({role:'user',content:text});
-    conversationHistory.push({role:'assistant',content:'Pre-filled email form: to='+draft.to+', subject='+draft.subject});
+    // NOTE: intentionally NOT pushing email intent into conversationHistory
+    // so Sonia never hallucinates "I sent it" in subsequent replies.
     if(driveToken)saveMem(text,'[opened email form] to:'+draft.to+' subject:'+draft.subject);
     return;
   }
