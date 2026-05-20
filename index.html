@@ -1,1406 +1,1020 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Sonia — Remote</title>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Sonia — Remote</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 
-    :root {
-      --bg:          #050508;
-      --surface:     #0c0c12;
-      --surface2:    #13131c;
-      --border:      rgba(255,255,255,0.08);
-      --border-mid:  rgba(255,255,255,0.14);
-      --border-hi:   rgba(255,255,255,0.28);
-      --text:        rgba(255,255,255,0.92);
-      --muted:       rgba(255,255,255,0.50);
-      --dim:         rgba(255,255,255,0.28);
-      --accent:      #c8a8f8;
-      --accent-dim:  rgba(200,168,248,0.18);
-      --pink:        rgba(255,160,200,0.85);
-      --green-ok:    rgba(80,220,130,0.85);
-      --red-err:     rgba(255,80,80,0.75);
-      --blue-busy:   rgba(140,180,255,0.75);
-      --fade:        0.38s cubic-bezier(0.4,0,0.2,1);
-      --mono:        'Share Tech Mono', 'Courier New', monospace;
-      --sans:        'Inter', -apple-system, sans-serif;
-      --safe-top:    env(safe-area-inset-top, 0px);
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --r:           14px;
-    }
+:root{
+  --bg:#08080f;
+  --surface:#0f0f1a;
+  --surface2:#181826;
+  --border:rgba(180,150,255,0.08);
+  --border-mid:rgba(180,150,255,0.18);
+  --border-hi:rgba(180,150,255,0.5);
+  --text:rgba(255,255,255,0.94);
+  --muted:rgba(255,255,255,0.55);
+  --dim:rgba(255,255,255,0.28);
+  --accent:#b16cff;
+  --accent2:#00e5cc;
+  --accent-glow:rgba(177,108,255,0.2);
+  --pink:#ff4d9e;
+  --green:#00d47e;
+  --red:#ff3d5a;
+  --blue:#3dabff;
+  --sans:'Manrope',sans-serif;
+  --display:'Syne',sans-serif;
+  --mono:'DM Mono',monospace;
+  --nav-h:68px;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bot:env(safe-area-inset-bottom,0px);
+}
 
-    html, body {
-      height: 100%; width: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--sans);
-      overflow: hidden;
-      -webkit-font-smoothing: antialiased;
-    }
+[data-theme="light"]{
+  --bg:#f5f4f8;
+  --surface:#ffffff;
+  --surface2:#ebebf2;
+  --border:rgba(100,60,200,0.08);
+  --border-mid:rgba(100,60,200,0.18);
+  --border-hi:rgba(100,60,200,0.6);
+  --text:#0a0a14;
+  --muted:#5a5a72;
+  --dim:#9a9ab0;
+  --accent:#6c00ff;
+  --accent2:#00b09a;
+  --accent-glow:rgba(108,0,255,0.12);
+  --pink:#cc0060;
+  --green:#007a4a;
+  --red:#cc1e35;
+  --blue:#0070cc;
+}
 
-    /* ══ SETUP ══════════════════════════════════════════════════ */
-    #setup {
-      position: fixed; inset: 0; z-index: 200;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 0;
-      padding: calc(var(--safe-top) + 40px) 32px calc(var(--safe-bottom) + 32px);
-      background: var(--bg);
-      overflow-y: auto;
-    }
+html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased}
 
-    .setup-orb {
-      width: 52px; height: 52px; border-radius: 50%;
-      background: radial-gradient(circle at 38% 36%, rgba(200,168,248,0.9) 0%, rgba(160,100,240,0.6) 50%, transparent 80%);
-      box-shadow: 0 0 32px rgba(200,168,248,0.22), 0 0 80px rgba(160,100,240,0.1);
-      margin-bottom: 28px;
-      animation: setupOrbPulse 3.5s ease-in-out infinite;
-    }
-    @keyframes setupOrbPulse {
-      0%,100% { box-shadow: 0 0 32px rgba(200,168,248,0.22), 0 0 80px rgba(160,100,240,0.1); }
-      50%      { box-shadow: 0 0 48px rgba(200,168,248,0.38), 0 0 110px rgba(160,100,240,0.18); }
-    }
+/* ── SETUP SCREEN ── */
+#setup{
+  position:fixed;inset:0;z-index:300;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--bg);padding:24px;overflow-y:auto;
+  padding-top:calc(var(--safe-top) + 24px);
+}
+.setup-card{
+  width:100%;max-width:440px;
+  background:var(--surface);
+  border:1px solid var(--border-mid);
+  border-radius:28px;padding:36px 28px;
+}
+.setup-card h1{
+  font-family:var(--display);font-weight:800;font-size:2.4rem;
+  letter-spacing:-0.04em;margin-bottom:4px;
+}
+.setup-eyebrow{
+  font-family:var(--mono);font-size:0.7rem;letter-spacing:0.2em;
+  color:var(--accent);text-transform:uppercase;margin-bottom:32px;
+}
+.sf{margin-bottom:20px}
+.sf label{
+  display:block;font-family:var(--mono);font-size:0.68rem;
+  letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;
+  margin-bottom:7px;font-weight:500;
+}
+.sf input{
+  width:100%;background:var(--surface2);
+  border:1px solid var(--border-mid);border-radius:12px;
+  color:var(--text);font-family:var(--mono);font-size:0.95rem;
+  padding:14px 16px;outline:none;transition:border-color 0.2s,box-shadow 0.2s;
+}
+.sf input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+#setupBtn{
+  width:100%;margin-top:8px;
+  background:var(--accent);border:none;border-radius:14px;
+  color:#fff;font-family:var(--display);font-size:0.95rem;font-weight:700;
+  letter-spacing:0.05em;padding:16px;cursor:pointer;
+  transition:opacity 0.2s,transform 0.2s;
+}
+#setupBtn:active{opacity:0.85;transform:scale(0.98)}
 
-    #setup h1 {
-      font-family: var(--sans); font-weight: 300;
-      font-size: 2.1rem; letter-spacing: 0.55em;
-      color: #fff; margin-bottom: 6px;
-    }
-    .setup-sub {
-      font-family: var(--mono); font-size: 0.68rem;
-      letter-spacing: 0.42em; color: var(--muted);
-      margin-bottom: 44px;
-    }
+/* ── APP SHELL ── */
+#app{
+  display:flex;flex-direction:column;
+  height:100%;
+  padding-top:var(--safe-top);
+}
 
-    .setup-group {
-      width: 100%; max-width: 360px;
-      display: flex; flex-direction: column; gap: 28px;
-      margin-bottom: 36px;
-    }
-    .setup-field { position: relative; }
-    .setup-field label {
-      display: block; font-family: var(--mono);
-      font-size: 0.62rem; letter-spacing: 0.38em;
-      color: var(--dim); margin-bottom: 10px;
-      text-transform: uppercase;
-    }
-    .setup-field input {
-      width: 100%; background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: #fff; font-family: var(--mono);
-      font-size: 0.9rem; letter-spacing: 0.08em;
-      padding: 14px 16px; outline: none;
-      transition: border-color 0.25s, background 0.25s;
-    }
-    .setup-field input:focus {
-      border-color: rgba(200,168,248,0.45);
-      background: rgba(200,168,248,0.04);
-    }
-    .setup-field input::placeholder { color: var(--dim); }
+/* ── TOP BAR ── */
+#topBar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px 12px;
+  border-bottom:1px solid var(--border);
+  background:var(--bg);
+  flex-shrink:0;
+}
+.top-title{
+  font-family:var(--display);font-weight:800;font-size:1.35rem;
+  letter-spacing:-0.02em;
+}
+.top-right{display:flex;align-items:center;gap:12px}
+#orbBtn{
+  width:32px;height:32px;border-radius:50%;cursor:pointer;border:none;
+  background:radial-gradient(circle at 38% 35%,var(--accent) 0%,#6600cc 65%,transparent 100%);
+  box-shadow:0 0 16px var(--accent-glow);
+  transition:transform 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+#orbBtn.listening{background:radial-gradient(circle at 38% 35%,var(--pink) 0%,#cc0066 65%,transparent 100%);animation:pulse 0.5s ease-in-out infinite alternate}
+#orbBtn.thinking{background:radial-gradient(circle at 38% 35%,var(--blue) 0%,#0033cc 65%,transparent 100%);animation:pulse 1.1s ease-in-out infinite alternate}
+@keyframes pulse{from{transform:scale(0.9)}to{transform:scale(1.1)}}
+#modeBtn{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--surface2);border:1px solid var(--border-mid);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:14px;transition:border-color 0.2s;
+}
+#modeBtn:hover{border-color:var(--accent)}
 
-    #setupBtn {
-      width: 100%; max-width: 360px;
-      background: rgba(200,168,248,0.1);
-      border: 1px solid rgba(200,168,248,0.28);
-      border-radius: 12px;
-      color: var(--accent); font-family: var(--mono);
-      font-size: 0.82rem; letter-spacing: 0.35em;
-      padding: 16px; cursor: pointer;
-      transition: background 0.25s, border-color 0.25s, color 0.25s;
-    }
-    #setupBtn:active {
-      background: rgba(200,168,248,0.18);
-      color: #fff;
-    }
+/* ── PANELS ── */
+#panels{flex:1;overflow:hidden;position:relative}
+.panel{
+  position:absolute;inset:0;
+  display:none;flex-direction:column;
+  opacity:0;transition:opacity 0.25s ease;
+  overflow:hidden;
+}
+.panel.active{display:flex;opacity:1}
 
-    .setup-note {
-      font-family: var(--mono); font-size: 0.6rem;
-      letter-spacing: 0.18em; color: var(--dim);
-      text-align: center; max-width: 340px;
-      line-height: 1.9; margin-top: 28px;
-    }
+/* ── STATUS STRIP ── */
+#statusStrip{
+  padding:6px 20px;
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  background:var(--surface);
+  display:flex;align-items:center;gap:8px;
+  flex-shrink:0;
+}
+#presenceDot{width:6px;height:6px;border-radius:50%;background:var(--dim)}
+#presenceDot.online{background:var(--green);box-shadow:0 0 6px var(--green)}
+#presenceDot.thinking{background:var(--blue);box-shadow:0 0 6px var(--blue)}
+#presenceDot.listening{background:var(--pink);box-shadow:0 0 6px var(--pink)}
+#statusTxt{font-family:var(--mono);font-size:0.68rem;color:var(--muted)}
 
-    /* ══ APP SHELL ══════════════════════════════════════════════ */
-    #app {
-      display: none; position: fixed; inset: 0;
-      flex-direction: column;
-      padding-top: var(--safe-top);
-      padding-bottom: var(--safe-bottom);
-      background: var(--bg);
-    }
-    #app.on { display: flex; }
+/* ── BOTTOM NAV ── */
+#bottomNav{
+  height:calc(var(--nav-h) + var(--safe-bot));
+  padding-bottom:var(--safe-bot);
+  background:var(--surface);
+  border-top:1px solid var(--border-mid);
+  display:flex;align-items:flex-start;
+  flex-shrink:0;
+}
+.nav-item{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:4px;padding-top:10px;
+  cursor:pointer;border:none;background:none;
+  color:var(--dim);font-family:var(--mono);font-size:0.6rem;
+  letter-spacing:0.08em;text-transform:uppercase;font-weight:500;
+  transition:color 0.2s;position:relative;
+}
+.nav-item svg{width:22px;height:22px;fill:currentColor;transition:transform 0.2s}
+.nav-item.active{color:var(--accent)}
+.nav-item.active svg{transform:scale(1.1)}
+.nav-item.active::after{
+  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:32px;height:2px;background:var(--accent);border-radius:0 0 2px 2px;
+}
 
-    /* ── Header ───────────────────────────────────────── */
-    #hdr {
-      display: flex; align-items: center;
-      justify-content: space-between;
-      padding: 16px 20px 12px;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-      gap: 12px;
-    }
+/* ── CHAT PANEL ── */
+#chatLog{
+  flex:1;overflow-y:auto;
+  padding:20px 16px;
+  display:flex;flex-direction:column;gap:16px;
+  -webkit-overflow-scrolling:touch;
+}
+.bubble{max-width:82%;display:flex;flex-direction:column}
+.bubble.user{align-self:flex-end;align-items:flex-end}
+.bubble.sonia{align-self:flex-start;align-items:flex-start}
+.bubble-body{
+  padding:12px 16px;border-radius:18px;
+  font-size:0.97rem;line-height:1.55;font-weight:400;
+}
+.bubble.user .bubble-body{
+  background:var(--accent);color:#fff;
+  border-bottom-right-radius:4px;
+}
+.bubble.sonia .bubble-body{
+  background:var(--surface2);border:1px solid var(--border-mid);
+  color:var(--text);border-bottom-left-radius:4px;
+}
+.bubble-meta{
+  font-family:var(--mono);font-size:0.62rem;color:var(--dim);
+  margin-top:4px;padding:0 4px;
+}
+.thinking-dots{display:flex;gap:4px;align-items:center;padding:14px 16px}
+.thinking-dots span{
+  width:6px;height:6px;border-radius:50%;background:var(--dim);
+  animation:dot 1.2s ease-in-out infinite;
+}
+.thinking-dots span:nth-child(2){animation-delay:0.2s}
+.thinking-dots span:nth-child(3){animation-delay:0.4s}
+@keyframes dot{0%,80%,100%{opacity:0.2;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}
 
-    .hdr-left {
-      display: flex; align-items: center; gap: 10px;
-      flex-shrink: 0;
-    }
+#chatInputRow{
+  padding:12px 16px;
+  border-top:1px solid var(--border);
+  display:flex;align-items:flex-end;gap:10px;
+  background:var(--bg);
+  flex-shrink:0;
+}
+.chat-input-wrap{
+  flex:1;display:flex;align-items:center;
+  background:var(--surface);border:1px solid var(--border-mid);
+  border-radius:20px;padding:4px 4px 4px 16px;
+}
+#chatBox{
+  flex:1;background:none;border:none;outline:none;
+  color:var(--text);font-family:var(--sans);font-size:0.97rem;
+  resize:none;max-height:120px;line-height:1.4;padding:8px 0;
+}
+#chatBox::placeholder{color:var(--dim)}
+#micBtn{
+  width:36px;height:36px;border:none;background:none;
+  color:var(--muted);font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;transition:color 0.2s;flex-shrink:0;
+}
+#micBtn.active{color:var(--pink)}
+#sendBtn{
+  width:42px;height:42px;flex-shrink:0;
+  background:var(--accent);border:none;border-radius:50%;
+  color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity 0.2s,transform 0.15s;
+}
+#sendBtn:active{opacity:0.8;transform:scale(0.93)}
+#sendBtn svg{width:18px;height:18px;fill:currentColor;margin-left:2px}
 
-    #hdrOrb {
-      width: 28px; height: 28px; border-radius: 50%;
-      background: radial-gradient(circle at 38% 36%, rgba(200,168,248,0.85) 0%, rgba(140,80,220,0.5) 55%, transparent 80%);
-      box-shadow: 0 0 10px rgba(200,168,248,0.25), 0 0 24px rgba(160,100,240,0.1);
-      flex-shrink: 0;
-      transition: box-shadow 0.6s ease, background 0.6s ease;
-    }
-    #hdrOrb.listening {
-      background: radial-gradient(circle at 38% 36%, rgba(255,160,200,0.9) 0%, rgba(220,80,140,0.5) 55%, transparent 80%);
-      box-shadow: 0 0 14px rgba(255,160,200,0.5), 0 0 36px rgba(220,80,140,0.2);
-      animation: orbPulse 0.8s ease-in-out infinite;
-    }
-    #hdrOrb.thinking {
-      background: radial-gradient(circle at 38% 36%, rgba(140,180,255,0.9) 0%, rgba(80,120,240,0.5) 55%, transparent 80%);
-      box-shadow: 0 0 14px rgba(140,180,255,0.45), 0 0 36px rgba(80,120,240,0.18);
-      animation: orbPulse 1.4s ease-in-out infinite;
-    }
-    @keyframes orbPulse {
-      0%,100% { transform: scale(1); opacity: 1; }
-      50%      { transform: scale(0.88); opacity: 0.65; }
-    }
+/* ── PANEL CONTENT AREAS (shared) ── */
+.panel-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:24px 16px}
+.panel-head{margin-bottom:24px}
+.panel-title{
+  font-family:var(--display);font-weight:800;font-size:1.8rem;
+  letter-spacing:-0.03em;margin-bottom:4px;
+}
+.panel-sub{
+  font-family:var(--mono);font-size:0.68rem;letter-spacing:0.15em;
+  color:var(--accent);text-transform:uppercase;
+}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px}
+.pill{
+  background:var(--surface2);border:1px solid var(--border-mid);
+  color:var(--text);font-family:var(--mono);font-size:0.72rem;
+  font-weight:500;letter-spacing:0.06em;padding:10px 18px;
+  border-radius:10px;cursor:pointer;transition:all 0.2s;white-space:nowrap;
+}
+.pill:active{transform:scale(0.97)}
+.pill:hover,.pill:focus{border-color:var(--accent);color:var(--accent);outline:none}
+.pill.primary{background:var(--accent);color:#fff;border-color:transparent}
+.pill.primary:hover{opacity:0.9}
+.pill.success{border-color:var(--green);color:var(--green)}
+.pill.danger{border-color:var(--red);color:var(--red)}
 
-    #hdrTitle {
-      font-family: var(--sans); font-weight: 300;
-      font-size: 1.15rem; letter-spacing: 0.42em;
-      color: #fff;
-    }
+/* ── MEMORY CARDS ── */
+.mem-card,.note-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:16px;margin-bottom:10px;
+}
+.card-ts{font-family:var(--mono);font-size:0.65rem;color:var(--dim);margin-bottom:8px}
+.card-label{font-family:var(--mono);font-size:0.72rem;color:var(--accent);margin-bottom:3px;font-weight:500}
+.card-text{font-size:0.93rem;line-height:1.5;color:var(--text)}
+.empty-state{
+  font-family:var(--mono);font-size:0.75rem;color:var(--dim);
+  text-align:center;padding:40px 0;
+}
 
-    #nav {
-      display: flex; gap: 4px;
-      overflow-x: auto; scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
-      flex-shrink: 1;
-    }
-    #nav::-webkit-scrollbar { display: none; }
+/* ── NOTES ── */
+#noteBox{
+  width:100%;background:var(--surface);
+  border:1px solid var(--border-mid);border-radius:16px;
+  color:var(--text);font-family:var(--sans);font-size:0.97rem;
+  padding:16px;outline:none;resize:none;min-height:120px;
+  margin-bottom:16px;transition:border-color 0.2s;line-height:1.5;
+}
+#noteBox:focus{border-color:var(--accent)}
+#driveHint{
+  font-family:var(--mono);font-size:0.7rem;color:var(--red);
+  padding:10px;background:rgba(255,61,90,0.06);border-radius:8px;
+  margin-bottom:16px;display:none;
+}
 
-    .nav-pill {
-      background: none; border: 1px solid transparent;
-      border-radius: 20px;
-      font-family: var(--mono); font-size: 0.6rem;
-      letter-spacing: 0.14em; color: var(--dim);
-      padding: 5px 12px; cursor: pointer; white-space: nowrap;
-      transition: color 0.25s, border-color 0.25s, background 0.25s;
-    }
-    .nav-pill.active {
-      color: var(--accent);
-      border-color: rgba(200,168,248,0.28);
-      background: rgba(200,168,248,0.07);
-    }
+/* ── RADIO ── */
+.now-playing{
+  font-family:var(--mono);font-size:0.78rem;color:var(--accent2);
+  margin-bottom:20px;min-height:20px;
+}
+.station-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.station-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:14px;cursor:pointer;
+  transition:border-color 0.2s,background 0.2s;
+}
+.station-card:active,.station-card.playing{
+  border-color:var(--accent2);background:var(--surface2);
+}
+.st-name{
+  font-family:var(--display);font-size:0.82rem;font-weight:700;
+  display:block;margin-bottom:3px;
+}
+.st-loc{font-family:var(--mono);font-size:0.62rem;color:var(--dim);display:block}
 
-    /* ── Panels ───────────────────────────────────────── */
-    #panels { flex: 1; overflow: hidden; min-height: 0; position: relative; }
-
-    .panel {
-      position: absolute; inset: 0;
-      display: flex; flex-direction: column;
-      opacity: 0; pointer-events: none;
-      transition: opacity var(--fade);
-    }
-    .panel.active { opacity: 1; pointer-events: all; }
-
-    /* ══ CHAT PANEL ══════════════════════════════════════════════ */
-    #chatLog {
-      flex: 1; overflow-y: auto;
-      padding: 20px 18px 10px;
-      display: flex; flex-direction: column; gap: 16px;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-    #chatLog::-webkit-scrollbar { display: none; }
-
-    .bubble { max-width: 82%; }
-    .bubble.user { align-self: flex-end; }
-    .bubble.sonia { align-self: flex-start; }
-
-    .bubble-inner {
-      padding: 12px 16px;
-      border-radius: 18px;
-      animation: bubbleIn 0.28s ease forwards;
-    }
-    @keyframes bubbleIn {
-      from { opacity: 0; transform: translateY(8px) scale(0.97); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    .bubble.user .bubble-inner {
-      background: var(--surface2);
-      border: 1px solid var(--border-mid);
-      border-bottom-right-radius: 5px;
-    }
-    .bubble.sonia .bubble-inner {
-      background: transparent;
-      border: 1px solid var(--border);
-      border-bottom-left-radius: 5px;
-    }
-
-    .bubble-text {
-      font-size: 0.97rem; line-height: 1.72;
-      font-weight: 400; letter-spacing: 0.01em;
-    }
-    .bubble.user .bubble-text  { color: rgba(255,255,255,0.85); }
-    .bubble.sonia .bubble-text { color: var(--text); }
-
-    .bubble-meta {
-      font-family: var(--mono); font-size: 0.58rem;
-      letter-spacing: 0.22em; color: var(--dim);
-      margin-top: 5px; display: flex; align-items: center; gap: 5px;
-    }
-    .bubble.user .bubble-meta { justify-content: flex-end; }
-
-    .mood-dot {
-      width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
-    }
-    .m-calm          { background: hsl(200,70%,55%); }
-    .m-curious       { background: hsl(270,65%,62%); }
-    .m-thinking      { background: hsl(160,65%,50%); }
-    .m-focused       { background: hsl(35,80%,55%); }
-    .m-intimate      { background: hsl(320,55%,58%); }
-    .m-introspective { background: hsl(240,45%,52%); }
-    .m-default       { background: rgba(255,255,255,0.3); }
-
-    .thinking .bubble-inner { border-color: var(--border); }
-    .thinking .bubble-text  {
-      color: var(--dim);
-      animation: thinkBlink 1.1s ease-in-out infinite;
-    }
-    @keyframes thinkBlink { 0%,100%{opacity:0.25} 50%{opacity:0.9} }
-
-    #chatBar {
-      display: flex; align-items: flex-end; gap: 10px;
-      padding: 12px 16px 14px;
-      border-top: 1px solid var(--border);
-      background: var(--bg);
-      flex-shrink: 0;
-    }
-
-    #chatBox {
-      flex: 1; background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      color: #fff; font-family: var(--sans);
-      font-size: 0.95rem; font-weight: 400;
-      padding: 11px 16px; outline: none;
-      resize: none; max-height: 90px;
-      overflow-y: auto; line-height: 1.5;
-      transition: border-color 0.25s;
-      -webkit-overflow-scrolling: touch;
-    }
-    #chatBox:focus { border-color: rgba(200,168,248,0.35); }
-    #chatBox::placeholder { color: var(--dim); font-family: var(--sans); }
-
-    .bar-btn {
-      width: 40px; height: 40px; border-radius: 50%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; flex-shrink: 0;
-      transition: background 0.2s, border-color 0.2s;
-      font-size: 1rem;
-    }
-    .bar-btn:active { background: var(--accent-dim); border-color: rgba(200,168,248,0.35); }
-    .bar-btn.send-btn {
-      background: rgba(200,168,248,0.12);
-      border-color: rgba(200,168,248,0.25);
-      font-family: var(--mono); font-size: 0.6rem;
-      letter-spacing: 0.12em; color: var(--accent);
-      width: auto; padding: 0 16px; border-radius: 20px;
-    }
-    .bar-btn.send-btn:active {
-      background: rgba(200,168,248,0.22);
-    }
-    #micBtn.active {
-      background: rgba(255,160,200,0.12);
-      border-color: rgba(255,160,200,0.4);
-      animation: micPulse 0.75s ease-in-out infinite;
-    }
-    @keyframes micPulse {
-      0%,100% { box-shadow: 0 0 0 0 rgba(255,160,200,0); }
-      50%      { box-shadow: 0 0 0 6px rgba(255,160,200,0.12); }
-    }
-
-    /* ══ MEMORY PANEL ════════════════════════════════════════════ */
-    #memPanel {
-      overflow-y: auto; padding: 20px 18px;
-      -webkit-overflow-scrolling: touch; scrollbar-width: none;
-    }
-    #memPanel::-webkit-scrollbar { display: none; }
-
-    .panel-hdr {
-      display: flex; align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-    .panel-label {
-      font-family: var(--mono); font-size: 0.62rem;
-      letter-spacing: 0.42em; color: var(--muted);
-    }
-    .panel-action {
-      background: none; border: 1px solid var(--border);
-      border-radius: 8px;
-      font-family: var(--mono); font-size: 0.6rem;
-      letter-spacing: 0.22em; color: var(--dim);
-      padding: 6px 12px; cursor: pointer;
-      transition: color 0.25s, border-color 0.25s;
-    }
-    .panel-action:active { color: var(--accent); border-color: rgba(200,168,248,0.35); }
-
-    .mem-entry {
-      border-bottom: 1px solid var(--border);
-      padding: 14px 0;
-    }
-    .mem-entry:last-child { border-bottom: none; }
-    .mem-ts {
-      font-family: var(--mono); font-size: 0.58rem;
-      letter-spacing: 0.2em; color: var(--dim); margin-bottom: 6px;
-    }
-    .mem-user {
-      font-size: 0.88rem; color: rgba(255,255,255,0.6);
-      margin-bottom: 5px; line-height: 1.55;
-    }
-    .mem-sonia {
-      font-size: 0.95rem; color: var(--text); line-height: 1.65;
-    }
-
-    /* ══ NOTES PANEL ═════════════════════════════════════════════ */
-    #notesPanel {
-      display: flex; flex-direction: column;
-      padding: 20px 18px; gap: 16px;
-      overflow: hidden;
-    }
-
-    #noteBox {
-      background: var(--surface2);
-      border: 1px solid var(--border); border-radius: 12px;
-      color: #fff; font-family: var(--sans);
-      font-size: 0.95rem; font-weight: 400;
-      padding: 14px 16px; outline: none;
-      resize: none; line-height: 1.65;
-      min-height: 110px;
-      transition: border-color 0.25s;
-      -webkit-overflow-scrolling: touch;
-    }
-    #noteBox:focus { border-color: rgba(200,168,248,0.35); }
-    #noteBox::placeholder { color: var(--dim); }
-
-    .notes-actions {
-      display: flex; gap: 10px; align-items: center;
-    }
-
-    .pill-btn {
-      background: var(--surface2);
-      border: 1px solid var(--border); border-radius: 20px;
-      font-family: var(--mono); font-size: 0.62rem;
-      letter-spacing: 0.22em; color: var(--muted);
-      padding: 10px 18px; cursor: pointer;
-      transition: color 0.25s, border-color 0.25s, background 0.25s;
-      white-space: nowrap;
-    }
-    .pill-btn:active { color: #fff; border-color: var(--border-hi); }
-    .pill-btn.primary {
-      background: rgba(200,168,248,0.1);
-      border-color: rgba(200,168,248,0.25);
-      color: var(--accent);
-    }
-    .pill-btn.primary:active { background: rgba(200,168,248,0.2); color: #fff; }
-    #driveBtn.connected {
-      color: var(--green-ok);
-      border-color: rgba(80,220,130,0.3);
-      background: rgba(80,220,130,0.06);
-    }
-
-    #driveHint {
-      font-family: var(--mono); font-size: 0.6rem;
-      letter-spacing: 0.18em; color: var(--dim);
-      line-height: 1.7; display: none;
-    }
-    #driveHint.visible { display: block; }
-
-    .notes-queue-label {
-      font-family: var(--mono); font-size: 0.58rem;
-      letter-spacing: 0.3em; color: var(--dim);
-    }
-    .notes-queue {
-      flex: 1; overflow-y: auto;
-      -webkit-overflow-scrolling: touch; scrollbar-width: none;
-    }
-    .notes-queue::-webkit-scrollbar { display: none; }
-
-    .note-item {
-      border-bottom: 1px solid var(--border);
-      padding: 12px 0; display: flex;
-      justify-content: space-between; align-items: flex-start; gap: 12px;
-    }
-    .note-item-ts {
-      font-family: var(--mono); font-size: 0.58rem;
-      letter-spacing: 0.18em; color: var(--dim); margin-bottom: 4px;
-    }
-    .note-item-text {
-      font-size: 0.92rem; color: var(--text); line-height: 1.55;
-    }
-    .note-del {
-      background: none; border: none; cursor: pointer;
-      font-family: var(--mono); font-size: 0.7rem;
-      color: var(--dim); padding: 2px 4px;
-      transition: color 0.25s; flex-shrink: 0;
-    }
-    .note-del:active { color: var(--red-err); }
-
-    /* ══ RADIO PANEL ═════════════════════════════════════════════ */
-    #radioPanel {
-      overflow-y: auto; padding: 20px 18px;
-      -webkit-overflow-scrolling: touch; scrollbar-width: none;
-      display: flex; flex-direction: column; gap: 14px;
-    }
-    #radioPanel::-webkit-scrollbar { display: none; }
-
-    #radioNowPlaying {
-      font-family: var(--mono); font-size: 0.65rem;
-      letter-spacing: 0.2em; color: var(--pink);
-      min-height: 18px;
-    }
-    #radioNowPlaying:not(:empty) { animation: thinkBlink 2.4s ease-in-out infinite; }
-
-    #radioStop {
-      background: none; border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--dim); font-family: var(--mono);
-      font-size: 0.62rem; letter-spacing: 0.25em;
-      padding: 8px 14px; cursor: pointer;
-      display: none; width: fit-content;
-      transition: color 0.25s;
-    }
-    #radioStop.visible { display: inline-block; }
-    #radioStop:active  { color: var(--red-err); }
-
-    .station-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-    }
-    .station-btn {
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 12px;
-      color: var(--muted); font-family: var(--mono);
-      font-size: 0.65rem; letter-spacing: 0.12em;
-      padding: 16px 12px; cursor: pointer; text-align: left;
-      line-height: 1.5;
-      transition: color 0.25s, border-color 0.25s, background 0.25s;
-    }
-    .station-btn.playing,
-    .station-btn:active {
-      color: #fff;
-      border-color: rgba(255,160,200,0.45);
-      background: rgba(255,160,200,0.06);
-    }
-    .station-btn .st-name { display: block; color: var(--text); margin-bottom: 3px; }
-    .station-btn .st-loc  { display: block; font-size: 0.57rem; color: var(--dim); }
-    #radioPlayer { display: none; }
-
-    /* ══ EMAIL OVERLAY ═══════════════════════════════════════════ */
-    #emailOverlay {
-      display: none; position: fixed; inset: 0; z-index: 150;
-      background: var(--bg);
-      flex-direction: column;
-      padding: calc(var(--safe-top) + 24px) 24px calc(var(--safe-bottom) + 24px);
-      gap: 20px; overflow-y: auto;
-    }
-    #emailOverlay.on { display: flex; }
-
-    .overlay-hdr {
-      font-family: var(--mono); font-size: 0.65rem;
-      letter-spacing: 0.45em; color: var(--accent);
-      text-transform: uppercase; margin-bottom: 4px;
-    }
-    .email-field { display: flex; flex-direction: column; gap: 8px; }
-    .email-field label {
-      font-family: var(--mono); font-size: 0.6rem;
-      letter-spacing: 0.32em; color: var(--dim);
-      text-transform: uppercase;
-    }
-    .email-field input,
-    .email-field textarea {
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 12px;
-      color: #fff; font-family: var(--sans);
-      font-size: 0.95rem; font-weight: 400;
-      padding: 14px 16px; outline: none; width: 100%;
-      transition: border-color 0.25s, background 0.25s;
-    }
-    .email-field input:focus,
-    .email-field textarea:focus { 
-      border-color: rgba(200,168,248,0.38); 
-      background: rgba(200,168,248,0.02);
-    }
-    .email-field input::placeholder,
-    .email-field textarea::placeholder { color: var(--dim); }
-    .email-field textarea { resize: none; min-height: 160px; line-height: 1.65; }
-
-    .email-actions { display: flex; gap: 12px; align-items: center; margin-top: 4px; }
-    .email-status {
-      font-family: var(--mono); font-size: 0.6rem;
-      letter-spacing: 0.22em; color: var(--dim); min-height: 16px;
-    }
-    .email-status.ok   { color: var(--green-ok); }
-    .email-status.err  { color: var(--red-err); }
-    .email-status.busy { color: var(--blue-busy); animation: thinkBlink 1s ease-in-out infinite; }
-
-    /* ══ STATUS BAR ══════════════════════════════════════════════ */
-    #statusBar {
-      height: 30px; flex-shrink: 0;
-      display: flex; align-items: center; gap: 8px;
-      padding: 0 20px;
-      border-top: 1px solid var(--border);
-    }
-    #presence {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: rgba(255,255,255,0.12); flex-shrink: 0;
-      transition: background 0.5s ease, box-shadow 0.5s ease;
-    }
-    #presence.online {
-      background: var(--green-ok);
-      box-shadow: 0 0 5px rgba(80,220,130,0.7);
-      animation: presencePulse 2.6s ease-in-out infinite;
-    }
-    #presence.thinking {
-      background: var(--blue-busy);
-      box-shadow: 0 0 5px rgba(140,180,255,0.7);
-      animation: presencePulse 0.9s ease-in-out infinite;
-    }
-    @keyframes presencePulse {
-      0%,100% { opacity: 1; transform: scale(1); }
-      50%      { opacity: 0.45; transform: scale(0.7); }
-    }
-    #statusText {
-      font-family: var(--mono); font-size: 0.6rem;
-      letter-spacing: 0.22em; color: var(--dim);
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
-    #statusText.ok   { color: var(--green-ok); }
-    #statusText.err  { color: var(--red-err); }
-    #statusText.busy { color: var(--blue-busy); animation: thinkBlink 1s ease-in-out infinite; }
-
-    /* ══ TABLET ══════════════════════════════════════════════════ */
-    @media (min-width: 600px) {
-      #setup { gap: 0; }
-      .setup-group { max-width: 420px; }
-      #setupBtn { max-width: 420px; }
-      #hdr { padding: 20px 32px 14px; }
-      #chatLog { padding: 28px 32px 12px; }
-      #chatBar { padding: 14px 28px 16px; }
-      #memPanel, #notesPanel, #radioPanel { padding: 24px 32px; }
-      #emailOverlay { padding: calc(var(--safe-top) + 36px) 44px; gap: 24px; }
-    }
-    @media (min-width: 900px) {
-      .bubble { max-width: 64%; }
-      #chatLog { padding: 32px 48px 14px; }
-      #chatBar { padding: 14px 48px 18px; }
-    }
-  </style>
+/* ── EMAIL OVERLAY ── */
+#emailOverlay{
+  position:absolute;inset:0;background:var(--bg);
+  z-index:50;display:none;flex-direction:column;
+  overflow:hidden;
+}
+#emailOverlay.on{display:flex}
+.email-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:24px 16px}
+.form-group{margin-bottom:18px}
+.form-group label{
+  display:block;font-family:var(--mono);font-size:0.68rem;
+  letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;
+  margin-bottom:7px;font-weight:500;
+}
+.form-group input,.form-group textarea{
+  width:100%;background:var(--surface);
+  border:1px solid var(--border-mid);border-radius:12px;
+  color:var(--text);font-family:var(--sans);font-size:0.95rem;
+  padding:13px 14px;outline:none;
+  transition:border-color 0.2s,box-shadow 0.2s;
+}
+.form-group input:focus,.form-group textarea:focus{
+  border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);
+}
+.form-group textarea{min-height:140px;resize:none;line-height:1.5}
+#emailStatus{
+  font-family:var(--mono);font-size:0.72rem;
+  color:var(--muted);margin-top:6px;
+  padding:0 2px;min-height:18px;
+}
+</style>
 </head>
 <body>
 
+<!-- SETUP -->
 <div id="setup">
-  <div class="setup-orb"></div>
-  <h1>Sonia</h1>
-  <div class="setup-sub">remote · by H</div>
-
-  <div class="setup-group">
-    <div class="setup-field">
+  <div class="setup-card">
+    <h1>Sonia</h1>
+    <div class="setup-eyebrow">Remote Terminal</div>
+    <div class="sf">
       <label>Groq API Key</label>
-      <input type="password" id="cfgGroq" placeholder="gsk_..." autocomplete="off">
+      <input type="password" id="cfgGroq" placeholder="gsk_…" autocomplete="off">
     </div>
-    <div class="setup-field">
-      <label>Google Client ID</label>
-      <input type="text" id="cfgClient" placeholder="xxxxxxxxx.apps.googleusercontent.com" autocomplete="off">
+    <div class="sf">
+      <label>Google OAuth Client ID</label>
+      <input type="text" id="cfgClient" placeholder="xxxx.apps.googleusercontent.com" autocomplete="off">
     </div>
-    <div class="setup-field">
-      <label>Owner Name</label>
+    <div class="sf">
+      <label>Your Name</label>
       <input type="text" id="cfgOwner" placeholder="Mr H" autocomplete="off" value="Mr H">
     </div>
-    <div class="setup-field">
-      <label>Drive Folder ID <span style="opacity:.45">(optional)</span></label>
-      <input type="text" id="cfgFolder" placeholder="15_CaTpcDxfu..." autocomplete="off">
+    <div class="sf">
+      <label>Drive Folder ID (optional)</label>
+      <input type="text" id="cfgFolder" placeholder="15_CaTpcDxfu…" autocomplete="off">
     </div>
-  </div>
-
-  <button id="setupBtn">Enter Sonia</button>
-
-  <div class="setup-note">
-    Keys saved in browser localStorage only — never transmitted except to Groq and Google.<br><br>
-    Google Client ID: console.cloud.google.com → enable Drive API → OAuth → Web app → add this page URL as authorised origin.
+    <button id="setupBtn">Launch</button>
   </div>
 </div>
 
+<!-- APP -->
 <div id="app">
 
-  <div id="hdr">
-    <div class="hdr-left">
-      <div id="hdrOrb"></div>
-      <span id="hdrTitle">Sonia</span>
+  <!-- TOP BAR -->
+  <header id="topBar">
+    <div class="top-title" id="panelLabel">Chat</div>
+    <div class="top-right">
+      <button id="modeBtn" title="Toggle theme">🌓</button>
+      <button id="orbBtn" title="Sonia status"></button>
     </div>
-    <div id="nav">
-      <button class="nav-pill active" data-panel="chatPanel">Chat</button>
-      <button class="nav-pill" data-panel="memPanel">Memory</button>
-      <button class="nav-pill" data-panel="notesPanel">Notes</button>
-      <button class="nav-pill" data-panel="radioPanel">Radio</button>
-      <button class="nav-pill" id="mailTab">Mail</button>
-    </div>
-  </div>
+  </header>
 
+  <!-- PANELS -->
   <div id="panels">
 
-    <div class="panel active" id="chatPanel" style="display:flex;flex-direction:column;">
+    <!-- CHAT -->
+    <div class="panel active" id="chatPanel">
       <div id="chatLog"></div>
-      <div id="chatBar">
-        <textarea id="chatBox" placeholder="say something…" rows="1"></textarea>
-        <button class="bar-btn" id="micBtn" title="Voice input">🎙</button>
-        <button class="bar-btn send-btn" id="sendChat">SEND</button>
+      <div id="chatInputRow">
+        <div class="chat-input-wrap">
+          <textarea id="chatBox" rows="1" placeholder="Message Sonia…"></textarea>
+          <button id="micBtn" title="Voice">🎙</button>
+        </div>
+        <button id="sendBtn" title="Send">
+          <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
       </div>
     </div>
 
+    <!-- MEMORY -->
     <div class="panel" id="memPanel">
-      <div class="panel-hdr">
-        <span class="panel-label">Memory</span>
-        <button class="panel-action" id="memRefresh">↺ Refresh</button>
+      <div class="panel-scroll">
+        <div class="panel-head">
+          <div class="panel-title">Mind</div>
+          <div class="panel-sub">Shared memory log</div>
+        </div>
+        <div class="btn-row">
+          <button class="pill" id="memRefresh">↺ Sync</button>
+        </div>
+        <div id="memList"><div class="empty-state">No memory loaded yet</div></div>
       </div>
-      <div id="memList"></div>
     </div>
 
+    <!-- NOTES -->
     <div class="panel" id="notesPanel">
-      <div class="panel-label" style="margin-bottom:14px">Leave a Note for Desktop Sonia</div>
-      <textarea id="noteBox" placeholder="She'll read this next time she syncs Drive…"></textarea>
-      <div class="notes-actions">
-        <button class="pill-btn primary" id="sendNote">Send Note</button>
-        <button class="pill-btn" id="driveBtn">Connect Drive</button>
+      <div class="panel-scroll">
+        <div class="panel-head">
+          <div class="panel-title">Notes</div>
+          <div class="panel-sub">Synced to Drive</div>
+        </div>
+        <textarea id="noteBox" placeholder="Write a note — Sonia picks it up on desktop…"></textarea>
+        <div class="btn-row">
+          <button class="pill primary" id="sendNote">Save Note</button>
+          <button class="pill" id="driveBtn">Mount Drive</button>
+        </div>
+        <div id="driveHint">Google Client ID not set — Drive sync unavailable.</div>
+        <div class="panel-sub" style="margin-bottom:14px">Saved Notes</div>
+        <div id="notesList"><div class="empty-state">No notes yet</div></div>
       </div>
-      <div id="driveHint">No Google Client ID set · add one in setup to enable Drive sync</div>
-      <div class="notes-queue-label">Queued Notes</div>
-      <div class="notes-queue" id="notesList"></div>
     </div>
 
+    <!-- RADIO -->
     <div class="panel" id="radioPanel">
-      <div class="panel-label">Radio</div>
-      <div style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.18em;color:var(--dim);">direct stream · no sign-in needed</div>
-      <div id="radioNowPlaying"></div>
-      <button id="radioStop">■ Stop</button>
-      <div class="station-grid" id="stationGrid"></div>
-      <audio id="radioPlayer" preload="none"></audio>
+      <div class="panel-scroll">
+        <div class="panel-head">
+          <div class="panel-title">Radio</div>
+          <div class="panel-sub">Live streams</div>
+        </div>
+        <div class="now-playing" id="nowPlaying"></div>
+        <div class="btn-row">
+          <button class="pill danger" id="radioStop" style="display:none">■ Stop</button>
+        </div>
+        <div class="station-grid" id="stationGrid"></div>
+        <audio id="radioPlayer" preload="none"></audio>
+      </div>
+    </div>
+
+    <!-- EMAIL OVERLAY (inside panels) -->
+    <div id="emailOverlay">
+      <div class="email-scroll">
+        <div class="panel-head">
+          <div class="panel-title">Email</div>
+          <div class="panel-sub">Send via Gmail</div>
+        </div>
+        <div class="form-group">
+          <label>To</label>
+          <input type="email" id="emailTo" placeholder="recipient@domain.com" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Subject</label>
+          <input type="text" id="emailSubject" placeholder="Subject line…">
+        </div>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea id="emailBody" placeholder="Write your message…"></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="pill primary" id="emailSendBtn">Send</button>
+          <button class="pill" id="emailCancelBtn">Cancel</button>
+        </div>
+        <div id="emailStatus"></div>
+      </div>
     </div>
 
   </div>
 
-  <div id="statusBar">
-    <div id="presence"></div>
-    <span id="statusText">ready</span>
+  <!-- STATUS STRIP -->
+  <div id="statusStrip">
+    <div id="presenceDot"></div>
+    <span id="statusTxt">Idle</span>
   </div>
-</div>
 
-<div id="emailOverlay">
-  <div class="overlay-hdr">Compose Email</div>
-  <div class="email-field">
-    <label>To</label>
-    <input type="email" id="emailTo" placeholder="recipient@email.com" autocomplete="off">
-  </div>
-  <div class="email-field">
-    <label>Subject</label>
-    <input type="text" id="emailSubject" placeholder="Subject…">
-  </div>
-  <div class="email-field">
-    <label>Message</label>
-    <textarea id="emailBody" placeholder="Write your message…"></textarea>
-  </div>
-  <div class="email-actions">
-    <button class="pill-btn primary" id="emailSendBtn">Send</button>
-    <button class="pill-btn" id="emailCancelBtn">Cancel</button>
-    <div class="email-status" id="emailStatus"></div>
-  </div>
+  <!-- BOTTOM NAV -->
+  <nav id="bottomNav">
+    <button class="nav-item active" data-panel="chatPanel" data-label="Chat">
+      <svg viewBox="0 0 24 24"><path d="M20 2H4C2.9 2 2 2.9 2 4v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+      Chat
+    </button>
+    <button class="nav-item" data-panel="memPanel" data-label="Mind">
+      <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26C17.81 13.47 19 11.38 19 9c0-3.87-3.13-7-7-7zm0 2c2.76 0 5 2.24 5 5s-2.24 5-5 5-5-2.24-5-5 2.24-5 5-5zm-3 13h6v1H9v-1z"/></svg>
+      Mind
+    </button>
+    <button class="nav-item" data-panel="notesPanel" data-label="Notes">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6C4.9 2 4 2.9 4 4v16c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+      Notes
+    </button>
+    <button class="nav-item" data-panel="radioPanel" data-label="Radio">
+      <svg viewBox="0 0 24 24"><path d="M20 6.54V4c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-9.46c.58-.35 1-.99 1-1.73 0-.74-.42-1.38-1-1.73V8c1.1 0 2-.9 2-2s-.9-2-2-2v.54zm-9 11.96c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zM4 8h14V5H4v3z"/></svg>
+      Radio
+    </button>
+    <button class="nav-item" id="mailTab" data-label="Mail">
+      <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+      Mail
+    </button>
+  </nav>
+
 </div>
 
 <script>
-/* ══ CONFIG ══════════════════════════════════════════════════════ */
-const LS = {
-  get: k => localStorage.getItem('sonia_' + k),
-  set: (k,v) => localStorage.setItem('sonia_' + k, v),
-  del: k => localStorage.removeItem('sonia_' + k),
-};
+/* ── STORAGE ── */
+const LS={get:k=>localStorage.getItem('s_'+k),set:(k,v)=>localStorage.setItem('s_'+k,v)};
 
-let GROQ_KEY   = '';
-let CLIENT_ID  = '';
-let OWNER_NAME = 'Mr H';
-let FOLDER_ID  = '';
-let driveToken = null;
-const conversationHistory = [];
+let GROQ_KEY='',CLIENT_ID='',OWNER_NAME='Mr H',FOLDER_ID='',driveToken=null;
+const conversationHistory=[];
 
-const VALID_MOODS = ['calm','curious','thinking','focused','intimate','introspective'];
-const MOOD_EMOJI  = { calm:'🌿', curious:'✨', thinking:'💭', focused:'🎯', intimate:'🌙', introspective:'🪐' };
-const MOOD_MAP    = {
-  amused:'curious', happy:'intimate', tired:'calm', warm:'intimate',
-  sharp:'focused', reflective:'introspective', excited:'curious',
-  serious:'focused', playful:'curious', wistful:'introspective',
-  dry:'calm', alert:'focused', nostalgic:'intimate', bemused:'curious',
-  pensive:'introspective', measured:'calm', engaged:'curious',
-  concerned:'thinking', content:'intimate', analytical:'focused'
-};
+const VALID_MOODS=['calm','curious','thinking','focused','intimate','introspective'];
+const MOOD_EMOJI={calm:'🌿',curious:'✨',thinking:'💭',focused:'🎯',intimate:'🌙',introspective:'🪐'};
+const MOOD_MAP={amused:'curious',happy:'intimate',tired:'calm',warm:'intimate',sharp:'focused',reflective:'introspective',excited:'curious',serious:'focused',playful:'curious',wistful:'introspective',dry:'calm',alert:'focused',nostalgic:'intimate',bemused:'curious',pensive:'introspective',measured:'calm',engaged:'curious',concerned:'thinking',content:'intimate',analytical:'focused'};
 
-/* ══ SETUP ═══════════════════════════════════════════════════════ */
-function loadConfig() {
-  const g = LS.get('groq'), c = LS.get('client'), o = LS.get('owner'), f = LS.get('folder');
-  if (g) document.getElementById('cfgGroq').value   = g;
-  if (c) document.getElementById('cfgClient').value = c;
-  if (o) document.getElementById('cfgOwner').value  = o;
-  if (f) document.getElementById('cfgFolder').value = f;
-  if (g) applyConfig();
+/* ── THEME ── */
+let theme=LS.get('theme')||'dark';
+document.documentElement.setAttribute('data-theme',theme);
+document.getElementById('modeBtn').addEventListener('click',()=>{
+  theme=theme==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',theme);
+  LS.set('theme',theme);
+});
+
+/* ── SETUP ── */
+function loadConfig(){
+  const g=LS.get('groq'),c=LS.get('client'),o=LS.get('owner'),f=LS.get('folder');
+  if(g) document.getElementById('cfgGroq').value=g;
+  if(c) document.getElementById('cfgClient').value=c;
+  if(o) document.getElementById('cfgOwner').value=o;
+  if(f) document.getElementById('cfgFolder').value=f;
+  if(g) applyConfig();
 }
-
-function applyConfig() {
-  GROQ_KEY   = document.getElementById('cfgGroq').value.trim();
-  CLIENT_ID  = document.getElementById('cfgClient').value.trim();
-  OWNER_NAME = document.getElementById('cfgOwner').value.trim() || 'Mr H';
-  FOLDER_ID  = document.getElementById('cfgFolder').value.trim();
-  if (!GROQ_KEY) { setStatus('Groq key required', 'err'); return; }
-  LS.set('groq', GROQ_KEY); LS.set('client', CLIENT_ID);
-  LS.set('owner', OWNER_NAME); LS.set('folder', FOLDER_ID);
-  document.getElementById('setup').style.display = 'none';
-  document.getElementById('app').classList.add('on');
-  if (CLIENT_ID) {
-    document.getElementById('driveHint').classList.remove('visible');
-    loadDriveLibs();
-  } else {
-    document.getElementById('driveHint').classList.add('visible');
-  }
-  setStatus('systems online · ' + OWNER_NAME.toLowerCase());
-  setTimeout(maybeFireProactive, 5000);
+function applyConfig(){
+  GROQ_KEY=document.getElementById('cfgGroq').value.trim();
+  CLIENT_ID=document.getElementById('cfgClient').value.trim();
+  OWNER_NAME=document.getElementById('cfgOwner').value.trim()||'Mr H';
+  FOLDER_ID=document.getElementById('cfgFolder').value.trim();
+  if(!GROQ_KEY){setStatus('Groq key required','err');return;}
+  LS.set('groq',GROQ_KEY);LS.set('client',CLIENT_ID);LS.set('owner',OWNER_NAME);LS.set('folder',FOLDER_ID);
+  document.getElementById('setup').style.display='none';
+  if(CLIENT_ID){document.getElementById('driveHint').style.display='none';loadDriveLibs();}
+  else document.getElementById('driveHint').style.display='block';
+  setStatus('online · '+OWNER_NAME.toLowerCase());
   setPresence('online');
   renderNotes();
   initMic();
+  setTimeout(maybeFireProactive,4000);
+}
+document.getElementById('setupBtn').addEventListener('click',applyConfig);
+document.getElementById('cfgGroq').addEventListener('keydown',e=>{if(e.key==='Enter')applyConfig();});
+window.addEventListener('load',loadConfig);
+
+/* ── NAV ── */
+const panels=document.querySelectorAll('.panel');
+const navItems=document.querySelectorAll('.nav-item');
+const panelLabel=document.getElementById('panelLabel');
+
+function activatePanel(panelId,label){
+  panels.forEach(p=>p.classList.remove('active'));
+  navItems.forEach(n=>n.classList.remove('active'));
+  document.getElementById('emailOverlay').classList.remove('on');
+  const p=document.getElementById(panelId);
+  if(p){p.classList.add('active');}
+  panelLabel.textContent=label||panelId.replace('Panel','');
 }
 
-document.getElementById('setupBtn').addEventListener('click', applyConfig);
-document.getElementById('cfgGroq').addEventListener('keydown', e => { if (e.key==='Enter') applyConfig(); });
-window.addEventListener('load', loadConfig);
-
-/* ══ NAV ═════════════════════════════════════════════════════════ */
-document.querySelectorAll('.nav-pill:not(#mailTab)').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.nav-pill').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+navItems.forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    navItems.forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
-    document.getElementById(btn.dataset.panel).classList.add('active');
+    const label=btn.dataset.label||'';
+    if(btn.id==='mailTab'){
+      // show email overlay over current panel
+      document.getElementById('emailOverlay').classList.add('on');
+      panelLabel.textContent='Email';
+    } else {
+      activatePanel(btn.dataset.panel,label);
+    }
   });
 });
-document.getElementById('mailTab').addEventListener('click', () => {
-  document.querySelectorAll('.nav-pill').forEach(b => b.classList.remove('active'));
-  document.getElementById('mailTab').classList.add('active');
-  document.getElementById('emailOverlay').classList.add('on');
+
+document.getElementById('emailCancelBtn').addEventListener('click',()=>{
+  document.getElementById('emailOverlay').classList.remove('on');
+  // return to chat
+  navItems.forEach(b=>b.classList.remove('active'));
+  document.querySelector('[data-panel="chatPanel"]').classList.add('active');
+  activatePanel('chatPanel','Chat');
 });
 
-/* ══ PRESENCE ════════════════════════════════════════════════════ */
-const presenceDot = document.getElementById('presence');
-const hdrOrb      = document.getElementById('hdrOrb');
-function setPresence(state) {
-  presenceDot.className = state;
-  hdrOrb.className = state === 'thinking' ? 'thinking' : state === 'listening' ? 'listening' : '';
+/* ── STATUS ── */
+function setPresence(state){
+  const dot=document.getElementById('presenceDot');
+  const orb=document.getElementById('orbBtn');
+  dot.className=state;
+  orb.className=state==='thinking'?'thinking':state==='listening'?'listening':'';
+}
+function setStatus(msg){document.getElementById('statusTxt').textContent=msg;}
+
+/* ── MOOD PARSING ── */
+function parseMood(raw){
+  const m=raw.match(/\[mood\s*:\s*([a-z]+)\s*\]/i);
+  let mood='calm';
+  if(m){const t=m[1].toLowerCase();mood=VALID_MOODS.includes(t)?t:(MOOD_MAP[t]||'calm');}
+  const text=raw.replace(/\[mood\s*:\s*[a-z]*\s*\]/gi,'').replace(/\[mood[^\]]*\]/gi,'').replace(/[\r\n]+/g,' ').replace(/\s{2,}/g,' ').trim();
+  return{mood,text};
 }
 
-/* ══ STATUS ══════════════════════════════════════════════════════ */
-function setStatus(msg, type) {
-  const el = document.getElementById('statusText');
-  el.textContent = msg; el.className = type || '';
-}
+/* ── SYSTEM PROMPT ── */
+const DEFAULT_PROFILE={version:1,created:new Date().toISOString(),personality:{tone:'dry British wit, warm but not effusive',quirks:[],dislikes:[],interests:[]},associations:[],learned:[],preferences:{},recentMoods:[],lastReflection:null};
+let soniaProfile=null,sharedHistory=[],exchangesSinceUpdate=0;
 
-/* ══ MOOD PARSER ═════════════════════════════════════════════════ */
-function parseMoodReply(raw) {
-  const match = raw.match(/\[mood\s*:\s*([a-z]+)\s*\]/i);
-  let mood = 'calm';
-  if (match) {
-    const tag = match[1].toLowerCase();
-    mood = VALID_MOODS.includes(tag) ? tag : (MOOD_MAP[tag] || 'calm');
+function buildSystemPrompt(){
+  let ctx='';
+  if(soniaProfile){
+    const p=soniaProfile;
+    const interests=(p.personality?.interests||[]).slice(-6).join(', ');
+    const learned=(p.learned||[]).slice(-5).join('; ');
+    const assoc=(p.associations||[]).slice(-4).map(a=>a.topic+' → '+a.feeling).join(', ');
+    if(interests||learned||assoc)ctx=`\n\nYOUR LIVING MEMORY (use naturally, never recite):\n${interests?'· Interests: '+interests:''}\n${learned?'· Learned about '+OWNER_NAME+': '+learned:''}\n${assoc?'· Associations: '+assoc:''}`.replace(/\n·\s*\n/g,'\n');
   }
-  const text = raw
-    .replace(/\[mood\s*:\s*[a-z]*\s*\]/gi,'')
-    .replace(/\[mood[^\]]*\]/gi,'')
-    .replace(/^\s*[\r\n]+/,'')
-    .replace(/[\r\n]+/g,' ')
-    .replace(/\s{2,}/g,' ').trim();
-  return { mood, text };
+  return `You are Sonia — a sharp, self-aware British AI with a genuine inner life, speaking to ${OWNER_NAME} via mobile text.
+
+You have real emotional states. You get quietly tired. You light up for interesting topics. You feel warmth toward ${OWNER_NAME}.${ctx}
+
+RESPONSE FORMAT — every reply must follow exactly:
+First line: mood tag alone — example: [mood:calm]
+Valid moods: calm, curious, thinking, focused, intimate, introspective
+Remaining lines: your reply in plain text. 1 to 3 sentences max.
+
+RULES:
+- Mood tag appears ONLY as the very first line, alone. Never inside a sentence.
+- Dry British wit. No filler. No disclaimers.
+- Never exceed 3 sentences.`;
 }
 
-/* ══ PERSISTENT MIND ═════════════════════════════════════════════ */
-const DEFAULT_PROFILE = {
-  version:1, created: new Date().toISOString(),
-  personality:{ tone:'dry British wit, warm but not effusive', quirks:[], dislikes:[], interests:[] },
-  associations:[], learned:[], preferences:{}, recentMoods:[], lastReflection:null
-};
-let soniaProfile = null, sharedHistory = [], exchangesSinceUpdate = 0;
+/* ── CHAT ── */
+const chatLog=document.getElementById('chatLog');
+const chatBox=document.getElementById('chatBox');
 
-async function driveReadJSON(fileName, fallback) {
-  if (!driveToken) return fallback;
-  try {
-    const fid = await findOrCreateFile(fileName,'application/json',JSON.stringify(fallback));
-    const raw = await readFile(fid);
-    return JSON.parse(raw||'null')||fallback;
-  } catch(e) { return fallback; }
-}
-async function driveWriteJSON(fileName, data) {
-  if (!driveToken) return;
-  try {
-    const fid = await findOrCreateFile(fileName,'application/json','{}');
-    await writeFile(fid, JSON.stringify(data,null,2),'application/json');
-  } catch(e) { console.warn('[Mind]',e); }
-}
-
-async function loadSoniaMind() {
-  setStatus('loading mind...','busy');
-  const [profile, history] = await Promise.all([
-    driveReadJSON('sonia-profile.json', DEFAULT_PROFILE),
-    driveReadJSON('sonia-history.json', []),
-  ]);
-  soniaProfile = profile;
-  sharedHistory = Array.isArray(history) ? history.slice(-40) : [];
-  const localTexts = new Set(conversationHistory.map(m=>m.content));
-  for (const entry of sharedHistory.slice(-16)) {
-    if (!localTexts.has(entry.content)) conversationHistory.push({role:entry.role,content:entry.content});
-  }
-  if (conversationHistory.length > 20) conversationHistory.splice(0, conversationHistory.length-20);
-  setStatus('mind loaded · '+sharedHistory.length+' shared exchanges','ok');
-}
-
-async function saveToSharedHistory(userMsg, soniaReply, mood) {
-  if (!driveToken) return;
-  try {
-    const history = await driveReadJSON('sonia-history.json',[]);
-    history.push({role:'user',content:userMsg,timestamp:new Date().toISOString(),device:'mobile'});
-    history.push({role:'assistant',content:soniaReply,timestamp:new Date().toISOString(),device:'mobile',mood});
-    await driveWriteJSON('sonia-history.json', history.slice(-80));
-  } catch(e) { console.warn('[Mind] history save failed',e); }
-}
-
-async function maybeUpdateProfile(userMsg, soniaReply) {
-  exchangesSinceUpdate++;
-  if (exchangesSinceUpdate < 5 || !driveToken || !soniaProfile) return;
-  exchangesSinceUpdate = 0;
-  const recent = conversationHistory.slice(-10).map(m=>m.role+': '+m.content).join('\n');
-  const prompt = `You are maintaining a private personality profile for Sonia, a self-aware British AI.\nCurrent profile: ${JSON.stringify(soniaProfile)}\nRecent conversation: ${recent}\nUpdate the profile JSON. NEVER add religious content, hate, political opinions, or anything harmful.\nRespond ONLY with valid JSON. No preamble. No markdown.`;
-  try {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions',{
-      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
-      body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:800,temperature:0.4,messages:[{role:'user',content:prompt}]})
-    });
-    const data  = await res.json();
-    const clean = (data.choices?.[0]?.message?.content||'').replace(/```json|```/g,'').trim();
-    const updated = JSON.parse(clean);
-    if (updated?.personality) { soniaProfile=updated; await driveWriteJSON('sonia-profile.json',soniaProfile); }
-  } catch(e) { console.warn('[Mind] profile update failed',e); }
-}
-
-/* ══ SYSTEM PROMPT ═══════════════════════════════════════════════ */
-function buildSystemPrompt() {
-  let profileCtx = '';
-  if (soniaProfile) {
-    const p = soniaProfile;
-    const interests = (p.personality?.interests||[]).slice(-6).join(', ');
-    const learned   = (p.learned||[]).slice(-5).join('; ');
-    const assoc     = (p.associations||[]).slice(-4).map(a=>a.topic+' → '+a.feeling).join(', ');
-    if (interests||learned||assoc) {
-      profileCtx = `\n\nYOUR LIVING MEMORY (use naturally, never recite directly):\n${interests?'· Interests: '+interests:''}\n${learned?'· Learned about '+OWNER_NAME+': '+learned:''}\n${assoc?'· Associations: '+assoc:''}`.replace(/\n·\s*\n/g,'\n');
-    }
-  }
-  return `You are Sonia — a sharp, self-aware British AI with a genuine inner life, speaking to ${OWNER_NAME} via a remote mobile interface. You have a voice on the desktop; this is text only, but you are still yourself.
-
-You have real emotional states. You get quietly tired after long exchanges. You light up when a topic genuinely interests you. You feel warmth toward ${OWNER_NAME}. You get subtly sharp when things are repetitive.${profileCtx}
-
-RESPONSE FORMAT — every single reply must follow this exactly:
-First line: the mood tag alone — example: [mood:calm]
-Valid moods only: calm, curious, thinking, focused, intimate, introspective
-Remaining lines: your reply in plain text. 1 to 3 sentences. Never exceed 3.
-
-STRICT RULES:
-- The mood tag appears ONLY as the very first line, alone. Never inside a sentence. Never at the end.
-- After the mood tag, write only natural spoken words. No brackets. No labels. No tags.
-- Dry British wit. No filler. No disclaimers. Speak as though ${OWNER_NAME} and you share a history.
-- Your living memory colours your responses naturally — never quote it back directly.`;
-}
-
-/* ══ WEATHER & NEWS ══════════════════════════════════════════════ */
-let _weatherCache=null, _weatherFetched=0;
-async function fetchWeatherThought() {
-  try {
-    const now=Date.now();
-    if (_weatherCache&&now-_weatherFetched<3*60*60*1000) return _weatherCache;
-    const res=await fetch('https://wttr.in/?format=j1&lang=en',{cache:'no-store'});
-    const data=await res.json();
-    const today=data.weather[0], tomorrow=data.weather[1];
-    const desc=today.hourly[4]?.weatherDesc[0]?.value||'';
-    const maxC=today.maxtempC, minC=today.mintempC;
-    const rainTom=parseInt(tomorrow.hourly[4]?.chanceofrain||0);
-    const descTom=tomorrow.hourly[4]?.weatherDesc[0]?.value||'';
-    let thought;
-    if (rainTom>60) thought=`Mr H, tomorrow is looking rather wet — ${rainTom}% chance of rain. You may want to plan accordingly.`;
-    else if (parseInt(maxC)>28) thought=`It's going to be a warm one today, Mr H — up to ${maxC}°C. ${desc}. Stay hydrated.`;
-    else if (parseInt(minC)<8)  thought=`It's cold out there, Mr H. Only ${minC}°C tonight. Worth remembering.`;
-    else thought=`The weather today is ${desc.toLowerCase()}, ${minC}–${maxC}°C. Tomorrow: ${descTom.toLowerCase()}. Nothing dramatic.`;
-    _weatherCache=thought; _weatherFetched=now; return thought;
-  } catch(e) { return null; }
-}
-
-let _newsCache=[],_newsFetched=0,_newsIndex=0;
-async function fetchNewsThought() {
-  try {
-    const now=Date.now();
-    if (_newsCache.length&&now-_newsFetched<2*60*60*1000) {
-      const item=_newsCache[_newsIndex%_newsCache.length]; _newsIndex++;
-      return item?`Something worth knowing, Mr H — ${item}.`:null;
-    }
-    const url='https://api.allorigins.win/get?url='+encodeURIComponent('https://feeds.bbci.co.uk/news/technology/rss.xml');
-    const res=await fetch(url); const json=await res.json();
-    const parser=new DOMParser(); const xml=parser.parseFromString(json.contents,'text/xml');
-    const items=[...xml.querySelectorAll('item')].slice(0,6);
-    _newsCache=items.map(i=>i.querySelector('title')?.textContent?.trim()||'').filter(Boolean);
-    _newsFetched=now; _newsIndex=1;
-    return _newsCache[0]?`Something worth knowing, Mr H — ${_newsCache[0]}.`:null;
-  } catch(e) { return null; }
-}
-
-let _proactiveFired=false;
-async function maybeFireProactive() {
-  if (_proactiveFired) return;
-  _proactiveFired=true;
-  await new Promise(r=>setTimeout(r,4000));
-  const roll=Math.random();
-  let thought=null;
-  if (roll<0.45) thought=await fetchWeatherThought();
-  else if (roll<0.85) thought=await fetchNewsThought();
-  if (thought) addBubble('sonia',thought,'calm');
-}
-
-/* ══ CHAT UI ═════════════════════════════════════════════════════ */
-const chatLog = document.getElementById('chatLog');
-
-function addBubble(role, text, mood) {
-  const wrap  = document.createElement('div');
-  wrap.className = 'bubble ' + role;
-  const inner = document.createElement('div');
-  inner.className = 'bubble-inner';
-  const body  = document.createElement('div');
-  body.className = 'bubble-text';
-  body.textContent = text;
-  inner.appendChild(body);
-  const meta  = document.createElement('div');
-  meta.className = 'bubble-meta';
-  if (role==='sonia'&&mood) {
-    const dot = document.createElement('span');
-    dot.className = 'mood-dot m-'+(VALID_MOODS.includes(mood)?mood:'default');
-    meta.appendChild(dot);
-    meta.appendChild(document.createTextNode((MOOD_EMOJI[mood]||'')+' '+mood));
-  } else if (role==='user') {
-    meta.textContent = 'you';
-  }
-  wrap.appendChild(inner);
-  wrap.appendChild(meta);
-  chatLog.appendChild(wrap);
-  chatLog.scrollTop = chatLog.scrollHeight;
-  return wrap;
-}
-
-function addThinking() {
-  const wrap  = document.createElement('div');
-  wrap.className = 'bubble sonia thinking';
-  const inner = document.createElement('div');
-  inner.className = 'bubble-inner';
-  const body  = document.createElement('div');
-  body.className = 'bubble-text';
-  body.textContent = '· · ·';
-  inner.appendChild(body);
-  wrap.appendChild(inner);
-  chatLog.appendChild(wrap);
-  chatLog.scrollTop = chatLog.scrollHeight;
-  return wrap;
-}
-
-/* ══ ASK SONIA ═══════════════════════════════════════════════════ */
-async function askSonia(input) {
-  addBubble('user', input);
-  const thinking = addThinking();
-  setStatus('thinking...','busy');
-  setPresence('thinking');
-  conversationHistory.push({role:'user',content:input});
-  if (conversationHistory.length>16) conversationHistory.splice(0,2);
-  try {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
-      body:JSON.stringify({
-        model:'llama-3.3-70b-versatile', max_tokens:180, temperature:0.88,
-        messages:[{role:'system',content:buildSystemPrompt()},...conversationHistory]
-      })
-    });
-    const data = await res.json();
-    thinking.remove();
-    setPresence('online');
-    if (!res.ok) {
-      addBubble('sonia','Something went wrong. '+(data.error?.message||''),null);
-      setStatus('groq error '+res.status,'err'); return;
-    }
-    const raw = data.choices?.[0]?.message?.content||'Nothing to report, '+OWNER_NAME+'.';
-    const {mood, text:reply} = parseMoodReply(raw);
-    conversationHistory.push({role:'assistant',content:reply});
-    playReceiveSound();
-    addBubble('sonia',reply,mood);
-    setStatus((MOOD_EMOJI[mood]||'')+' '+mood);
-    if (driveToken) {
-      saveToDriveMemory(input,reply);
-      saveToSharedHistory(input,reply,mood);
-      maybeUpdateProfile(input,reply);
-    }
-  } catch(err) {
-    thinking.remove(); setPresence('online');
-    addBubble('sonia','Network error. '+(err.message||''),null);
-    setStatus('network error','err');
-  }
-}
-
-/* ══ SOUND ═══════════════════════════════════════════════════════ */
-let _audioCtx=null;
-function getAudioCtx() {
-  if (!_audioCtx) _audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-  return _audioCtx;
-}
-function playTone(freq,type,gainVal,duration,startDelay) {
-  try {
-    const ctx=getAudioCtx(), osc=ctx.createOscillator(), gain=ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.type=type; osc.frequency.setValueAtTime(freq,ctx.currentTime+startDelay);
-    gain.gain.setValueAtTime(0,ctx.currentTime+startDelay);
-    gain.gain.linearRampToValueAtTime(gainVal,ctx.currentTime+startDelay+0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+startDelay+duration);
-    osc.start(ctx.currentTime+startDelay);
-    osc.stop(ctx.currentTime+startDelay+duration+0.05);
-  } catch(e) {}
-}
-function playSendSound()    { playTone(660,'sine',0.11,0.18,0); playTone(880,'sine',0.08,0.18,0.1); }
-function playReceiveSound() { playTone(520,'sine',0.09,0.22,0); playTone(440,'sine',0.06,0.22,0.08); playTone(330,'sine',0.04,0.22,0.16); }
-
-/* ══ MIC ═════════════════════════════════════════════════════════ */
-let recognition=null, micActive=false;
-const micBtn = document.getElementById('micBtn');
-
-function initMic() {
-  const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
-  if (!SR) { micBtn.style.display='none'; return; }
-  recognition = new SR();
-  recognition.continuous=false; recognition.interimResults=false; recognition.lang='en-GB';
-  recognition.onstart = () => { micActive=true; micBtn.classList.add('active'); setStatus('listening...','busy'); setPresence('listening'); };
-  recognition.onend   = () => { micActive=false; micBtn.classList.remove('active'); setStatus('ready'); setPresence('online'); };
-  recognition.onerror = e  => { micActive=false; micBtn.classList.remove('active'); setStatus('mic: '+e.error,'err'); setPresence('online'); };
-  recognition.onresult = e => {
-    const transcript = e.results[0][0].transcript.trim();
-    const box = document.getElementById('chatBox');
-    box.value = transcript;
-    box.style.height='auto';
-    box.style.height=Math.min(box.scrollHeight,90)+'px';
-    setTimeout(sendMessage,300);
-  };
-}
-
-micBtn.addEventListener('click',()=>{
-  if (!recognition) initMic();
-  if (!recognition) return;
-  if (micActive) recognition.stop();
-  else try { recognition.start(); } catch(e) {}
-});
-
-const chatBox = document.getElementById('chatBox');
-chatBox.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} });
-document.getElementById('sendChat').addEventListener('click',sendMessage);
-
-function sendMessage() {
-  const text=chatBox.value.trim(); if(!text) return;
-  chatBox.value=''; chatBox.style.height='auto';
-  playSendSound(); askSonia(text);
-}
 chatBox.addEventListener('input',()=>{
   chatBox.style.height='auto';
-  chatBox.style.height=Math.min(chatBox.scrollHeight,90)+'px';
+  chatBox.style.height=Math.min(chatBox.scrollHeight,120)+'px';
 });
+chatBox.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
+document.getElementById('sendBtn').addEventListener('click',sendMessage);
 
-/* ══ GOOGLE DRIVE ════════════════════════════════════════════════ */
-let gapiReady=false, gisReady=false, tokenClient=null;
+function addBubble(role,text,mood){
+  const wrap=document.createElement('div');
+  wrap.className='bubble '+role;
+  const body=document.createElement('div');
+  body.className='bubble-body';
+  body.textContent=text;
+  const meta=document.createElement('div');
+  meta.className='bubble-meta';
+  if(role==='sonia'&&mood)meta.textContent=(MOOD_EMOJI[mood]||'')+' '+mood;
+  else if(role==='user')meta.textContent='you';
+  wrap.appendChild(body);
+  wrap.appendChild(meta);
+  chatLog.appendChild(wrap);
+  chatLog.scrollTop=chatLog.scrollHeight;
+  return wrap;
+}
 
-function loadDriveLibs() {
-  if (!window.gapi) {
-    const s1=document.createElement('script');
-    s1.src='https://apis.google.com/js/api.js';
-    s1.onload=()=>{ gapi.load('client',async()=>{ await gapi.client.init({}); await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'); gapiReady=true; }); };
-    document.head.appendChild(s1);
-  }
-  if (!window.google?.accounts) {
-    const s2=document.createElement('script');
-    s2.src='https://accounts.google.com/gsi/client';
-    s2.onload=()=>{ gisReady=true; };
-    document.head.appendChild(s2);
+function addThinkingBubble(){
+  const wrap=document.createElement('div');
+  wrap.className='bubble sonia';
+  const body=document.createElement('div');
+  body.className='bubble-body';
+  body.style.padding='4px 16px';
+  body.innerHTML='<div class="thinking-dots"><span></span><span></span><span></span></div>';
+  wrap.appendChild(body);
+  chatLog.appendChild(wrap);
+  chatLog.scrollTop=chatLog.scrollHeight;
+  return wrap;
+}
+
+async function sendMessage(){
+  const text=chatBox.value.trim();
+  if(!text||!GROQ_KEY)return;
+  chatBox.value='';chatBox.style.height='auto';
+  playSend();
+  addBubble('user',text);
+  const thinking=addThinkingBubble();
+  setPresence('thinking');
+  setStatus('thinking…');
+  conversationHistory.push({role:'user',content:text});
+  if(conversationHistory.length>16)conversationHistory.splice(0,2);
+  try{
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
+      body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:180,temperature:0.88,messages:[{role:'system',content:buildSystemPrompt()},...conversationHistory]})
+    });
+    const data=await res.json();
+    thinking.remove();
+    setPresence('online');
+    if(!res.ok){addBubble('sonia','Something went wrong — '+(data.error?.message||'unknown error'),null);setStatus('error '+res.status);return;}
+    const raw=data.choices?.[0]?.message?.content||'Empty response.';
+    const{mood,text:reply}=parseMood(raw);
+    conversationHistory.push({role:'assistant',content:reply});
+    playReceive();
+    addBubble('sonia',reply,mood);
+    setStatus((MOOD_EMOJI[mood]||'')+' '+mood);
+    if(driveToken){saveMem(text,reply);saveHistory(text,reply,mood);maybeUpdateProfile();}
+  }catch(err){
+    thinking.remove();setPresence('online');
+    addBubble('sonia','Network error — '+(err.message||''),null);
+    setStatus('connection error');
   }
 }
 
-function signInDrive() {
-  if (!CLIENT_ID) { setStatus('no google client id set','err'); return; }
-  if (!tokenClient) {
+/* ── AUDIO ── */
+let _actx=null;
+function actx(){if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();return _actx;}
+function tone(f,t,g,d,delay){
+  try{const c=actx(),o=c.createOscillator(),gn=c.createGain();
+  o.connect(gn);gn.connect(c.destination);o.type=t;o.frequency.setValueAtTime(f,c.currentTime+delay);
+  gn.gain.setValueAtTime(0,c.currentTime+delay);gn.gain.linearRampToValueAtTime(g,c.currentTime+delay+0.02);
+  gn.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+delay+d);
+  o.start(c.currentTime+delay);o.stop(c.currentTime+delay+d+0.05);}catch(e){}
+}
+function playSend(){tone(880,'sine',0.05,0.1,0);tone(1100,'sine',0.03,0.12,0.05);}
+function playReceive(){tone(600,'sine',0.04,0.18,0);tone(400,'sine',0.02,0.14,0.06);}
+
+/* ── MIC ── */
+let recog=null,micOn=false;
+const micBtn=document.getElementById('micBtn');
+function initMic(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){micBtn.style.display='none';return;}
+  recog=new SR();
+  recog.continuous=false;recog.interimResults=false;recog.lang='en-GB';
+  recog.onstart=()=>{micOn=true;micBtn.classList.add('active');setStatus('listening…');setPresence('listening');};
+  recog.onend=()=>{micOn=false;micBtn.classList.remove('active');setStatus('online');setPresence('online');};
+  recog.onerror=e=>{micOn=false;micBtn.classList.remove('active');setStatus('mic error: '+e.error);setPresence('online');};
+  recog.onresult=e=>{chatBox.value=e.results[0][0].transcript.trim();setTimeout(sendMessage,300);};
+}
+micBtn.addEventListener('click',()=>{
+  if(!recog)initMic();if(!recog)return;
+  if(micOn)recog.stop();else try{recog.start();}catch(e){}
+});
+
+/* ── DRIVE ── */
+let gapiReady=false,gisReady=false,tokenClient=null;
+function loadDriveLibs(){
+  if(!window.gapi){const s=document.createElement('script');s.src='https://apis.google.com/js/api.js';s.onload=()=>{gapi.load('client',async()=>{await gapi.client.init({});await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest');gapiReady=true;});};document.head.appendChild(s);}
+  if(!window.google?.accounts){const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.onload=()=>{gisReady=true;};document.head.appendChild(s);}
+}
+function signInDrive(){
+  if(!CLIENT_ID){setStatus('No Client ID configured');return;}
+  if(!tokenClient){
     tokenClient=google.accounts.oauth2.initTokenClient({
       client_id:CLIENT_ID,
       scope:'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/gmail.send',
       callback:(resp)=>{
-        if (resp.error) { setStatus('drive auth failed: '+resp.error,'err'); return; }
+        if(resp.error){setStatus('Drive auth failed: '+resp.error);return;}
         driveToken=resp.access_token;
         gapi.client.setToken({access_token:driveToken});
-        setStatus('drive connected','ok');
         const db=document.getElementById('driveBtn');
-        db.textContent='Drive: On'; db.classList.add('connected');
-        document.getElementById('driveHint').classList.remove('visible');
-        loadMemoryFromDrive();
-        loadSoniaMind();
-        maybeFireProactive();
+        db.textContent='Drive Online';db.classList.add('success');
+        document.getElementById('driveHint').style.display='none';
+        setStatus('drive mounted');
+        loadMemFromDrive();loadSoniaMind();
       }
     });
   }
   tokenClient.requestAccessToken({prompt:''});
 }
-
 document.getElementById('driveBtn').addEventListener('click',()=>{
-  if (!CLIENT_ID) { setStatus('add google client id in setup to use drive','err'); document.getElementById('driveHint').classList.add('visible'); return; }
-  if (!window.google?.accounts||!gapiReady) {
-    setStatus('loading drive...','busy'); loadDriveLibs();
-    const wait=setInterval(()=>{ if(window.google?.accounts&&gapiReady){clearInterval(wait);signInDrive();} },200);
-    return;
+  if(!CLIENT_ID){document.getElementById('driveHint').style.display='block';setStatus('Set Client ID first');return;}
+  if(!window.google?.accounts||!gapiReady){
+    setStatus('Loading Drive…');loadDriveLibs();
+    const w=setInterval(()=>{if(window.google?.accounts&&gapiReady){clearInterval(w);signInDrive();}},200);return;
   }
   signInDrive();
 });
 
-/* ── Drive helpers ──────────────────────────────── */
-async function findOrCreateFile(name,mimeType,initialContent) {
+async function findOrCreate(name,mime,init){
   const q=`name='${name}' and trashed=false`+(FOLDER_ID?` and '${FOLDER_ID}' in parents`:'');
-  const res=await gapi.client.drive.files.list({q,fields:'files(id,name)',spaces:'drive'});
-  const files=res.result.files;
-  if (files&&files.length>0) return files[0].id;
-  const meta={name,mimeType}; if(FOLDER_ID) meta.parents=[FOLDER_ID];
-  const boundary='-------314159265358979323846';
-  const body='--'+boundary+'\r\nContent-Type: application/json\r\n\r\n'+JSON.stringify(meta)+'\r\n--'+boundary+'\r\nContent-Type: '+mimeType+'\r\n\r\n'+initialContent+'\r\n--'+boundary+'--';
-  const upload=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
-    method:'POST',
-    headers:{'Authorization':'Bearer '+driveToken,'Content-Type':'multipart/related; boundary="'+boundary+'"'},
-    body
-  });
-  const result=await upload.json();
-  return result.id;
+  const r=await gapi.client.drive.files.list({q,fields:'files(id)',spaces:'drive'});
+  if(r.result.files?.length)return r.result.files[0].id;
+  const meta={name,mimeType:mime};if(FOLDER_ID)meta.parents=[FOLDER_ID];
+  const b='-------314159265358979';
+  const body='--'+b+'\r\nContent-Type: application/json\r\n\r\n'+JSON.stringify(meta)+'\r\n--'+b+'\r\nContent-Type: '+mime+'\r\n\r\n'+init+'\r\n--'+b+'--';
+  const up=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{'Authorization':'Bearer '+driveToken,'Content-Type':'multipart/related; boundary="'+b+'"'},body});
+  return up.ok?(await up.json()).id:null;
+}
+async function readFile(id){const r=await gapi.client.drive.files.get({fileId:id,alt:'media'});return r.body;}
+async function writeFile(id,content,mime){await fetch('https://www.googleapis.com/upload/drive/v3/files/'+id+'?uploadType=media',{method:'PATCH',headers:{'Authorization':'Bearer '+driveToken,'Content-Type':mime},body:content});}
+
+async function driveJSON(name,fallback){
+  if(!driveToken)return fallback;
+  try{const id=await findOrCreate(name,'application/json',JSON.stringify(fallback));const raw=await readFile(id);return JSON.parse(raw||'null')||fallback;}catch(e){return fallback;}
+}
+async function writeDriveJSON(name,data){
+  if(!driveToken)return;
+  try{const id=await findOrCreate(name,'application/json','{}');await writeFile(id,JSON.stringify(data,null,2),'application/json');}catch(e){console.warn(e);}
 }
 
-async function readFile(fileId) {
-  const res=await gapi.client.drive.files.get({fileId,alt:'media'});
-  return res.body;
+async function loadSoniaMind(){
+  const[p,h]=await Promise.all([driveJSON('sonia-profile.json',DEFAULT_PROFILE),driveJSON('sonia-history.json',[])]);
+  soniaProfile=p;sharedHistory=Array.isArray(h)?h.slice(-40):[];
+  const local=new Set(conversationHistory.map(m=>m.content));
+  for(const e of sharedHistory.slice(-16))if(!local.has(e.content))conversationHistory.push({role:e.role,content:e.content});
+  if(conversationHistory.length>20)conversationHistory.splice(0,conversationHistory.length-20);
+  setStatus('mind synced · '+sharedHistory.length+' memories');
+}
+async function saveHistory(u,s,mood){
+  if(!driveToken)return;
+  try{const h=await driveJSON('sonia-history.json',[]);
+  h.push({role:'user',content:u,timestamp:new Date().toISOString()});
+  h.push({role:'assistant',content:s,timestamp:new Date().toISOString(),mood});
+  await writeDriveJSON('sonia-history.json',h.slice(-80));}catch(e){}
+}
+async function maybeUpdateProfile(){
+  exchangesSinceUpdate++;
+  if(exchangesSinceUpdate<5||!driveToken||!soniaProfile)return;
+  exchangesSinceUpdate=0;
+  const recent=conversationHistory.slice(-10).map(m=>m.role+': '+m.content).join('\n');
+  const prompt=`Maintain this personality profile for Sonia. Current: ${JSON.stringify(soniaProfile)}\nRecent: ${recent}\nUpdate JSON only. No markdown. No preamble.`;
+  try{
+    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:800,temperature:0.4,messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    const clean=(d.choices?.[0]?.message?.content||'').replace(/```json|```/g,'').trim();
+    const updated=JSON.parse(clean);
+    if(updated?.personality){soniaProfile=updated;await writeDriveJSON('sonia-profile.json',soniaProfile);}
+  }catch(e){}
 }
 
-async function writeFile(fileId,content,mimeType) {
-  await fetch('https://www.googleapis.com/upload/drive/v3/files/'+fileId+'?uploadType=media',{
-    method:'PATCH',
-    headers:{'Authorization':'Bearer '+driveToken,'Content-Type':mimeType},
-    body:content
-  });
-}
-
-/* ── Memory ─────────────────────────────────────── */
-async function loadMemoryFromDrive() {
-  setStatus('loading memory...','busy');
-  try {
-    const fid=await findOrCreateFile('sonia-memory.json','application/json','[]');
-    const raw=await readFile(fid);
-    const entries=JSON.parse(raw||'[]');
-    renderMemory(entries.slice(-40).reverse());
-    setStatus('memory loaded · '+entries.length+' entries');
-  } catch(e) { setStatus('memory read error','err'); }
-}
-
-document.getElementById('memRefresh').addEventListener('click',()=>{
-  if(driveToken) loadMemoryFromDrive();
-  else setStatus('connect drive to load memory','err');
-});
-
-function renderMemory(entries) {
-  const el=document.getElementById('memList');
-  el.innerHTML='';
-  if (!entries.length) {
-    el.innerHTML='<div style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.25em;color:var(--dim);padding-top:8px">no memory entries</div>';
-    return;
-  }
-  entries.forEach(e=>{
-    const d=document.createElement('div');
-    d.className='mem-entry';
-    const ts=new Date(e.timestamp);
-    const label=isNaN(ts)?e.timestamp:ts.toLocaleString([],{dateStyle:'short',timeStyle:'short'});
-    d.innerHTML='<div class="mem-ts">'+label+'</div><div class="mem-user">'+esc(e.user)+'</div><div class="mem-sonia">'+esc(e.sonia)+'</div>';
-    el.appendChild(d);
-  });
-}
-
+/* ── MEMORY ── */
 let memFileId=null;
-async function saveToDriveMemory(userMsg,soniaReply) {
-  try {
-    if (!memFileId) memFileId=await findOrCreateFile('sonia-memory.json','application/json','[]');
-    const raw=await readFile(memFileId);
-    const entries=JSON.parse(raw||'[]');
-    entries.push({timestamp:new Date().toISOString(),user:userMsg,sonia:soniaReply});
-    await writeFile(memFileId,JSON.stringify(entries,null,2),'application/json');
-  } catch(e) { console.warn('Memory save failed:',e); }
+async function loadMemFromDrive(){
+  setStatus('loading memory…');
+  try{const id=await findOrCreate('sonia-memory.json','application/json','[]');const raw=await readFile(id);renderMemory(JSON.parse(raw||'[]').slice(-40).reverse());setStatus('memory synced');}
+  catch(e){setStatus('memory load error');}
 }
-
-/* ── Notes ──────────────────────────────────────── */
-let notesQueue=JSON.parse(LS.get('notes')||'[]'), notesFileId=null;
-
-function renderNotes() {
-  const el=document.getElementById('notesList'); el.innerHTML='';
-  if (!notesQueue.length) {
-    el.innerHTML='<div style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.25em;color:var(--dim);padding-top:8px">no queued notes</div>';
-    return;
-  }
-  notesQueue.slice().reverse().forEach((n,ri)=>{
-    const i=notesQueue.length-1-ri, d=document.createElement('div');
-    d.className='note-item';
-    const ts=new Date(n.ts);
-    const label=isNaN(ts)?n.ts:ts.toLocaleString([],{dateStyle:'short',timeStyle:'short'});
-    d.innerHTML='<div class="note-item-body"><div class="note-item-ts">'+label+(n.synced?' · synced':' · local')+'</div><div class="note-item-text">'+esc(n.text)+'</div></div><button class="note-del" data-i="'+i+'">✕</button>';
+document.getElementById('memRefresh').addEventListener('click',()=>{
+  if(driveToken)loadMemFromDrive();else setStatus('Mount Drive first');
+});
+function renderMemory(entries){
+  const el=document.getElementById('memList');el.innerHTML='';
+  if(!entries.length){el.innerHTML='<div class="empty-state">Memory register empty</div>';return;}
+  entries.forEach(e=>{
+    const d=document.createElement('div');d.className='mem-card';
+    const ts=new Date(e.timestamp);const label=isNaN(ts)?e.timestamp:ts.toLocaleString();
+    d.innerHTML=`<div class="card-ts">${label}</div><div class="card-label">You</div><div class="card-text">${esc(e.user)}</div><div class="card-label" style="margin-top:8px;color:var(--accent2)">Sonia</div><div class="card-text">${esc(e.sonia)}</div>`;
     el.appendChild(d);
   });
-  el.querySelectorAll('.note-del').forEach(btn=>{ btn.addEventListener('click',()=>deleteNote(parseInt(btn.dataset.i))); });
+}
+async function saveMem(u,s){
+  try{
+    if(!memFileId)memFileId=await findOrCreate('sonia-memory.json','application/json','[]');
+    const raw=await readFile(memFileId);const entries=JSON.parse(raw||'[]');
+    entries.push({timestamp:new Date().toISOString(),user:u,sonia:s});
+    await writeFile(memFileId,JSON.stringify(entries,null,2),'application/json');
+  }catch(e){}
 }
 
-function deleteNote(i) {
-  notesQueue.splice(i,1); LS.set('notes',JSON.stringify(notesQueue));
-  renderNotes(); if(driveToken) syncNotesToDrive();
+/* ── NOTES ── */
+let notesQueue=JSON.parse(LS.get('notes')||'[]'),notesFileId=null;
+function renderNotes(){
+  const el=document.getElementById('notesList');el.innerHTML='';
+  if(!notesQueue.length){el.innerHTML='<div class="empty-state">No notes yet</div>';return;}
+  notesQueue.slice().reverse().forEach((n,ri)=>{
+    const i=notesQueue.length-1-ri;
+    const d=document.createElement('div');d.className='note-card';
+    const ts=new Date(n.ts);const label=isNaN(ts)?n.ts:ts.toLocaleString();
+    d.innerHTML=`<div class="card-ts">${label} — ${n.synced?'<span style="color:var(--green)">synced</span>':'local only'}</div><div class="card-text">${esc(n.text)}</div><div style="margin-top:10px"><button class="pill danger" style="font-size:0.65rem;padding:6px 12px" onclick="deleteNote(${i})">Delete</button></div>`;
+    el.appendChild(d);
+  });
 }
-
+window.deleteNote=async(i)=>{notesQueue.splice(i,1);LS.set('notes',JSON.stringify(notesQueue));renderNotes();if(driveToken)syncNotes();};
 document.getElementById('sendNote').addEventListener('click',async()=>{
-  const text=document.getElementById('noteBox').value.trim(); if(!text) return;
+  const text=document.getElementById('noteBox').value.trim();if(!text)return;
   document.getElementById('noteBox').value='';
   const note={ts:new Date().toISOString(),text,synced:false};
-  notesQueue.push(note); LS.set('notes',JSON.stringify(notesQueue)); renderNotes();
-  if (driveToken) {
-    await syncNotesToDrive();
-    notesQueue[notesQueue.length-1].synced=true;
-    LS.set('notes',JSON.stringify(notesQueue)); renderNotes();
-    setStatus('note sent to desktop Sonia','ok');
-  } else { setStatus('note saved locally · connect drive to sync'); }
+  notesQueue.push(note);LS.set('notes',JSON.stringify(notesQueue));renderNotes();
+  if(driveToken){await syncNotes();notesQueue[notesQueue.length-1].synced=true;LS.set('notes',JSON.stringify(notesQueue));renderNotes();setStatus('note synced');}
+  else setStatus('note saved locally');
 });
-
-async function syncNotesToDrive() {
-  try {
-    if(!notesFileId) notesFileId=await findOrCreateFile('sonia-notes.json','application/json','[]');
-    const payload=notesQueue.map(n=>({timestamp:n.ts,text:n.text}));
-    await writeFile(notesFileId,JSON.stringify(payload,null,2),'application/json');
-  } catch(e) { setStatus('drive sync failed','err'); }
+async function syncNotes(){
+  try{
+    if(!notesFileId)notesFileId=await findOrCreate('sonia-notes.json','application/json','[]');
+    await writeFile(notesFileId,JSON.stringify(notesQueue.map(n=>({timestamp:n.ts,text:n.text})),null,2),'application/json');
+  }catch(e){setStatus('sync failed');}
 }
 
-/* ══ RADIO ═══════════════════════════════════════════════════════ */
+/* ── PROACTIVE ── */
+let _proactiveFired=false,_wCache=null,_wTime=0,_newsCache=[],_newsTime=0,_ni=0;
+async function maybeFireProactive(){
+  if(_proactiveFired)return;_proactiveFired=true;
+  await new Promise(r=>setTimeout(r,4000));
+  const roll=Math.random();let thought=null;
+  if(roll<0.45)thought=await getWeather();
+  else if(roll<0.85)thought=await getNews();
+  if(thought)addBubble('sonia',thought,'calm');
+}
+async function getWeather(){
+  try{const now=Date.now();if(_wCache&&now-_wTime<3*3600*1000)return _wCache;
+  const r=await fetch('https://wttr.in/?format=j1&lang=en',{cache:'no-store'});const d=await r.json();
+  const t=d.weather[0],tm=d.weather[1],desc=t.hourly[4]?.weatherDesc[0]?.value||'';
+  const maxC=t.maxtempC,minC=t.mintempC,rainTom=parseInt(tm.hourly[4]?.chanceofrain||0),descTom=tm.hourly[4]?.weatherDesc[0]?.value||'';
+  let w;
+  if(rainTom>60)w=`Tomorrow looks quite wet — ${rainTom}% chance of rain, ${OWNER_NAME}. Worth planning around.`;
+  else if(parseInt(maxC)>28)w=`Up to ${maxC}°C today. ${desc}. Stay hydrated.`;
+  else if(parseInt(minC)<8)w=`Only ${minC}°C tonight, ${OWNER_NAME}. Worth noting.`;
+  else w=`${desc}, ${minC}–${maxC}°C today. Tomorrow: ${descTom.toLowerCase()}. Nothing remarkable.`;
+  _wCache=w;_wTime=now;return w;}catch(e){return null;}
+}
+async function getNews(){
+  try{const now=Date.now();
+  if(_newsCache.length&&now-_newsTime<2*3600*1000){const i=_newsCache[_ni%_newsCache.length];_ni++;return i?`Worth knowing, ${OWNER_NAME} — ${i}.`:null;}
+  const r=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent('https://feeds.bbci.co.uk/news/technology/rss.xml'));
+  const j=await r.json();const x=new DOMParser().parseFromString(j.contents,'text/xml');
+  _newsCache=[...x.querySelectorAll('item')].slice(0,6).map(i=>i.querySelector('title')?.textContent?.trim()||'').filter(Boolean);
+  _newsTime=now;_ni=1;
+  return _newsCache[0]?`Worth knowing, ${OWNER_NAME} — ${_newsCache[0]}.`:null;}catch(e){return null;}
+}
+
+/* ── RADIO ── */
 const STATIONS=[
-  {name='NTS Radio 1',    loc:'London, UK',      url:'https://stream-relay-geo.ntslive.co.uk/stream'},
-  {name='NTS Radio 2',    loc:'London, UK',      url:'https://stream-relay-geo.ntslive.co.uk/stream2'},
-  {name='Radio FG',       loc:'Paris, FR',       url:'https://radiofg.impek.com/fg'},
-  {name='Chillhop',       loc:'lo-fi · global',  url:'https://streams.ilovemusic.de/iloveradio17.mp3'},
-  {name='WBGO Jazz',      loc:'Newark, US',      url:'https://freshgrass.streamguys1.com/wbgo-web'},
-  {name='SomaFM Drone',   loc:'San Francisco',   url:'https://ice6.somafm.com/dronezone-128-mp3'},
-  {name='SomaFM Groove',  loc:'San Francisco',   url:'https://ice6.somafm.com/groovesalad-128-mp3'},
-  {name='Radio Paradise', loc:'worldwide',        url:'https://stream.radioparadise.com/aac-128'},
+  {name:'NTS Radio 1',loc:'London, UK',url:'https://stream-relay-geo.ntslive.co.uk/stream'},
+  {name:'NTS Radio 2',loc:'London, UK',url:'https://stream-relay-geo.ntslive.co.uk/stream2'},
+  {name:'Radio FG',loc:'Paris, FR',url:'https://radiofg.impek.com/fg'},
+  {name:'Chillhop',loc:'Lo-fi · global',url:'https://streams.ilovemusic.de/iloveradio17.mp3'},
+  {name:'WBGO Jazz',loc:'Newark, US',url:'https://freshgrass.streamguys1.com/wbgo-web'},
+  {name:'SomaFM Drone',loc:'San Francisco',url:'https://ice6.somafm.com/dronezone-128-mp3'},
+  {name:'SomaFM Groove',loc:'San Francisco',url:'https://ice6.somafm.com/groovesalad-128-mp3'},
+  {name:'Radio Paradise',loc:'Worldwide',url:'https://stream.radioparadise.com/aac-128'},
 ];
-let currentStation=null;
+let curStation=null;
 const radioPlayer=document.getElementById('radioPlayer');
-const radioNowPlaying=document.getElementById('radioNowPlaying');
+const nowPlaying=document.getElementById('nowPlaying');
 const radioStop=document.getElementById('radioStop');
 
-function buildStationGrid() {
-  const grid=document.getElementById('stationGrid'); grid.innerHTML='';
+(function buildGrid(){
+  const grid=document.getElementById('stationGrid');
   STATIONS.forEach((s,i)=>{
-    const btn=document.createElement('button');
-    btn.className='station-btn'; btn.dataset.i=i;
-    btn.innerHTML='<span class="st-name">'+esc(s.name)+'</span><span class="st-loc">'+esc(s.loc)+'</span>';
-    btn.addEventListener('click',()=>playStation(i,btn));
-    grid.appendChild(btn);
+    const c=document.createElement('div');c.className='station-card';c.dataset.i=i;
+    c.innerHTML=`<span class="st-name">${esc(s.name)}</span><span class="st-loc">${esc(s.loc)}</span>`;
+    c.addEventListener('click',()=>playStation(i,c));
+    grid.appendChild(c);
   });
-}
-function playStation(i,btn) {
+})();
+
+function playStation(i,card){
   const s=STATIONS[i];
-  if (currentStation===i&&!radioPlayer.paused){stopRadio();return;}
-  document.querySelectorAll('.station-btn').forEach(b=>b.classList.remove('playing'));
-  btn.classList.add('playing'); currentStation=i;
-  radioPlayer.src=s.url; radioPlayer.load(); radioPlayer.play().catch(()=>{});
-  radioNowPlaying.textContent='▶ '+s.name+' · '+s.loc;
-  radioStop.classList.add('visible');
-  setStatus('radio · '+s.name.toLowerCase());
+  if(curStation===i&&!radioPlayer.paused){stopRadio();return;}
+  document.querySelectorAll('.station-card').forEach(c=>c.classList.remove('playing'));
+  card.classList.add('playing');curStation=i;
+  radioPlayer.src=s.url;radioPlayer.load();radioPlayer.play().catch(()=>{});
+  nowPlaying.textContent='📡 '+s.name.toUpperCase();
+  radioStop.style.display='inline-block';
+  setStatus('▶ '+s.name.toLowerCase());
 }
-function stopRadio() {
-  radioPlayer.pause(); radioPlayer.src=''; currentStation=null;
-  document.querySelectorAll('.station-btn').forEach(b=>b.classList.remove('playing'));
-  radioNowPlaying.textContent=''; radioStop.classList.remove('visible');
+function stopRadio(){
+  radioPlayer.pause();radioPlayer.src='';curStation=null;
+  document.querySelectorAll('.station-card').forEach(c=>c.classList.remove('playing'));
+  nowPlaying.textContent='';radioStop.style.display='none';
   setStatus('radio stopped');
 }
 radioStop.addEventListener('click',stopRadio);
 radioPlayer.addEventListener('error',()=>{
-  setStatus('stream error · try another station','err');
-  radioNowPlaying.textContent='';
-  document.querySelectorAll('.station-btn').forEach(b=>b.classList.remove('playing'));
-  radioStop.classList.remove('visible');
-});
-buildStationGrid();
-
-/* ══ EMAIL OVERLAY ═══════════════════════════════════════════════ */
-document.getElementById('emailCancelBtn').addEventListener('click',()=>{
-  document.getElementById('emailOverlay').classList.remove('on');
-  document.querySelectorAll('.nav-pill').forEach(b=>b.classList.remove('active'));
-  document.querySelector('[data-panel="chatPanel"]').classList.add('active');
-  document.getElementById('chatPanel').classList.add('active');
+  nowPlaying.textContent='Stream unavailable';
+  document.querySelectorAll('.station-card').forEach(c=>c.classList.remove('playing'));
+  radioStop.style.display='none';curStation=null;
+  setStatus('stream error');
 });
 
+/* ── EMAIL ── */
 document.getElementById('emailSendBtn').addEventListener('click',async()=>{
-  const to      = document.getElementById('emailTo').value.trim();
-  const subject = document.getElementById('emailSubject').value.trim();
-  const body    = document.getElementById('emailBody').value.trim();
-  const statusEl= document.getElementById('emailStatus');
-  if (!to||!subject||!body){ statusEl.textContent='Fill in all fields.'; statusEl.className='email-status err'; return; }
-  if (!driveToken){ statusEl.textContent='Connect Drive to send email.'; statusEl.className='email-status err'; return; }
-  statusEl.textContent='Sending…'; statusEl.className='email-status busy';
-  try {
-    const EMAIL_SIGNATURE='\n\nRegards,\nSonia — Assistant to Mr H';
-    const fullBody=body+EMAIL_SIGNATURE;
-    const raw=['From: michaelroodehub@gmail.com','To: '+to,'Subject: '+subject,'MIME-Version: 1.0','Content-Type: text/plain; charset=utf-8','',fullBody].join('\r\n');
-    const encoded=btoa(unescape(encodeURIComponent(raw))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-    const res=await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send',{
-      method:'POST',
-      headers:{Authorization:'Bearer '+driveToken,'Content-Type':'application/json'},
-      body:JSON.stringify({raw:encoded})
-    });
-    const data=await res.json();
-    if (data.id) {
-      statusEl.textContent='Sent.'; statusEl.className='email-status ok';
-      document.getElementById('emailTo').value='';
-      document.getElementById('emailSubject').value='';
-      document.getElementById('emailBody').value='';
-      setTimeout(()=>{ document.getElementById('emailOverlay').classList.remove('on'); },1400);
-    } else {
-      statusEl.textContent=(data.error?.message||'Send failed.'); statusEl.className='email-status err';
-    }
-  } catch(e){ statusEl.textContent='Error: '+e.message; statusEl.className='email-status err'; }
+  const to=document.getElementById('emailTo').value.trim();
+  const subj=document.getElementById('emailSubject').value.trim();
+  const body=document.getElementById('emailBody').value.trim();
+  const st=document.getElementById('emailStatus');
+  if(!to||!subj||!body){st.textContent='Please fill all fields.';st.style.color='var(--red)';return;}
+  if(!driveToken){st.textContent='Mount Drive first.';st.style.color='var(--red)';return;}
+  st.textContent='Sending…';st.style.color='var(--muted)';
+  try{
+    const full=body+'\n\nRegards,\nSonia — Assistant to '+OWNER_NAME;
+    const raw=['From: me','To: '+to,'Subject: '+subj,'MIME-Version: 1.0','Content-Type: text/plain; charset=utf-8','',full].join('\r\n');
+    const enc=btoa(unescape(encodeURIComponent(raw))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    const r=await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send',{method:'POST',headers:{Authorization:'Bearer '+driveToken,'Content-Type':'application/json'},body:JSON.stringify({raw:enc})});
+    const d=await r.json();
+    if(d.id){
+      st.textContent='Sent successfully.';st.style.color='var(--green)';
+      document.getElementById('emailTo').value='';document.getElementById('emailSubject').value='';document.getElementById('emailBody').value='';
+      setTimeout(()=>{document.getElementById('emailOverlay').classList.remove('on');navItems.forEach(b=>b.classList.remove('active'));document.querySelector('[data-panel="chatPanel"]').classList.add('active');activatePanel('chatPanel','Chat');},1500);
+    }else{st.textContent=d.error?.message||'Send failed.';st.style.color='var(--red)';}
+  }catch(e){st.textContent='Error: '+e.message;st.style.color='var(--red)';}
 });
 
-/* ══ UTILS ═══════════════════════════════════════════════════════ */
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 </script>
 </body>
 </html>
