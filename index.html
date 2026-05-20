@@ -698,12 +698,65 @@ function addThinkingBubble(){
   return wrap;
 }
 
+/* ── EMAIL INTENT DETECTION ── */
+function detectEmailIntent(text){
+  // Patterns: "email X about Y", "send an email to X", "draft an email", "message X about Y via email", etc.
+  const lower=text.toLowerCase();
+  const emailPhrases=['email ','send an email','draft an email','write an email','compose an email','send a message to','mail '];
+  return emailPhrases.some(p=>lower.includes(p));
+}
+
+async function extractEmailDraft(userText){
+  // Ask Sonia to extract To, Subject, Body from the user's intent
+  try{
+    const prompt=`The user wants to send an email. Extract the recipient email (if stated, else leave blank), a subject line, and a draft message body from their request. Respond ONLY with valid JSON, no markdown, no preamble:\n{"to":"","subject":"","body":""}\n\nUser request: "${userText}"`;
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
+      body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:300,temperature:0.3,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await res.json();
+    const raw=(data.choices?.[0]?.message?.content||'{}').replace(/```json|```/g,'').trim();
+    return JSON.parse(raw);
+  }catch(e){return{to:'',subject:'',body:''};}
+}
+
+function openEmailOverlay(to,subject,body){
+  document.getElementById('emailTo').value=to||'';
+  document.getElementById('emailSubject').value=subject||'';
+  document.getElementById('emailBody').value=body||'';
+  document.getElementById('emailStatus').textContent='';
+  document.getElementById('emailOverlay').classList.add('on');
+  navItems.forEach(b=>b.classList.remove('active'));
+  document.getElementById('mailTab').classList.add('active');
+  document.getElementById('panelLabel').textContent='Email';
+}
+
 async function sendMessage(){
   const text=chatBox.value.trim();
   if(!text||!GROQ_KEY)return;
   chatBox.value='';chatBox.style.height='auto';
   playSend();
   addBubble('user',text);
+
+  // ── EMAIL INTENT PATH ──
+  if(detectEmailIntent(text)){
+    const thinking=addThinkingBubble();
+    setPresence('thinking');
+    setStatus('drafting email…');
+    const draft=await extractEmailDraft(text);
+    thinking.remove();
+    setPresence('online');
+    addBubble('sonia','I\'ve pre-filled the email form for you — check it over and send when ready.','focused');
+    setStatus('🎯 focused');
+    openEmailOverlay(draft.to,draft.subject,draft.body);
+    conversationHistory.push({role:'user',content:text});
+    conversationHistory.push({role:'assistant',content:'Pre-filled email form: to='+draft.to+', subject='+draft.subject});
+    if(driveToken)saveMem(text,'[opened email form] to:'+draft.to+' subject:'+draft.subject);
+    return;
+  }
+
+  // ── NORMAL CHAT PATH ──
   const thinking=addThinkingBubble();
   setPresence('thinking');
   setStatus('thinking…');
