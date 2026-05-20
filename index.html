@@ -32,6 +32,40 @@
       --r:           14px;
     }
 
+    /* ══ LIGHT MODE ════════════════════════════════════════════════ */
+    body.light {
+      --bg:          #f5f5f7;
+      --surface:     #ffffff;
+      --surface2:    #ebebef;
+      --border:      rgba(0,0,0,0.09);
+      --border-mid:  rgba(0,0,0,0.15);
+      --border-hi:   rgba(0,0,0,0.30);
+      --text:        rgba(0,0,0,0.88);
+      --muted:       rgba(0,0,0,0.50);
+      --dim:         rgba(0,0,0,0.35);
+      --accent:      #7c3fe4;
+      --accent-dim:  rgba(124,63,228,0.12);
+      --pink:        rgba(200,60,120,0.85);
+      --green-ok:    rgba(30,160,80,0.9);
+      --red-err:     rgba(210,40,40,0.85);
+      --blue-busy:   rgba(40,100,220,0.80);
+    }
+
+    /* appearance toggle button */
+    #appearBtn {
+      background: none;
+      border: 1px solid var(--border-mid);
+      border-radius: 20px;
+      font-size: 1.05rem;
+      line-height: 1;
+      padding: 5px 9px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.25s, border-color 0.25s;
+      color: var(--text);
+    }
+    #appearBtn:active { background: var(--accent-dim); }
+
     html, body {
       height: 100%; width: 100%;
       background: var(--bg);
@@ -51,8 +85,6 @@
       background: var(--bg);
       overflow-y: auto;
     }
-
-    .setup-orb {
       width: 52px; height: 52px; border-radius: 50%;
       background: radial-gradient(circle at 38% 36%, rgba(200,168,248,0.9) 0%, rgba(160,100,240,0.6) 50%, transparent 80%);
       box-shadow: 0 0 32px rgba(200,168,248,0.22), 0 0 80px rgba(160,100,240,0.1);
@@ -65,12 +97,12 @@
     }
 
     #setup h1 {
-      font-family: var(--sans); font-weight: 300;
-      font-size: 2.1rem; letter-spacing: 0.55em;
-      color: #fff; margin-bottom: 6px;
+      font-family: var(--sans); font-weight: 500;
+      font-size: 2.6rem; letter-spacing: 0.55em;
+      color: var(--text); margin-bottom: 6px;
     }
     .setup-sub {
-      font-family: var(--mono); font-size: 0.68rem;
+      font-family: var(--mono); font-size: 0.78rem;
       letter-spacing: 0.42em; color: var(--muted);
       margin-bottom: 44px;
     }
@@ -83,15 +115,15 @@
     .setup-field { position: relative; }
     .setup-field label {
       display: block; font-family: var(--mono);
-      font-size: 0.62rem; letter-spacing: 0.38em;
-      color: var(--dim); margin-bottom: 10px;
+      font-size: 0.68rem; letter-spacing: 0.38em;
+      color: var(--muted); margin-bottom: 10px;
       text-transform: uppercase;
     }
     .setup-field input {
       width: 100%; background: var(--surface2);
       border: 1px solid var(--border);
       border-radius: 10px;
-      color: #fff; font-family: var(--mono);
+      color: var(--text); font-family: var(--mono);
       font-size: 0.9rem; letter-spacing: 0.08em;
       padding: 14px 16px; outline: none;
       transition: border-color 0.25s, background 0.25s;
@@ -173,9 +205,9 @@
     }
 
     #hdrTitle {
-      font-family: var(--sans); font-weight: 300;
-      font-size: 1.15rem; letter-spacing: 0.42em;
-      color: #fff;
+      font-family: var(--sans); font-weight: 500;
+      font-size: 1.45rem; letter-spacing: 0.42em;
+      color: var(--text);
     }
 
     /* Nav pills */
@@ -190,9 +222,9 @@
     .nav-pill {
       background: none; border: 1px solid transparent;
       border-radius: 20px;
-      font-family: var(--mono); font-size: 0.6rem;
+      font-family: var(--mono); font-size: 0.72rem;
       letter-spacing: 0.14em; color: var(--dim);
-      padding: 5px 12px; cursor: pointer; white-space: nowrap;
+      padding: 6px 14px; cursor: pointer; white-space: nowrap;
       transition: color 0.25s, border-color 0.25s, background 0.25s;
     }
     .nav-pill.active {
@@ -249,10 +281,10 @@
     }
 
     .bubble-text {
-      font-size: 0.97rem; line-height: 1.72;
+      font-size: 1.05rem; line-height: 1.72;
       font-weight: 400; letter-spacing: 0.01em;
     }
-    .bubble.user .bubble-text  { color: rgba(255,255,255,0.85); }
+    .bubble.user .bubble-text  { color: var(--text); }
     .bubble.sonia .bubble-text { color: var(--text); }
 
     .bubble-meta {
@@ -293,7 +325,7 @@
       flex: 1; background: var(--surface2);
       border: 1px solid var(--border);
       border-radius: 22px;
-      color: #fff; font-family: var(--sans);
+      color: var(--text); font-family: var(--sans);
       font-size: 0.95rem; font-weight: 400;
       padding: 11px 16px; outline: none;
       resize: none; max-height: 90px;
@@ -387,7 +419,7 @@
     #noteBox {
       background: var(--surface2);
       border: 1px solid var(--border); border-radius: 12px;
-      color: #fff; font-family: var(--sans);
+      color: var(--text); font-family: var(--sans);
       font-size: 0.95rem; font-weight: 400;
       padding: 14px 16px; outline: none;
       resize: none; line-height: 1.65;
@@ -513,7 +545,7 @@
     /* ══ EMAIL OVERLAY ═══════════════════════════════════════════ */
     #emailOverlay {
       display: none; position: fixed; inset: 0; z-index: 150;
-      background: rgba(5,5,8,0.97);
+      background: var(--bg);
       flex-direction: column;
       padding: calc(var(--safe-top) + 28px) 20px calc(var(--safe-bottom) + 24px);
       gap: 18px; overflow-y: auto;
@@ -534,7 +566,7 @@
     .email-field textarea {
       background: var(--surface2); border: 1px solid var(--border);
       border-radius: 10px;
-      color: #fff; font-family: var(--sans);
+      color: var(--text); font-family: var(--sans);
       font-size: 0.95rem;
       padding: 12px 14px; outline: none; width: 100%;
       transition: border-color 0.25s;
@@ -656,6 +688,7 @@
       <button class="nav-pill" data-panel="radioPanel">Radio</button>
       <button class="nav-pill" id="mailTab">Mail</button>
     </div>
+    <button id="appearBtn" title="Toggle appearance">☀︎</button>
   </div>
 
   <div id="panels">
@@ -739,6 +772,19 @@ const LS = {
   set: (k,v) => localStorage.setItem('sonia_' + k, v),
   del: k => localStorage.removeItem('sonia_' + k),
 };
+
+/* ══ APPEARANCE TOGGLE ══════════════════════════════════════════ */
+(function() {
+  const btn = document.getElementById('appearBtn');
+  const saved = localStorage.getItem('sonia_appearance');
+  if (saved === 'light') { document.body.classList.add('light'); btn.textContent = '🌑'; }
+  else { btn.textContent = '☀︎'; }
+  btn.addEventListener('click', () => {
+    const isLight = document.body.classList.toggle('light');
+    btn.textContent = isLight ? '🌑' : '☀︎';
+    localStorage.setItem('sonia_appearance', isLight ? 'light' : 'dark');
+  });
+})();
 
 let GROQ_KEY   = '';
 let CLIENT_ID  = '';
