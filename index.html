@@ -570,8 +570,10 @@ function loadConfig(){
   const g=LS.get('groq'),c=LS.get('client'),o=LS.get('owner'),f=LS.get('folder');
   if(g) document.getElementById('cfgGroq').value=g;
   if(c) document.getElementById('cfgClient').value=c;
-  if(o) document.getElementById('cfgOwner').value=o;
+  if(o) document.getElementById('cfgOwner').value=o||'Mr H';
   if(f) document.getElementById('cfgFolder').value=f;
+  // Auto-launch only if key exists — user still sees the pre-filled form briefly
+  // then it fires. If they want to change it they can edit before it fires.
   if(g) applyConfig();
 }
 function applyConfig(){
@@ -579,8 +581,18 @@ function applyConfig(){
   CLIENT_ID=document.getElementById('cfgClient').value.trim();
   OWNER_NAME=document.getElementById('cfgOwner').value.trim()||'Mr H';
   FOLDER_ID=document.getElementById('cfgFolder').value.trim();
-  if(!GROQ_KEY){setStatus('Groq key required','err');return;}
-  LS.set('groq',GROQ_KEY);LS.set('client',CLIENT_ID);LS.set('owner',OWNER_NAME);LS.set('folder',FOLDER_ID);
+  if(!GROQ_KEY){
+    // Show error inline on setup card instead of calling setStatus (app not launched yet)
+    const btn=document.getElementById('setupBtn');
+    btn.textContent='API Key Required';
+    btn.style.background='var(--red)';
+    setTimeout(()=>{btn.textContent='Launch';btn.style.background='';},2000);
+    return;
+  }
+  LS.set('groq',GROQ_KEY);
+  LS.set('client',CLIENT_ID);
+  LS.set('owner',OWNER_NAME);
+  LS.set('folder',FOLDER_ID);
   document.getElementById('setup').style.display='none';
   if(CLIENT_ID){document.getElementById('driveHint').style.display='none';loadDriveLibs();}
   else document.getElementById('driveHint').style.display='block';
@@ -590,7 +602,18 @@ function applyConfig(){
   initMic();
   setTimeout(maybeFireProactive,4000);
 }
-document.getElementById('setupBtn').addEventListener('click',applyConfig);
+
+document.getElementById('setupBtn').addEventListener('click',()=>{
+  // Visual tap feedback before async work
+  const btn=document.getElementById('setupBtn');
+  btn.textContent='Launching…';
+  btn.style.opacity='0.7';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    btn.textContent='Launch';
+    btn.style.opacity='';
+    applyConfig();
+  }));
+});
 document.getElementById('cfgGroq').addEventListener('keydown',e=>{if(e.key==='Enter')applyConfig();});
 window.addEventListener('load',loadConfig);
 
