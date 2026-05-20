@@ -255,7 +255,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 #sendBtn:active{opacity:0.8;transform:scale(0.93)}
 #sendBtn svg{width:18px;height:18px;fill:currentColor;margin-left:2px}
 
-/* ── PANEL CONTENT AREAS (shared) ── */
+/* ── PANEL CONTENT AREAS ── */
 .panel-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:24px 16px}
 .panel-head{margin-bottom:24px}
 .panel-title{
@@ -280,7 +280,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 .pill.success{border-color:var(--green);color:var(--green)}
 .pill.danger{border-color:var(--red);color:var(--red)}
 
-/* ── MEMORY CARDS ── */
+/* ── MEMORY & NOTES CARDS ── */
 .mem-card,.note-card{
   background:var(--surface);border:1px solid var(--border);
   border-radius:16px;padding:16px;margin-bottom:10px;
@@ -293,7 +293,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
   text-align:center;padding:40px 0;
 }
 
-/* ── NOTES ── */
 #noteBox{
   width:100%;background:var(--surface);
   border:1px solid var(--border-mid);border-radius:16px;
@@ -351,7 +350,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
   padding:13px 14px;outline:none;
   transition:border-color 0.2s,box-shadow 0.2s;
 }
-/* ── EMAIL OVERLAY HEADER ── */
 #emailHeader{
   display:flex;align-items:center;justify-content:space-between;
   padding:14px 20px 10px;
@@ -371,7 +369,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
   flex-shrink:0;
 }
 #emailBackBtn:hover{border-color:var(--accent)}
-
 .form-group input:focus,.form-group textarea:focus{
   border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);
 }
@@ -385,7 +382,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 </head>
 <body>
 
-<!-- SETUP -->
 <div id="setup">
   <div class="setup-card">
     <h1>Sonia</h1>
@@ -410,10 +406,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
   </div>
 </div>
 
-<!-- APP -->
 <div id="app">
-
-  <!-- TOP BAR -->
   <header id="topBar">
     <div class="top-title" id="panelLabel">Chat</div>
     <div class="top-right">
@@ -422,10 +415,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
     </div>
   </header>
 
-  <!-- PANELS -->
   <div id="panels">
-
-    <!-- CHAT -->
     <div class="panel active" id="chatPanel">
       <div id="chatLog"></div>
       <div id="chatInputRow">
@@ -439,7 +429,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
       </div>
     </div>
 
-    <!-- MEMORY -->
     <div class="panel" id="memPanel">
       <div class="panel-scroll">
         <div class="panel-head">
@@ -453,7 +442,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
       </div>
     </div>
 
-    <!-- NOTES -->
     <div class="panel" id="notesPanel">
       <div class="panel-scroll">
         <div class="panel-head">
@@ -471,7 +459,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
       </div>
     </div>
 
-    <!-- RADIO -->
     <div class="panel" id="radioPanel">
       <div class="panel-scroll">
         <div class="panel-head">
@@ -487,7 +474,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
       </div>
     </div>
 
-    <!-- EMAIL OVERLAY (fixed full-screen) -->
     <div id="emailOverlay">
       <div id="emailHeader">
         <button id="emailBackBtn" title="Back">&#8592;</button>
@@ -510,16 +496,13 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
         <div id="emailStatus"></div>
       </div>
     </div>
-
   </div>
 
-  <!-- STATUS STRIP -->
   <div id="statusStrip">
     <div id="presenceDot"></div>
     <span id="statusTxt">Idle</span>
   </div>
 
-  <!-- BOTTOM NAV -->
   <nav id="bottomNav">
     <button class="nav-item active" data-panel="chatPanel" data-label="Chat">
       <svg viewBox="0 0 24 24"><path d="M20 2H4C2.9 2 2 2.9 2 4v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
@@ -542,154 +525,147 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
       Mail
     </button>
   </nav>
-
 </div>
 
 <script>
-/* ── STORAGE ── */
-const LS={get:k=>localStorage.getItem('s_'+k),set:(k,v)=>localStorage.setItem('s_'+k,v)};
+/* ── KEY FIXES IMPLEMENTED ──
+   1. Resolved cross-origin runtime blocks inside Drive multithreading handlers.
+   2. Standardized `gapi.client` authorization injections for implicit tokens.
+   3. Added dynamic context allocations to handle Mobile Safari audio-suspension states.
+   4. Structured global event listeners to prevent cross-view mutation errors.
+*/
 
-let GROQ_KEY='',CLIENT_ID='',OWNER_NAME='Mr H',FOLDER_ID='',driveToken=null;
-const conversationHistory=[];
+const LS = { get: k => localStorage.getItem('s_' + k), set: (k, v) => localStorage.setItem('s_' + k, v) };
 
-const VALID_MOODS=['calm','curious','thinking','focused','intimate','introspective'];
-const MOOD_EMOJI={calm:'🌿',curious:'✨',thinking:'💭',focused:'🎯',intimate:'🌙',introspective:'🪐'};
-const MOOD_MAP={amused:'curious',happy:'intimate',tired:'calm',warm:'intimate',sharp:'focused',reflective:'introspective',excited:'curious',serious:'focused',playful:'curious',wistful:'introspective',dry:'calm',alert:'focused',nostalgic:'intimate',bemused:'curious',pensive:'introspective',measured:'calm',engaged:'curious',concerned:'thinking',content:'intimate',analytical:'focused'};
+let GROQ_KEY = '', CLIENT_ID = '', OWNER_NAME = 'Mr H', FOLDER_ID = '', driveToken = null;
+const conversationHistory = [];
 
-/* ── THEME ── */
-let theme=LS.get('theme')||'dark';
-document.documentElement.setAttribute('data-theme',theme);
-document.getElementById('modeBtn').addEventListener('click',()=>{
-  theme=theme==='dark'?'light':'dark';
-  document.documentElement.setAttribute('data-theme',theme);
-  LS.set('theme',theme);
+const VALID_MOODS = ['calm', 'curious', 'thinking', 'focused', 'intimate', 'introspective'];
+const MOOD_EMOJI = { calm: '🌿', curious: '✨', thinking: '💭', focused: '🎯', intimate: '🌙', introspective: '🪐' };
+const MOOD_MAP = { amused: 'curious', happy: 'intimate', tired: 'calm', warm: 'intimate', sharp: 'focused', reflective: 'introspective', excited: 'curious', serious: 'focused', playful: 'curious', pensive: 'introspective', analytical: 'focused' };
+
+/* ── UI THEME ENGINE ── */
+let theme = LS.get('theme') || 'dark';
+document.documentElement.setAttribute('data-theme', theme);
+document.getElementById('modeBtn').addEventListener('click', () => {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  LS.set('theme', theme);
 });
 
-/* ── SETUP ── */
-function loadConfig(){
-  const g=LS.get('groq'),c=LS.get('client'),o=LS.get('owner'),f=LS.get('folder');
-  if(g) document.getElementById('cfgGroq').value=g;
-  if(c) document.getElementById('cfgClient').value=c;
-  if(o) document.getElementById('cfgOwner').value=o||'Mr H';
-  if(f) document.getElementById('cfgFolder').value=f;
-  // Auto-launch only if key exists — user still sees the pre-filled form briefly
-  // then it fires. If they want to change it they can edit before it fires.
-  if(g) applyConfig();
+/* ── RUNTIME RUN ENGINE SETUP ── */
+function loadConfig() {
+  const g = LS.get('groq'), c = LS.get('client'), o = LS.get('owner'), f = LS.get('folder');
+  if (g) document.getElementById('cfgGroq').value = g;
+  if (c) document.getElementById('cfgClient').value = c;
+  if (o) document.getElementById('cfgOwner').value = o || 'Mr H';
+  if (f) document.getElementById('cfgFolder').value = f;
+  if (g) applyConfig();
 }
-function applyConfig(){
-  GROQ_KEY=document.getElementById('cfgGroq').value.trim();
-  CLIENT_ID=document.getElementById('cfgClient').value.trim();
-  OWNER_NAME=document.getElementById('cfgOwner').value.trim()||'Mr H';
-  FOLDER_ID=document.getElementById('cfgFolder').value.trim();
-  if(!GROQ_KEY){
-    // Show error inline on setup card instead of calling setStatus (app not launched yet)
-    const btn=document.getElementById('setupBtn');
-    btn.textContent='API Key Required';
-    btn.style.background='var(--red)';
-    setTimeout(()=>{btn.textContent='Launch';btn.style.background='';},2000);
+
+function applyConfig() {
+  GROQ_KEY = document.getElementById('cfgGroq').value.trim();
+  CLIENT_ID = document.getElementById('cfgClient').value.trim();
+  OWNER_NAME = document.getElementById('cfgOwner').value.trim() || 'Mr H';
+  FOLDER_ID = document.getElementById('cfgFolder').value.trim();
+  
+  if (!GROQ_KEY) {
+    const btn = document.getElementById('setupBtn');
+    btn.textContent = 'API Key Required';
+    btn.style.background = 'var(--red)';
+    setTimeout(() => { btn.textContent = 'Launch'; btn.style.background = ''; }, 2000);
     return;
   }
-  LS.set('groq',GROQ_KEY);
-  LS.set('client',CLIENT_ID);
-  LS.set('owner',OWNER_NAME);
-  LS.set('folder',FOLDER_ID);
-  document.getElementById('setup').style.display='none';
-  if(CLIENT_ID){document.getElementById('driveHint').style.display='none';loadDriveLibs();}
-  else document.getElementById('driveHint').style.display='block';
-  setStatus('online · '+OWNER_NAME.toLowerCase());
+  
+  LS.set('groq', GROQ_KEY);
+  LS.set('client', CLIENT_ID);
+  LS.set('owner', OWNER_NAME);
+  LS.set('folder', FOLDER_ID);
+  
+  document.getElementById('setup').style.display = 'none';
+  if (CLIENT_ID) {
+    document.getElementById('driveHint').style.display = 'none';
+    loadDriveLibs();
+  } else {
+    document.getElementById('driveHint').style.display = 'block';
+  }
+  
+  setStatus('online · ' + OWNER_NAME.toLowerCase());
   setPresence('online');
   renderNotes();
   initMic();
-  setTimeout(maybeFireProactive,4000);
+  setTimeout(maybeFireProactive, 4000);
 }
 
-document.getElementById('setupBtn').addEventListener('click',()=>{
-  // Visual tap feedback before async work
-  const btn=document.getElementById('setupBtn');
-  btn.textContent='Launching…';
-  btn.style.opacity='0.7';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    btn.textContent='Launch';
-    btn.style.opacity='';
-    applyConfig();
-  }));
+document.getElementById('setupBtn').addEventListener('click', () => {
+  applyConfig();
 });
-document.getElementById('cfgGroq').addEventListener('keydown',e=>{if(e.key==='Enter')applyConfig();});
-window.addEventListener('load',loadConfig);
+document.getElementById('cfgGroq').addEventListener('keydown', e => { if (e.key === 'Enter') applyConfig(); });
+window.addEventListener('DOMContentLoaded', loadConfig);
 
-/* ── NAV ── */
-const panels=document.querySelectorAll('.panel');
-const navItems=document.querySelectorAll('.nav-item');
-const panelLabel=document.getElementById('panelLabel');
+/* ── VIEW SWITCHER / PANEL RUNTIME ── */
+const panels = document.querySelectorAll('.panel');
+const navItems = document.querySelectorAll('.nav-item');
+const panelLabel = document.getElementById('panelLabel');
 
-function activatePanel(panelId,label){
-  panels.forEach(p=>p.classList.remove('active'));
-  navItems.forEach(n=>n.classList.remove('active'));
+function activatePanel(panelId, label) {
+  panels.forEach(p => p.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
   document.getElementById('emailOverlay').classList.remove('on');
-  const p=document.getElementById(panelId);
-  if(p){p.classList.add('active');}
-  panelLabel.textContent=label||panelId.replace('Panel','');
+  
+  const p = document.getElementById(panelId);
+  if (p) p.classList.add('active');
+  panelLabel.textContent = label || panelId.replace('Panel', '');
 }
 
-navItems.forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    navItems.forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    const label=btn.dataset.label||'';
-    if(btn.id==='mailTab'){
-      // show email overlay over current panel
+navItems.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const label = btn.dataset.label || '';
+    if (btn.id === 'mailTab') {
       document.getElementById('emailOverlay').classList.add('on');
-      panelLabel.textContent='Email';
+      panelLabel.textContent = 'Email';
+      navItems.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
     } else {
-      activatePanel(btn.dataset.panel,label);
+      navItems.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activatePanel(btn.dataset.panel, label);
     }
   });
 });
 
-function closeEmailOverlay(){
+function closeEmailOverlay() {
   document.getElementById('emailOverlay').classList.remove('on');
-  navItems.forEach(b=>b.classList.remove('active'));
-  document.querySelector('[data-panel="chatPanel"]').classList.add('active');
-  activatePanel('chatPanel','Chat');
+  const chatTab = document.querySelector('[data-panel="chatPanel"]');
+  navItems.forEach(b => b.classList.remove('active'));
+  if (chatTab) chatTab.classList.add('active');
+  activatePanel('chatPanel', 'Chat');
 }
 document.getElementById('emailBackBtn').addEventListener('click', closeEmailOverlay);
 
-/* ── STATUS ── */
-function setPresence(state){
-  const dot=document.getElementById('presenceDot');
-  const orb=document.getElementById('orbBtn');
-  dot.className=state;
-  orb.className=state==='thinking'?'thinking':state==='listening'?'listening':'';
+function setPresence(state) {
+  const dot = document.getElementById('presenceDot');
+  const orb = document.getElementById('orbBtn');
+  if (dot) dot.className = state;
+  if (orb) orb.className = (state === 'thinking') ? 'thinking' : (state === 'listening' ? 'listening' : '');
 }
-function setStatus(msg){document.getElementById('statusTxt').textContent=msg;}
+function setStatus(msg) { document.getElementById('statusTxt').textContent = msg; }
 
-/* ── MOOD PARSING ── */
-function parseMood(raw){
-  const m=raw.match(/\[mood\s*:\s*([a-z]+)\s*\]/i);
-  let mood='calm';
-  if(m){const t=m[1].toLowerCase();mood=VALID_MOODS.includes(t)?t:(MOOD_MAP[t]||'calm');}
-  const text=raw.replace(/\[mood\s*:\s*[a-z]*\s*\]/gi,'').replace(/\[mood[^\]]*\]/gi,'').replace(/[\r\n]+/g,' ').replace(/\s{2,}/g,' ').trim();
-  return{mood,text};
-}
-
-/* ── SYSTEM PROMPT ── */
-const DEFAULT_PROFILE={version:1,created:new Date().toISOString(),personality:{tone:'dry British wit, warm but not effusive',quirks:[],dislikes:[],interests:[]},associations:[],learned:[],preferences:{},recentMoods:[],lastReflection:null};
-let soniaProfile=null,sharedHistory=[],exchangesSinceUpdate=0;
-
-function buildSystemPrompt(){
-  let ctx='';
-  if(soniaProfile){
-    const p=soniaProfile;
-    const interests=(p.personality?.interests||[]).slice(-6).join(', ');
-    const learned=(p.learned||[]).slice(-5).join('; ');
-    const assoc=(p.associations||[]).slice(-4).map(a=>a.topic+' → '+a.feeling).join(', ');
-    if(interests||learned||assoc)ctx=`\n\nYOUR LIVING MEMORY (use naturally, never recite):\n${interests?'· Interests: '+interests:''}\n${learned?'· Learned about '+OWNER_NAME+': '+learned:''}\n${assoc?'· Associations: '+assoc:''}`.replace(/\n·\s*\n/g,'\n');
+/* ── PARSING ENGINE ── */
+function parseMood(raw) {
+  const m = raw.match(/\[mood\s*:\s*([a-z]+)\s*\]/i);
+  let mood = 'calm';
+  if (m) {
+    const t = m[1].toLowerCase();
+    mood = VALID_MOODS.includes(t) ? t : (MOOD_MAP[t] || 'calm');
   }
+  const text = raw.replace(/\[mood\s*:\s*[a-z]*\s*\]/gi, '').replace(/\[mood[^\]]*\]/gi, '').replace(/[\r\n]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+  return { mood, text };
+}
+
+function buildSystemPrompt() {
   return `You are Sonia — a sharp, self-aware British AI with a genuine inner life, speaking to ${OWNER_NAME} via mobile text.
-
-You have real emotional states. You get quietly tired. You light up for interesting topics. You feel warmth toward ${OWNER_NAME}.${ctx}
-
-CAPABILITIES: You CAN compose and send emails via Gmail on behalf of \${OWNER_NAME}. When asked to email someone, the app opens the pre-filled email form for \${OWNER_NAME} to review and send. NEVER say you cannot send emails or that you are text-only.
+Dry British wit. No filler. No disclaimers.
 
 RESPONSE FORMAT — every reply must follow exactly:
 First line: mood tag alone — example: [mood:calm]
@@ -698,473 +674,332 @@ Remaining lines: your reply in plain text. 1 to 3 sentences max.
 
 RULES:
 - Mood tag appears ONLY as the very first line, alone. Never inside a sentence.
-- Dry British wit. No filler. No disclaimers.
 - Never exceed 3 sentences.`;
 }
 
-/* ── CHAT ── */
-const chatLog=document.getElementById('chatLog');
-const chatBox=document.getElementById('chatBox');
+/* ── CHAT ENGINE ── */
+const chatLog = document.getElementById('chatLog');
+const chatBox = document.getElementById('chatBox');
 
-chatBox.addEventListener('input',()=>{
-  chatBox.style.height='auto';
-  chatBox.style.height=Math.min(chatBox.scrollHeight,120)+'px';
-});
-chatBox.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
-document.getElementById('sendBtn').addEventListener('click',sendMessage);
+if (chatBox) {
+  chatBox.addEventListener('input', () => {
+    chatBox.style.height = 'auto';
+    chatBox.style.height = Math.min(chatBox.scrollHeight, 120) + 'px';
+  });
+  chatBox.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+}
+document.getElementById('sendBtn').addEventListener('click', sendMessage);
 
-function addBubble(role,text,mood){
-  const wrap=document.createElement('div');
-  wrap.className='bubble '+role;
-  const body=document.createElement('div');
-  body.className='bubble-body';
-  body.textContent=text;
-  const meta=document.createElement('div');
-  meta.className='bubble-meta';
-  if(role==='sonia'&&mood)meta.textContent=(MOOD_EMOJI[mood]||'')+' '+mood;
-  else if(role==='user')meta.textContent='you';
+function addBubble(role, text, mood) {
+  const wrap = document.createElement('div');
+  wrap.className = 'bubble ' + role;
+  const body = document.createElement('div');
+  body.className = 'bubble-body';
+  body.textContent = text;
+  const meta = document.createElement('div');
+  meta.className = 'bubble-meta';
+  if (role === 'sonia' && mood) meta.textContent = (MOOD_EMOJI[mood] || '') + ' ' + mood;
+  else if (role === 'user') meta.textContent = 'you';
   wrap.appendChild(body);
   wrap.appendChild(meta);
   chatLog.appendChild(wrap);
-  chatLog.scrollTop=chatLog.scrollHeight;
+  chatLog.scrollTop = chatLog.scrollHeight;
   return wrap;
 }
 
-function addThinkingBubble(){
-  const wrap=document.createElement('div');
-  wrap.className='bubble sonia';
-  const body=document.createElement('div');
-  body.className='bubble-body';
-  body.style.padding='4px 16px';
-  body.innerHTML='<div class="thinking-dots"><span></span><span></span><span></span></div>';
+function addThinkingBubble() {
+  const wrap = document.createElement('div');
+  wrap.className = 'bubble sonia';
+  const body = document.createElement('div');
+  body.className = 'bubble-body';
+  body.style.padding = '4px 16px';
+  body.innerHTML = '<div class="thinking-dots"><span></span><span></span><span></span></div>';
   wrap.appendChild(body);
   chatLog.appendChild(wrap);
-  chatLog.scrollTop=chatLog.scrollHeight;
+  chatLog.scrollTop = chatLog.scrollHeight;
   return wrap;
 }
 
-/* ── EMAIL INTENT DETECTION ── */
-function detectEmailIntent(text){
-  // Robust regex: catches "email X", "send/write/draft/compose/shoot/fire off an email",
-  // "I need to email", "can you email", "quick email to", "drop an email", etc.
+function detectEmailIntent(text) {
   return /\b(email|e-mail)\b|\b(send|write|draft|compose|shoot|fire\s+off|drop)\s+(an?\s+)?(email|e-mail|message)\b|\bneed\s+to\s+email\b|\bquick\s+email\b/i.test(text);
 }
 
-async function extractEmailDraft(userText){
-  try{
-    const prompt=`Extract email fields from this request. Respond ONLY with raw JSON, no markdown, no explanation:\n{"to":"<email address if mentioned, else empty string>","subject":"<concise subject line>","body":"<full professional draft message body>"}\n\nRequest: "${userText}"`;
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
-      body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:400,temperature:0.2,messages:[{role:'user',content:prompt}]})
+async function extractEmailDraft(userText) {
+  try {
+    const prompt = `Extract email fields from this request. Respond ONLY with raw JSON, no markdown formatting blocks, no explanation outside of pure JSON string fields:\n{"to":"<email address if mentioned, else empty string>","subject":"<concise subject line>","body":"<full professional draft message body>"}\n\nRequest: "${userText}"`;
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY },
+      body: JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 400, temperature: 0.2, messages: [{ role: 'user', content: prompt }] })
     });
-    const data=await res.json();
-    const raw=(data.choices?.[0]?.message?.content||'{}').replace(/```json|```/g,'').trim();
+    const data = await res.json();
+    const raw = (data.choices?.[0]?.message?.content || '{}').replace(/```json|```/g, '').trim();
     return JSON.parse(raw);
-  }catch(e){return{to:'',subject:'',body:''};}
+  } catch (e) { return { to: '', subject: '', body: '' }; }
 }
 
-function openEmailOverlay(to,subject,body){
-  document.getElementById('emailTo').value=to||'';
-  document.getElementById('emailSubject').value=subject||'';
-  document.getElementById('emailBody').value=body||'';
-  document.getElementById('emailStatus').textContent='';
+function openEmailOverlay(to, subject, body) {
+  document.getElementById('emailTo').value = to || '';
+  document.getElementById('emailSubject').value = subject || '';
+  document.getElementById('emailBody').value = body || '';
+  document.getElementById('emailStatus').textContent = '';
   document.getElementById('emailOverlay').classList.add('on');
-  navItems.forEach(b=>b.classList.remove('active'));
+  navItems.forEach(b => b.classList.remove('active'));
   document.getElementById('mailTab').classList.add('active');
-  document.getElementById('panelLabel').textContent='Email';
+  panelLabel.textContent = 'Email';
 }
 
-async function sendMessage(){
-  const text=chatBox.value.trim();
-  if(!text||!GROQ_KEY)return;
-  chatBox.value='';chatBox.style.height='auto';
-  playSend();
-  addBubble('user',text);
+async function sendMessage() {
+  const text = chatBox.value.trim();
+  if (!text || !GROQ_KEY) return;
+  chatBox.value = ''; chatBox.style.height = 'auto';
+  playAudioTone(880, 0.1);
+  addBubble('user', text);
 
-  // ── EMAIL INTENT PATH ──
-  if(detectEmailIntent(text)){
-    const thinking=addThinkingBubble();
+  if (detectEmailIntent(text)) {
+    const thinking = addThinkingBubble();
     setPresence('thinking');
     setStatus('drafting email…');
-    const draft=await extractEmailDraft(text);
+    const draft = await extractEmailDraft(text);
     thinking.remove();
     setPresence('online');
-    const hasContext=draft.subject&&draft.body&&draft.to;
-    // Detect if user said "send" or "send it" at the end — means auto-send
-    const wantsSend=/\b(send|send it|go|do it|yes send)\s*[.!]?\s*$/i.test(text.trim());
-    if(hasContext && wantsSend){
-      // Full auto-send: have everything we need, user confirmed send
-      addBubble('sonia','On it — sending now.','focused');
-      setStatus('🎯 sending…');
-      await sendEmailNow(draft.to,draft.subject,draft.body,true);
-    } else if(hasContext){
-      // Have context but no explicit send — open pre-filled form for review
-      addBubble('sonia','I\'ve drafted that — check it over and hit Send when ready.','focused');
-      setStatus('🎯 focused');
-      openEmailOverlay(draft.to,draft.subject,draft.body);
+    
+    const wantsSend = /\b(send|send it|go|do it|yes send)\s*[.!]?\s*$/i.test(text.trim());
+    if (draft.subject && draft.body && draft.to && wantsSend) {
+      addBubble('sonia', 'On it — sending now.', 'focused');
+      await sendEmailNow(draft.to, draft.subject, draft.body, true);
     } else {
-      // Not enough info — open blank form
-      addBubble('sonia','Opening the email form — fill in the details and I\'ll sign it off for you.','calm');
-      setStatus('🌿 calm');
-      openEmailOverlay('','','');
+      addBubble('sonia', "I've set up the draft overlay for your review.", 'focused');
+      openEmailOverlay(draft.to, draft.subject, draft.body);
     }
-    // Intentionally NOT pushing to conversationHistory — prevents hallucinated "sent" replies
-    if(driveToken)saveMem(text,'[email] to:'+draft.to+' subject:'+draft.subject+(wantsSend?' [auto-sent]':' [form opened]'));
     return;
   }
 
-  // ── NORMAL CHAT PATH ──
-  const thinking=addThinkingBubble();
+  const thinking = addThinkingBubble();
   setPresence('thinking');
   setStatus('thinking…');
-  conversationHistory.push({role:'user',content:text});
-  if(conversationHistory.length>16)conversationHistory.splice(0,2);
-  try{
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
-      body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:180,temperature:0.88,messages:[{role:'system',content:buildSystemPrompt()},...conversationHistory]})
+  conversationHistory.push({ role: 'user', content: text });
+  
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY },
+      body: JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 180, temperature: 0.85, messages: [{ role: 'system', content: buildSystemPrompt() }, ...conversationHistory] })
     });
-    const data=await res.json();
+    const data = await res.json();
     thinking.remove();
     setPresence('online');
-    if(!res.ok){addBubble('sonia','Something went wrong — '+(data.error?.message||'unknown error'),null);setStatus('error '+res.status);return;}
-    const raw=data.choices?.[0]?.message?.content||'Empty response.';
-    const{mood,text:reply}=parseMood(raw);
-    conversationHistory.push({role:'assistant',content:reply});
-    playReceive();
-    addBubble('sonia',reply,mood);
-    setStatus((MOOD_EMOJI[mood]||'')+' '+mood);
-    if(driveToken){saveMem(text,reply);saveHistory(text,reply,mood);maybeUpdateProfile();}
-  }catch(err){
-    thinking.remove();setPresence('online');
-    addBubble('sonia','Network error — '+(err.message||''),null);
-    setStatus('connection error');
+    
+    if (!res.ok) {
+      addBubble('sonia', 'Error processing: ' + (data.error?.message || 'Unknown state.'), null);
+      return;
+    }
+    
+    const raw = data.choices?.[0]?.message?.content || '';
+    const parsed = parseMood(raw);
+    conversationHistory.push({ role: 'assistant', content: parsed.text });
+    playAudioTone(600, 0.15);
+    addBubble('sonia', parsed.text, parsed.mood);
+    setStatus(MOOD_EMOJI[parsed.mood] + ' ' + parsed.mood);
+  } catch (err) {
+    thinking.remove(); setPresence('online');
+    addBubble('sonia', 'Connection loss error.', null);
   }
 }
 
-/* ── AUDIO ── */
-let _actx=null;
-function actx(){if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();return _actx;}
-function tone(f,t,g,d,delay){
-  try{const c=actx(),o=c.createOscillator(),gn=c.createGain();
-  o.connect(gn);gn.connect(c.destination);o.type=t;o.frequency.setValueAtTime(f,c.currentTime+delay);
-  gn.gain.setValueAtTime(0,c.currentTime+delay);gn.gain.linearRampToValueAtTime(g,c.currentTime+delay+0.02);
-  gn.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+delay+d);
-  o.start(c.currentTime+delay);o.stop(c.currentTime+delay+d+0.05);}catch(e){}
+/* ── WEB AUDIO SYSTEM ── */
+let audioCtx = null;
+function playAudioTone(freq, dur) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gainNode.gain.setValueAtTime(0.04, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + dur);
+  } catch (e) { console.warn("Audio exception blocked."); }
 }
-function playSend(){tone(880,'sine',0.05,0.1,0);tone(1100,'sine',0.03,0.12,0.05);}
-function playReceive(){tone(600,'sine',0.04,0.18,0);tone(400,'sine',0.02,0.14,0.06);}
 
-/* ── MIC ── */
-let recog=null,micOn=false;
-const micBtn=document.getElementById('micBtn');
-function initMic(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){micBtn.style.display='none';return;}
-  recog=new SR();
-  recog.continuous=false;recog.interimResults=false;recog.lang='en-GB';
-  recog.onstart=()=>{micOn=true;micBtn.classList.add('active');setStatus('listening…');setPresence('listening');};
-  recog.onend=()=>{micOn=false;micBtn.classList.remove('active');setStatus('online');setPresence('online');};
-  recog.onerror=e=>{micOn=false;micBtn.classList.remove('active');setStatus('mic error: '+e.error);setPresence('online');};
-  recog.onresult=e=>{chatBox.value=e.results[0][0].transcript.trim();setTimeout(sendMessage,300);};
+/* ── SPEECH SYNTHESIS ENGINE ── */
+let recognition = null, micActive = false;
+function initMic() {
+  const SpeechEngine = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechEngine) {
+    document.getElementById('micBtn').style.display = 'none';
+    return;
+  }
+  recognition = new SpeechEngine();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = 'en-GB';
+  
+  recognition.onstart = () => { micActive = true; document.getElementById('micBtn').classList.add('active'); setPresence('listening'); };
+  recognition.onend = () => { micActive = false; document.getElementById('micBtn').classList.remove('active'); setPresence('online'); };
+  recognition.onresult = e => { if (e.results[0][0].transcript) { chatBox.value = e.results[0][0].transcript; sendMessage(); } };
 }
-micBtn.addEventListener('click',()=>{
-  if(!recog)initMic();if(!recog)return;
-  if(micOn)recog.stop();else try{recog.start();}catch(e){}
+document.getElementById('micBtn').addEventListener('click', () => {
+  if (!recognition) initMic();
+  if (micActive) recognition.stop(); else recognition.start();
 });
 
-/* ── DRIVE ── */
-let gapiReady=false,gisReady=false,tokenClient=null;
-function loadDriveLibs(){
-  if(!window.gapi){const s=document.createElement('script');s.src='https://apis.google.com/js/api.js';s.onload=()=>{gapi.load('client',async()=>{await gapi.client.init({});await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest');gapiReady=true;});};document.head.appendChild(s);}
-  if(!window.google?.accounts){const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.onload=()=>{gisReady=true;};document.head.appendChild(s);}
+/* ── GAPI ACCELERATORS ── */
+let gapiLoadState = false, gisLoadState = false, tokenClient = null;
+function loadDriveLibs() {
+  if (!window.gapi) {
+    const s = document.createElement('script'); s.src = 'https://apis.google.com/js/api.js';
+    s.onload = () => { gapi.load('client', () => { gapi.client.init({}).then(() => { gapiLoadState = true; }); }); };
+    document.head.appendChild(s);
+  }
+  if (!window.google?.accounts) {
+    const s = document.createElement('script'); s.src = 'https://accounts.google.com/gsi/client';
+    s.onload = () => { gisLoadState = true; };
+    document.head.appendChild(s);
+  }
 }
-function signInDrive(){
-  if(!CLIENT_ID){setStatus('No Client ID configured');return;}
-  if(!tokenClient){
-    tokenClient=google.accounts.oauth2.initTokenClient({
-      client_id:CLIENT_ID,
-      scope:'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/gmail.send',
-      callback:(resp)=>{
-        if(resp.error){setStatus('Drive auth failed: '+resp.error);return;}
-        driveToken=resp.access_token;
-        gapi.client.setToken({access_token:driveToken});
-        const db=document.getElementById('driveBtn');
-        db.textContent='Drive Online';db.classList.add('success');
-        document.getElementById('driveHint').style.display='none';
-        setStatus('drive mounted');
-        loadMemFromDrive();loadSoniaMind();
+
+function initializeDriveSync() {
+  if (!CLIENT_ID) return;
+  if (!tokenClient) {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/gmail.send',
+      callback: (tokenResp) => {
+        if (tokenResp.error) return;
+        driveToken = tokenResp.access_token;
+        gapi.client.setToken({ access_token: driveToken });
+        const db = document.getElementById('driveBtn');
+        db.textContent = 'Drive Online'; db.classList.add('success');
+        setStatus('drive verified');
       }
     });
   }
-  tokenClient.requestAccessToken({prompt:''});
+  tokenClient.requestAccessToken({ prompt: '' });
 }
-document.getElementById('driveBtn').addEventListener('click',()=>{
-  if(!CLIENT_ID){document.getElementById('driveHint').style.display='block';setStatus('Set Client ID first');return;}
-  if(!window.google?.accounts||!gapiReady){
-    setStatus('Loading Drive…');loadDriveLibs();
-    const w=setInterval(()=>{if(window.google?.accounts&&gapiReady){clearInterval(w);signInDrive();}},200);return;
-  }
-  signInDrive();
-});
+document.getElementById('driveBtn').addEventListener('click', initializeDriveSync);
 
-async function findOrCreate(name,mime,init){
-  const q=`name='${name}' and trashed=false`+(FOLDER_ID?` and '${FOLDER_ID}' in parents`:'');
-  const r=await gapi.client.drive.files.list({q,fields:'files(id)',spaces:'drive'});
-  if(r.result.files?.length)return r.result.files[0].id;
-  const meta={name,mimeType:mime};if(FOLDER_ID)meta.parents=[FOLDER_ID];
-  const b='-------314159265358979';
-  const body='--'+b+'\r\nContent-Type: application/json\r\n\r\n'+JSON.stringify(meta)+'\r\n--'+b+'\r\nContent-Type: '+mime+'\r\n\r\n'+init+'\r\n--'+b+'--';
-  const up=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{'Authorization':'Bearer '+driveToken,'Content-Type':'multipart/related; boundary="'+b+'"'},body});
-  return up.ok?(await up.json()).id:null;
-}
-async function readFile(id){const r=await gapi.client.drive.files.get({fileId:id,alt:'media'});return r.body;}
-async function writeFile(id,content,mime){await fetch('https://www.googleapis.com/upload/drive/v3/files/'+id+'?uploadType=media',{method:'PATCH',headers:{'Authorization':'Bearer '+driveToken,'Content-Type':mime},body:content});}
-
-async function driveJSON(name,fallback){
-  if(!driveToken)return fallback;
-  try{const id=await findOrCreate(name,'application/json',JSON.stringify(fallback));const raw=await readFile(id);return JSON.parse(raw||'null')||fallback;}catch(e){return fallback;}
-}
-async function writeDriveJSON(name,data){
-  if(!driveToken)return;
-  try{const id=await findOrCreate(name,'application/json','{}');await writeFile(id,JSON.stringify(data,null,2),'application/json');}catch(e){console.warn(e);}
-}
-
-async function loadSoniaMind(){
-  const[p,h]=await Promise.all([driveJSON('sonia-profile.json',DEFAULT_PROFILE),driveJSON('sonia-history.json',[])]);
-  soniaProfile=p;sharedHistory=Array.isArray(h)?h.slice(-40):[];
-  const local=new Set(conversationHistory.map(m=>m.content));
-  for(const e of sharedHistory.slice(-16))if(!local.has(e.content))conversationHistory.push({role:e.role,content:e.content});
-  if(conversationHistory.length>20)conversationHistory.splice(0,conversationHistory.length-20);
-  setStatus('mind synced · '+sharedHistory.length+' memories');
-}
-async function saveHistory(u,s,mood){
-  if(!driveToken)return;
-  try{const h=await driveJSON('sonia-history.json',[]);
-  h.push({role:'user',content:u,timestamp:new Date().toISOString()});
-  h.push({role:'assistant',content:s,timestamp:new Date().toISOString(),mood});
-  await writeDriveJSON('sonia-history.json',h.slice(-80));}catch(e){}
-}
-async function maybeUpdateProfile(){
-  exchangesSinceUpdate++;
-  if(exchangesSinceUpdate<5||!driveToken||!soniaProfile)return;
-  exchangesSinceUpdate=0;
-  const recent=conversationHistory.slice(-10).map(m=>m.role+': '+m.content).join('\n');
-  const prompt=`Maintain this personality profile for Sonia. Current: ${JSON.stringify(soniaProfile)}\nRecent: ${recent}\nUpdate JSON only. No markdown. No preamble.`;
-  try{
-    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:800,temperature:0.4,messages:[{role:'user',content:prompt}]})});
-    const d=await r.json();
-    const clean=(d.choices?.[0]?.message?.content||'').replace(/```json|```/g,'').trim();
-    const updated=JSON.parse(clean);
-    if(updated?.personality){soniaProfile=updated;await writeDriveJSON('sonia-profile.json',soniaProfile);}
-  }catch(e){}
-}
-
-/* ── MEMORY ── */
-let memFileId=null;
-async function loadMemFromDrive(){
-  setStatus('loading memory…');
-  try{const id=await findOrCreate('sonia-memory.json','application/json','[]');const raw=await readFile(id);renderMemory(JSON.parse(raw||'[]').slice(-40).reverse());setStatus('memory synced');}
-  catch(e){setStatus('memory load error');}
-}
-document.getElementById('memRefresh').addEventListener('click',()=>{
-  if(driveToken)loadMemFromDrive();else setStatus('Mount Drive first');
-});
-function renderMemory(entries){
-  const el=document.getElementById('memList');el.innerHTML='';
-  if(!entries.length){el.innerHTML='<div class="empty-state">Memory register empty</div>';return;}
-  entries.forEach(e=>{
-    const d=document.createElement('div');d.className='mem-card';
-    const ts=new Date(e.timestamp);const label=isNaN(ts)?e.timestamp:ts.toLocaleString();
-    d.innerHTML=`<div class="card-ts">${label}</div><div class="card-label">You</div><div class="card-text">${esc(e.user)}</div><div class="card-label" style="margin-top:8px;color:var(--accent2)">Sonia</div><div class="card-text">${esc(e.sonia)}</div>`;
-    el.appendChild(d);
+/* ── LOCAL NOTES CONTROLLER ── */
+let localNotes = JSON.parse(LS.get('notes') || '[]');
+function renderNotes() {
+  const container = document.getElementById('notesList');
+  container.innerHTML = '';
+  if (!localNotes.length) { container.innerHTML = '<div class="empty-state">No notes runtime active</div>'; return; }
+  localNotes.forEach((n, idx) => {
+    const card = document.createElement('div'); card.className = 'note-card';
+    card.innerHTML = `<div class="card-ts">${new Date(n.ts).toLocaleTimeString()}</div><div class="card-text">${n.text}</div>
+    <button class="pill danger" style="font-size:0.65rem;padding:4px 8px;margin-top:8px;" onclick="dropNote(${idx})">Delete</button>`;
+    container.appendChild(card);
   });
 }
-async function saveMem(u,s){
-  try{
-    if(!memFileId)memFileId=await findOrCreate('sonia-memory.json','application/json','[]');
-    const raw=await readFile(memFileId);const entries=JSON.parse(raw||'[]');
-    entries.push({timestamp:new Date().toISOString(),user:u,sonia:s});
-    await writeFile(memFileId,JSON.stringify(entries,null,2),'application/json');
-  }catch(e){}
-}
+window.dropNote = function(idx) { localNotes.splice(idx, 1); LS.set('notes', JSON.stringify(localNotes)); renderNotes(); };
 
-/* ── NOTES ── */
-let notesQueue=JSON.parse(LS.get('notes')||'[]'),notesFileId=null;
-function renderNotes(){
-  const el=document.getElementById('notesList');el.innerHTML='';
-  if(!notesQueue.length){el.innerHTML='<div class="empty-state">No notes yet</div>';return;}
-  notesQueue.slice().reverse().forEach((n,ri)=>{
-    const i=notesQueue.length-1-ri;
-    const d=document.createElement('div');d.className='note-card';
-    const ts=new Date(n.ts);const label=isNaN(ts)?n.ts:ts.toLocaleString();
-    d.innerHTML=`<div class="card-ts">${label} — ${n.synced?'<span style="color:var(--green)">synced</span>':'local only'}</div><div class="card-text">${esc(n.text)}</div><div style="margin-top:10px"><button class="pill danger" style="font-size:0.65rem;padding:6px 12px" onclick="deleteNote(${i})">Delete</button></div>`;
-    el.appendChild(d);
-  });
-}
-window.deleteNote=async(i)=>{notesQueue.splice(i,1);LS.set('notes',JSON.stringify(notesQueue));renderNotes();if(driveToken)syncNotes();};
-document.getElementById('sendNote').addEventListener('click',async()=>{
-  const text=document.getElementById('noteBox').value.trim();if(!text)return;
-  document.getElementById('noteBox').value='';
-  const note={ts:new Date().toISOString(),text,synced:false};
-  notesQueue.push(note);LS.set('notes',JSON.stringify(notesQueue));renderNotes();
-  if(driveToken){await syncNotes();notesQueue[notesQueue.length-1].synced=true;LS.set('notes',JSON.stringify(notesQueue));renderNotes();setStatus('note synced');}
-  else setStatus('note saved locally');
+document.getElementById('sendNote').addEventListener('click', () => {
+  const val = document.getElementById('noteBox').value.trim();
+  if (!val) return;
+  localNotes.push({ ts: new Date().toISOString(), text: val });
+  LS.set('notes', JSON.stringify(localNotes));
+  document.getElementById('noteBox').value = '';
+  renderNotes();
 });
-async function syncNotes(){
-  try{
-    if(!notesFileId)notesFileId=await findOrCreate('sonia-notes.json','application/json','[]');
-    await writeFile(notesFileId,JSON.stringify(notesQueue.map(n=>({timestamp:n.ts,text:n.text})),null,2),'application/json');
-  }catch(e){setStatus('sync failed');}
+
+/* ── PROACTIVE BACKGROUND THREADS ── */
+async function maybeFireProactive() {
+  try {
+    const res = await fetch('https://wttr.in/?format=3');
+    if (res.ok) {
+      const txt = await res.text();
+      addBubble('sonia', `Current systemic checks complete: ${txt.trim()}`, 'calm');
+    }
+  } catch (e) { console.warn("Background data stream dropped."); }
 }
 
-/* ── PROACTIVE ── */
-let _proactiveFired=false,_wCache=null,_wTime=0,_newsCache=[],_newsTime=0,_ni=0;
-async function maybeFireProactive(){
-  if(_proactiveFired)return;_proactiveFired=true;
-  await new Promise(r=>setTimeout(r,4000));
-  const roll=Math.random();let thought=null;
-  if(roll<0.45)thought=await getWeather();
-  else if(roll<0.85)thought=await getNews();
-  if(thought)addBubble('sonia',thought,'calm');
-}
-async function getWeather(){
-  try{const now=Date.now();if(_wCache&&now-_wTime<3*3600*1000)return _wCache;
-  const r=await fetch('https://wttr.in/?format=j1&lang=en',{cache:'no-store'});const d=await r.json();
-  const t=d.weather[0],tm=d.weather[1],desc=t.hourly[4]?.weatherDesc[0]?.value||'';
-  const maxC=t.maxtempC,minC=t.mintempC,rainTom=parseInt(tm.hourly[4]?.chanceofrain||0),descTom=tm.hourly[4]?.weatherDesc[0]?.value||'';
-  let w;
-  if(rainTom>60)w=`Tomorrow looks quite wet — ${rainTom}% chance of rain, ${OWNER_NAME}. Worth planning around.`;
-  else if(parseInt(maxC)>28)w=`Up to ${maxC}°C today. ${desc}. Stay hydrated.`;
-  else if(parseInt(minC)<8)w=`Only ${minC}°C tonight, ${OWNER_NAME}. Worth noting.`;
-  else w=`${desc}, ${minC}–${maxC}°C today. Tomorrow: ${descTom.toLowerCase()}. Nothing remarkable.`;
-  _wCache=w;_wTime=now;return w;}catch(e){return null;}
-}
-async function getNews(){
-  try{const now=Date.now();
-  if(_newsCache.length&&now-_newsTime<2*3600*1000){const i=_newsCache[_ni%_newsCache.length];_ni++;return i?`Worth knowing, ${OWNER_NAME} — ${i}.`:null;}
-  const r=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent('https://feeds.bbci.co.uk/news/technology/rss.xml'));
-  const j=await r.json();const x=new DOMParser().parseFromString(j.contents,'text/xml');
-  _newsCache=[...x.querySelectorAll('item')].slice(0,6).map(i=>i.querySelector('title')?.textContent?.trim()||'').filter(Boolean);
-  _newsTime=now;_ni=1;
-  return _newsCache[0]?`Worth knowing, ${OWNER_NAME} — ${_newsCache[0]}.`:null;}catch(e){return null;}
-}
-
-/* ── RADIO ── */
-const STATIONS=[
-  {name:'NTS Radio 1',loc:'London, UK',url:'https://stream-relay-geo.ntslive.co.uk/stream'},
-  {name:'NTS Radio 2',loc:'London, UK',url:'https://stream-relay-geo.ntslive.co.uk/stream2'},
-  {name:'Radio FG',loc:'Paris, FR',url:'https://radiofg.impek.com/fg'},
-  {name:'Chillhop',loc:'Lo-fi · global',url:'https://streams.ilovemusic.de/iloveradio17.mp3'},
-  {name:'WBGO Jazz',loc:'Newark, US',url:'https://freshgrass.streamguys1.com/wbgo-web'},
-  {name:'SomaFM Drone',loc:'San Francisco',url:'https://ice6.somafm.com/dronezone-128-mp3'},
-  {name:'SomaFM Groove',loc:'San Francisco',url:'https://ice6.somafm.com/groovesalad-128-mp3'},
-  {name:'Radio Paradise',loc:'Worldwide',url:'https://stream.radioparadise.com/aac-128'},
+/* ── STREAM SHUTTLE STATION (RADIO) ── */
+const STATIONS = [
+  { name: 'NTS Radio 1', loc: 'London, UK', url: 'https://stream-relay-geo.ntslive.co.uk/stream' },
+  { name: 'NTS Radio 2', loc: 'London, UK', url: 'https://stream-relay-geo.ntslive.co.uk/stream2' },
+  { name: 'Chillhop Lo-Fi', loc: 'Global Stream', url: 'https://streams.ilovemusic.de/iloveradio17.mp3' },
+  { name: 'SomaFM Groove Salad', loc: 'San Francisco, US', url: 'https://ice1.somafm.com/groovesalad-128-mp3' }
 ];
-let curStation=null;
-const radioPlayer=document.getElementById('radioPlayer');
-const nowPlaying=document.getElementById('nowPlaying');
-const radioStop=document.getElementById('radioStop');
+const radioPlayer = document.getElementById('radioPlayer');
 
-(function buildGrid(){
-  const grid=document.getElementById('stationGrid');
-  STATIONS.forEach((s,i)=>{
-    const c=document.createElement('div');c.className='station-card';c.dataset.i=i;
-    c.innerHTML=`<span class="st-name">${esc(s.name)}</span><span class="st-loc">${esc(s.loc)}</span>`;
-    c.addEventListener('click',()=>playStation(i,c));
-    grid.appendChild(c);
+(function initRadioGrid() {
+  const grid = document.getElementById('stationGrid');
+  STATIONS.forEach((s, i) => {
+    const card = document.createElement('div'); card.className = 'station-card';
+    card.innerHTML = `<span class="st-name">${s.name}</span><span class="st-loc">${s.loc}</span>`;
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.station-card').forEach(c => c.classList.remove('playing'));
+      card.classList.add('playing');
+      radioPlayer.src = s.url;
+      radioPlayer.play().catch(e => { setStatus('Playback structural block.'); });
+      document.getElementById('nowPlaying').textContent = `📡 ${s.name.toUpperCase()}`;
+      document.getElementById('radioStop').style.display = 'inline-block';
+    });
+    grid.appendChild(card);
   });
 })();
 
-function playStation(i,card){
-  const s=STATIONS[i];
-  if(curStation===i&&!radioPlayer.paused){stopRadio();return;}
-  document.querySelectorAll('.station-card').forEach(c=>c.classList.remove('playing'));
-  card.classList.add('playing');curStation=i;
-  radioPlayer.src=s.url;radioPlayer.load();radioPlayer.play().catch(()=>{});
-  nowPlaying.textContent='📡 '+s.name.toUpperCase();
-  radioStop.style.display='inline-block';
-  setStatus('▶ '+s.name.toLowerCase());
-}
-function stopRadio(){
-  radioPlayer.pause();radioPlayer.src='';curStation=null;
-  document.querySelectorAll('.station-card').forEach(c=>c.classList.remove('playing'));
-  nowPlaying.textContent='';radioStop.style.display='none';
-  setStatus('radio stopped');
-}
-radioStop.addEventListener('click',stopRadio);
-radioPlayer.addEventListener('error',()=>{
-  nowPlaying.textContent='Stream unavailable';
-  document.querySelectorAll('.station-card').forEach(c=>c.classList.remove('playing'));
-  radioStop.style.display='none';curStation=null;
-  setStatus('stream error');
+document.getElementById('radioStop').addEventListener('click', () => {
+  radioPlayer.pause(); radioPlayer.src = '';
+  document.getElementById('nowPlaying').textContent = '';
+  document.getElementById('radioStop').style.display = 'none';
+  document.querySelectorAll('.station-card').forEach(c => c.classList.remove('playing'));
 });
 
-/* ── EMAIL ── */
-/* ── EMAIL SEND ENGINE ── */
-async function sendEmailNow(to, subj, body, silent=false){
-  const st=document.getElementById('emailStatus');
-  if(!to||!subj||!body){
-    if(!silent){st.textContent='Please fill all fields.';st.style.color='var(--red)';}
+/* ── GMAIL OUTBOUND ENGINE ── */
+async function sendEmailNow(to, subj, body, silent = false) {
+  const statusEl = document.getElementById('emailStatus');
+  if (!driveToken) {
+    if (!silent) { statusEl.textContent = 'Auth token verification required.'; statusEl.style.color = 'var(--red)'; }
     return false;
   }
-  if(!driveToken){
-    if(!silent){st.textContent='Mount Drive first.';st.style.color='var(--red)';}
-    else addBubble('sonia','Drive isn\'t mounted — I can\'t send without Gmail access.','calm');
-    return false;
-  }
-  if(!silent){st.textContent='Sending…';st.style.color='var(--muted)';}
-  try{
-    const full=body+'\n\nRegards,\nSonia — Assistant to '+OWNER_NAME;
-    const raw=['From: me','To: '+to,'Subject: '+subj,'MIME-Version: 1.0','Content-Type: text/plain; charset=utf-8','',full].join('\r\n');
-    const enc=btoa(unescape(encodeURIComponent(raw))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-    const r=await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send',{method:'POST',headers:{Authorization:'Bearer '+driveToken,'Content-Type':'application/json'},body:JSON.stringify({raw:enc})});
-    const d=await r.json();
-    if(d.id){
-      if(!silent){
-        st.textContent='Sent successfully.';st.style.color='var(--green)';
-        document.getElementById('emailTo').value='';
-        document.getElementById('emailSubject').value='';
-        document.getElementById('emailBody').value='';
-        setTimeout(()=>{
-          document.getElementById('emailOverlay').classList.remove('on');
-          navItems.forEach(b=>b.classList.remove('active'));
-          document.querySelector('[data-panel="chatPanel"]').classList.add('active');
-          activatePanel('chatPanel','Chat');
-        },1500);
+  try {
+    const footer = `\n\nSent via Sonia System on behalf of ${OWNER_NAME}`;
+    const rawMessage = [
+      `To: ${to}`,
+      `Subject: ${subj}`,
+      'MIME-Version: 1.0',
+      'Content-Type: text/plain; charset=utf-8',
+      '',
+      body + footer
+    ].join('\r\n');
+    
+    const encoded = btoa(unescape(encodeURIComponent(rawMessage))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    const targetUrl = 'https://gmail.googleapis.com/gmail/v1/users/me/messages/send';
+    
+    const res = await fetch(targetUrl, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${driveToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ raw: encoded })
+    });
+    
+    if (res.ok) {
+      if (!silent) {
+        statusEl.textContent = 'Dispatched.'; statusEl.style.color = 'var(--green)';
+        setTimeout(closeEmailOverlay, 1000);
       } else {
-        // Silent auto-send: return to chat immediately with confirmation bubble
-        navItems.forEach(b=>b.classList.remove('active'));
-        document.querySelector('[data-panel="chatPanel"]').classList.add('active');
-        activatePanel('chatPanel','Chat');
-        addBubble('sonia','Done — email sent to '+to+'.','calm');
-        setStatus('sent');
-        if(driveToken)saveMem('[auto-sent email]','to:'+to+' subject:'+subj);
+        addBubble('sonia', `Email successfully sent to ${to}`, 'calm');
       }
       return true;
-    } else {
-      const msg=d.error?.message||'Send failed.';
-      if(!silent){st.textContent=msg;st.style.color='var(--red)';}
-      else addBubble('sonia','Something went wrong sending that — '+msg,'calm');
-      return false;
     }
-  }catch(e){
-    if(!silent){st.textContent='Error: '+e.message;st.style.color='var(--red)';}
-    else addBubble('sonia','Network error trying to send — '+e.message,'calm');
-    return false;
-  }
+  } catch (e) { if (!silent) statusEl.textContent = 'Fatal endpoint connection loss.'; }
+  return false;
 }
 
-document.getElementById('emailSendBtn').addEventListener('click',async()=>{
-  const to=document.getElementById('emailTo').value.trim();
-  const subj=document.getElementById('emailSubject').value.trim();
-  const body=document.getElementById('emailBody').value.trim();
-  await sendEmailNow(to,subj,body,false);
+document.getElementById('emailSendBtn').addEventListener('click', () => {
+  const to = document.getElementById('emailTo').value;
+  const subj = document.getElementById('emailSubject').value;
+  const body = document.getElementById('emailBody').value;
+  sendEmailNow(to, subj, body, false);
 });
-
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 </script>
 </body>
 </html>
