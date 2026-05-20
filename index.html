@@ -4,358 +4,657 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Sonia — Remote</title>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
     :root {
-      --bg: #000; --surface: #0a0a0a;
-      --border: rgba(255,255,255,0.35); --border-hover: rgba(255,255,255,0.75);
-      --text: rgba(255,255,255,1.0); --muted: rgba(255,255,255,0.82);
-      --dim: rgba(255,255,255,0.55); --accent: rgba(255,255,255,0.95);
-      --fade: 0.45s cubic-bezier(0.4,0,0.2,1);
-      --font-mono: 'Share Tech Mono','Courier New',monospace;
-      --font-main: 'Century Gothic','CenturyGothic','AppleGothic',sans-serif;
-      --safe-top: env(safe-area-inset-top,0px); --safe-bottom: env(safe-area-inset-bottom,0px);
-      --fs-xs: 0.78rem; --fs-sm: 0.88rem; --fs-base: 1.05rem;
-      --fs-body: 1.1rem; --fs-title: 1.25rem;
+      --bg:          #050508;
+      --surface:     #0c0c12;
+      --surface2:    #13131c;
+      --border:      rgba(255,255,255,0.08);
+      --border-mid:  rgba(255,255,255,0.14);
+      --border-hi:   rgba(255,255,255,0.28);
+      --text:        rgba(255,255,255,0.92);
+      --muted:       rgba(255,255,255,0.50);
+      --dim:         rgba(255,255,255,0.28);
+      --accent:      #c8a8f8;
+      --accent-dim:  rgba(200,168,248,0.18);
+      --pink:        rgba(255,160,200,0.85);
+      --green-ok:    rgba(80,220,130,0.85);
+      --red-err:     rgba(255,80,80,0.75);
+      --blue-busy:   rgba(140,180,255,0.75);
+      --fade:        0.38s cubic-bezier(0.4,0,0.2,1);
+      --mono:        'Share Tech Mono', 'Courier New', monospace;
+      --sans:        'Inter', -apple-system, sans-serif;
+      --safe-top:    env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --r:           14px;
     }
-    html,body { height:100%; width:100%; background:var(--bg); color:var(--text);
-      font-family:var(--font-main); overflow:hidden;
-      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
 
-    /* ══ SETUP ══ */
-    #setup { position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;
-      align-items:center;justify-content:center;gap:24px;padding:40px 28px;background:var(--bg); }
-    #setup h1 { font-family:var(--font-main);font-weight:300;font-size:2rem;letter-spacing:0.45em;color:#fff; }
-    #setup .sub { font-family:var(--font-mono);font-size:var(--fs-sm);letter-spacing:0.4em;color:var(--muted);text-align:center; }
-    .setup-field { width:100%;max-width:360px; }
-    .setup-field label { display:block;font-family:var(--font-mono);font-size:var(--fs-sm);
-      letter-spacing:0.3em;color:var(--muted);margin-bottom:10px; }
-    .setup-field input { width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);
-      color:#fff;font-family:var(--font-mono);font-size:var(--fs-base);letter-spacing:0.12em;
-      padding:14px 0;outline:none;transition:border-color 0.3s; }
-    .setup-field input:focus { border-color:var(--accent); }
-    .setup-field input::placeholder { color:var(--dim); }
-    #setupBtn { background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);
-      font-size:var(--fs-base);letter-spacing:0.3em;padding:18px 44px;cursor:pointer;
-      transition:color 0.3s,border-color 0.3s;min-height:56px; }
-    #setupBtn:active { color:#fff;border-color:var(--accent); }
-    .setup-note { font-family:var(--font-mono);font-size:var(--fs-xs);letter-spacing:0.15em;
-      color:var(--dim);text-align:center;max-width:320px;line-height:1.9; }
-
-    /* ══ APP ══ */
-    #app { display:none;position:fixed;inset:0;flex-direction:column;
-      padding-top:var(--safe-top);padding-bottom:var(--safe-bottom); }
-    #app.on { display:flex; }
-
-    /* ── Header ── */
-    #hdr { display:flex;align-items:center;justify-content:space-between;
-      padding:16px 20px 14px;border-bottom:1px solid var(--border);flex-shrink:0;min-height:60px; }
-    #hdr-left { display:flex;align-items:center;gap:0; }
-    #hdr-title { font-family:var(--font-main);font-weight:300;font-size:var(--fs-title);letter-spacing:0.4em;color:#fff; }
-    #hdr-mode { display:flex;gap:0; }
-    .mode-btn { background:none;border:none;font-family:var(--font-mono);font-size:var(--fs-sm);
-      letter-spacing:0.08em;color:var(--muted);padding:12px 10px;min-height:44px;cursor:pointer;
-      border-bottom:2px solid transparent;transition:color 0.3s,border-color 0.3s;white-space:nowrap; }
-    .mode-btn.active { color:#fff;border-color:#fff; }
-    .mode-btn:active { color:#fff; }
-
-    /* ── Panels ── */
-    #panels { flex:1;overflow:hidden;min-height:0;position:relative; }
-    .panel { position:absolute;inset:0;display:flex;flex-direction:column;
-      opacity:0;pointer-events:none;transition:opacity var(--fade); }
-    .panel.active { opacity:1;pointer-events:all; }
-
-    /* ══ CHAT ══ */
-    #chatLog { flex:1;overflow-y:auto;padding:18px 18px;display:flex;flex-direction:column;
-      gap:20px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;scrollbar-width:none; }
-    #chatLog::-webkit-scrollbar { display:none; }
-    .bubble { max-width:88%;animation:bubbleIn 0.28s ease forwards; }
-    @keyframes bubbleIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-    .bubble.user  { align-self:flex-end; }
-    .bubble.sonia { align-self:flex-start; }
-    .bubble-text { font-size:var(--fs-body);line-height:1.75;letter-spacing:0.02em; }
-    .bubble.user  .bubble-text { color:#fff;text-align:right; }
-    .bubble.sonia .bubble-text { color:#fff; }
-    .bubble-meta { font-family:var(--font-mono);font-size:var(--fs-xs);letter-spacing:0.22em;
-      color:var(--dim);margin-top:5px; }
-    .bubble.user .bubble-meta { text-align:right; }
-    .mood-pip { display:inline-block;width:6px;height:6px;border-radius:50%;
-      margin-right:7px;vertical-align:middle; }
-    .thinking .bubble-text { color:var(--dim);animation:blink 1s ease-in-out infinite; }
-    @keyframes blink { 0%,100%{opacity:0.4} 50%{opacity:1} }
-
-    /* ── Chat input ── */
-    #chatInput { display:flex;align-items:flex-end;gap:12px;padding:14px 18px 16px;
-      border-top:1px solid var(--border);flex-shrink:0; }
-    #chatBox { flex:1;background:transparent;border:none;border-bottom:1px solid var(--border);
-      color:#fff;font-family:var(--font-mono);font-size:var(--fs-base);letter-spacing:0.08em;
-      padding:10px 0;outline:none;resize:none;max-height:80px;overflow-y:auto;line-height:1.5;
-      transition:border-color 0.3s; }
-    #chatBox:focus { border-color:#fff; }
-    #chatBox::placeholder { color:var(--dim); }
-    #sendChat { background:none;border:none;font-family:var(--font-mono);font-size:var(--fs-sm);
-      letter-spacing:0.2em;color:var(--muted);padding:12px 4px;min-height:44px;min-width:52px;
-      cursor:pointer;transition:color 0.3s;flex-shrink:0;
-      border-bottom:1px solid transparent;text-align:center; }
-    #sendChat:active { color:#fff;border-color:#fff; }
-
-    /* ── Mic button ── */
-    #micBtn { background:none;border:none;font-family:var(--font-mono);font-size:var(--fs-sm);
-      letter-spacing:0.18em;color:var(--muted);padding:12px 6px;min-height:44px;min-width:44px;
-      cursor:pointer;transition:color 0.3s;flex-shrink:0;text-align:center;border-bottom:1px solid transparent; }
-    #micBtn.active { color:rgba(160,215,255,0.95);border-color:rgba(160,215,255,0.6); animation:micBlink 0.7s ease-in-out infinite; }
-    @keyframes micBlink { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-    /* ══ STAR MATRIX ══ */
-    #starMatrix { position:fixed;width:14px;height:14px;border-radius:50%;pointer-events:auto;
-      cursor:grab;z-index:50;display:none;top:80px;right:40px;
-      background:radial-gradient(circle at 40% 35%,#fff 0%,rgba(200,220,255,0.7) 40%,rgba(180,200,255,0.1) 100%);
-      box-shadow:0 0 6px rgba(255,255,255,0.55),0 0 14px rgba(200,210,255,0.22);
-      animation:starFloat 6s ease-in-out infinite;transition:opacity 0.6s ease; }
-    #starMatrix.visible { display:block; }
-    #starMatrix:active { cursor:grabbing; }
-    #starMatrix::before,#starMatrix::after { content:'';position:absolute;background:rgba(255,255,255,0.55);
-      border-radius:2px;top:50%;left:50%;transform:translate(-50%,-50%); }
-    #starMatrix::before { width:2px;height:10px; }
-    #starMatrix::after  { width:10px;height:2px; }
-    @keyframes starFloat {
-      0%,100%{transform:translate(0,0) rotate(0deg)} 25%{transform:translate(3px,-5px) rotate(8deg)}
-      50%{transform:translate(-2px,-8px) rotate(-5deg)} 75%{transform:translate(4px,-3px) rotate(4deg)} }
-    #starMatrix.rainbow { animation:starRainbow 0.9s linear infinite,starFloat 6s ease-in-out infinite; }
-    @keyframes starRainbow {
-      0%   { box-shadow:0 0 10px 4px hsl(0,100%,60%),0 0 28px 8px rgba(255,80,80,0.3); background:radial-gradient(circle,hsl(0,100%,80%),hsl(0,100%,50%)); }
-      16%  { box-shadow:0 0 10px 4px hsl(51,100%,60%),0 0 28px 8px rgba(255,200,0,0.3); background:radial-gradient(circle,hsl(51,100%,80%),hsl(51,100%,50%)); }
-      32%  { box-shadow:0 0 10px 4px hsl(120,100%,55%),0 0 28px 8px rgba(0,255,80,0.3); background:radial-gradient(circle,hsl(120,100%,80%),hsl(120,100%,50%)); }
-      48%  { box-shadow:0 0 10px 4px hsl(180,100%,55%),0 0 28px 8px rgba(0,220,220,0.3); background:radial-gradient(circle,hsl(180,100%,80%),hsl(180,100%,50%)); }
-      64%  { box-shadow:0 0 10px 4px hsl(240,100%,65%),0 0 28px 8px rgba(80,80,255,0.3); background:radial-gradient(circle,hsl(240,100%,80%),hsl(240,100%,60%)); }
-      80%  { box-shadow:0 0 10px 4px hsl(300,100%,65%),0 0 28px 8px rgba(220,0,220,0.3); background:radial-gradient(circle,hsl(300,100%,80%),hsl(300,100%,60%)); }
-      100% { box-shadow:0 0 10px 4px hsl(0,100%,60%),0 0 28px 8px rgba(255,80,80,0.3); background:radial-gradient(circle,hsl(0,100%,80%),hsl(0,100%,50%)); } }
-    #starLabel { position:fixed;font-family:var(--font-mono);font-size:0.42rem;letter-spacing:0.3em;
-      color:rgba(255,255,255,0.28);pointer-events:none;white-space:nowrap;z-index:51;
-      display:none;transition:opacity 0.4s; }
-    #starLabel.visible { display:block; }
-
-    /* ══ MEMORY PANEL ══ */
-    #memPanel { overflow-y:auto;padding:22px 20px;-webkit-overflow-scrolling:touch;scrollbar-width:none; }
-    #memPanel::-webkit-scrollbar { display:none; }
-    .mem-hdr { font-family:var(--font-mono);font-size:var(--fs-sm);letter-spacing:0.35em;color:var(--muted);
-      margin-bottom:20px;display:flex;justify-content:space-between;align-items:center; }
-    .mem-refresh { background:none;border:none;cursor:pointer;font-family:var(--font-mono);
-      font-size:var(--fs-sm);letter-spacing:0.22em;color:var(--dim);padding:8px 0;min-height:44px;transition:color 0.3s; }
-    .mem-refresh:active { color:#fff; }
-    .mem-entry { border-bottom:1px solid var(--border);padding:16px 0; }
-    .mem-entry:last-child { border-bottom:none; }
-    .mem-ts { font-family:var(--font-mono);font-size:var(--fs-xs);letter-spacing:0.2em;color:var(--dim);margin-bottom:7px; }
-    .mem-user { font-size:var(--fs-base);color:rgba(255,255,255,0.82);margin-bottom:5px;line-height:1.55; }
-    .mem-sonia { font-size:var(--fs-base);color:#fff;line-height:1.65; }
-
-    /* ══ NOTES PANEL ══ */
-    #notesPanel { display:flex;flex-direction:column;padding:22px 20px;gap:18px; }
-    .notes-hdr { font-family:var(--font-mono);font-size:var(--fs-sm);letter-spacing:0.35em;color:var(--muted); }
-    #noteBox { flex:1;background:transparent;border:none;border-bottom:1px solid var(--border);
-      color:#fff;font-family:var(--font-mono);font-size:var(--fs-base);letter-spacing:0.06em;
-      padding:12px 0;outline:none;resize:none;line-height:1.7;min-height:100px;transition:border-color 0.3s; }
-    #noteBox:focus { border-color:#fff; }
-    #noteBox::placeholder { color:var(--dim); }
-    .notes-actions { display:flex;gap:16px; }
-    .note-btn { background:none;border:none;border-bottom:1px solid var(--border);color:var(--muted);
-      font-family:var(--font-mono);font-size:var(--fs-sm);letter-spacing:0.22em;padding:12px 0;
-      min-height:44px;cursor:pointer;transition:color 0.3s,border-color 0.3s; }
-    .note-btn:active { color:#fff;border-color:#fff; }
-    .notes-queue { flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none; }
-    .notes-queue::-webkit-scrollbar { display:none; }
-    .note-item { border-bottom:1px solid var(--border);padding:14px 0;display:flex;
-      justify-content:space-between;align-items:flex-start;gap:12px; }
-    .note-item-body { flex:1; }
-    .note-item-ts { font-family:var(--font-mono);font-size:var(--fs-xs);letter-spacing:0.18em;color:var(--dim);margin-bottom:5px; }
-    .note-item-text { font-size:var(--fs-base);color:#fff;line-height:1.55; }
-    .note-del { background:none;border:none;cursor:pointer;font-family:var(--font-mono);font-size:var(--fs-sm);
-      letter-spacing:0.18em;color:var(--dim);transition:color 0.3s;flex-shrink:0;
-      padding:8px 0;min-height:44px;min-width:36px;text-align:right; }
-    .note-del:active { color:rgba(255,90,90,0.9); }
-
-    /* ══ REMINDER PANEL ══ */
-    #remPanel { overflow-y:auto;padding:22px 20px;-webkit-overflow-scrolling:touch;scrollbar-width:none; }
-    #remPanel::-webkit-scrollbar { display:none; }
-    .rem-hdr { font-family:var(--font-mono);font-size:var(--fs-sm);letter-spacing:0.35em;color:var(--muted);
-      margin-bottom:20px;display:flex;justify-content:space-between;align-items:center; }
-    .rem-entry { border-bottom:1px solid var(--border);padding:16px 0; }
-    .rem-entry:last-child { border-bottom:none; }
-    .rem-ts { font-family:var(--font-mono);font-size:var(--fs-xs);letter-spacing:0.2em;color:var(--dim);margin-bottom:6px; }
-    .rem-title { font-size:var(--fs-base);color:#fff;margin-bottom:3px; }
-    .rem-badge { display:inline-block;font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.2em;
-      padding:2px 8px;border:1px solid var(--border);color:var(--dim);border-radius:2px;margin-bottom:4px; }
-    .rem-badge.diary   { border-color:rgba(160,215,255,0.4);color:rgba(160,215,255,0.8); }
-    .rem-badge.reminder{ border-color:rgba(80,255,140,0.4);color:rgba(80,255,140,0.8); }
-
-    /* ══ STATUS BAR ══ */
-    #statusBar { height:32px;flex-shrink:0;display:flex;align-items:center;
-      padding:0 20px;border-top:1px solid var(--border); }
-    #statusText { font-family:var(--font-mono);font-size:var(--fs-xs);letter-spacing:0.22em;color:var(--dim); }
-    #statusText.ok   { color:rgba(80,255,140,0.85); }
-    #statusText.err  { color:rgba(255,90,90,0.9); }
-    #statusText.busy { color:rgba(160,210,255,0.85);animation:blink 1s ease-in-out infinite; }
-
-    /* ══ DRIVE BUTTON ══ */
-    #driveBtn { display:none;background:none;border:none;border-bottom:1px solid var(--border);
-      color:var(--muted);font-family:var(--font-mono);font-size:var(--fs-sm);letter-spacing:0.22em;
-      padding:12px 0;min-height:44px;cursor:pointer;transition:color 0.3s,border-color 0.3s; }
-    #driveBtn.visible { display:inline; }
-    #driveBtn.connected { color:rgba(80,255,140,0.9);border-color:rgba(80,255,140,0.4); }
-    #driveBtn:active { color:#fff;border-color:#fff; }
-
-    /* ══ PRESENCE DOT ══ */
-    #presence { width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,0.2);
-      flex-shrink:0;margin-left:12px;transition:background 0.6s ease,box-shadow 0.6s ease; }
-    #presence.online { background:rgba(60,220,110,1);
-      box-shadow:0 0 6px rgba(60,220,110,0.8),0 0 16px rgba(60,220,110,0.4);
-      animation:presencePulse 2.4s ease-in-out infinite; }
-    #presence.thinking { background:rgba(160,180,255,1);
-      box-shadow:0 0 6px rgba(160,180,255,0.8),0 0 16px rgba(160,180,255,0.4);
-      animation:presencePulse 0.9s ease-in-out infinite; }
-    @keyframes presencePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.7)} }
-
-    /* ══ MOOD PIPS ══ */
-    .m-calm{background:hsl(200,80%,60%)} .m-curious{background:hsl(270,75%,62%)}
-    .m-thinking{background:hsl(160,78%,54%)} .m-focused{background:hsl(35,90%,60%)}
-    .m-intimate{background:hsl(320,65%,60%)} .m-introspective{background:hsl(240,55%,52%)}
-    .m-default{background:rgba(255,255,255,0.5)}
-
-    /* ══ EMAIL COMPOSER OVERLAY ══ */
-    #emailOverlay { display:none;position:fixed;inset:0;z-index:30;background:rgba(0,0,0,0.88);
-      flex-direction:column;padding:40px 24px 24px;gap:18px; }
-    #emailOverlay.on { display:flex; }
-    .email-hdr { font-family:var(--font-mono);font-size:var(--fs-xs);letter-spacing:0.45em;color:var(--muted);margin-bottom:4px; }
-    .email-field { display:flex;flex-direction:column;gap:8px; }
-    .email-field label { font-family:var(--font-mono);font-size:var(--fs-xs);letter-spacing:0.3em;color:var(--dim); }
-    .email-field input,.email-field textarea { background:transparent;border:none;border-bottom:1px solid var(--border);
-      color:#fff;font-family:var(--font-mono);font-size:var(--fs-sm);letter-spacing:0.06em;
-      padding:10px 0;outline:none;transition:border-color 0.3s;width:100%; }
-    .email-field input:focus,.email-field textarea:focus { border-color:#fff; }
-    .email-field input::placeholder,.email-field textarea::placeholder { color:var(--dim); }
-    .email-field textarea { resize:none;min-height:80px;line-height:1.6; }
-    .email-actions { display:flex;gap:16px;margin-top:8px; }
-    .email-btn { background:none;border:none;border-bottom:1px solid var(--border);color:var(--muted);
-      font-family:var(--font-mono);font-size:var(--fs-sm);letter-spacing:0.22em;padding:12px 0;
-      min-height:44px;cursor:pointer;transition:color 0.3s,border-color 0.3s; }
-    .email-btn:active { color:#fff;border-color:#fff; }
-    .email-btn.send { color:rgba(80,255,140,0.9);border-color:rgba(80,255,140,0.4); }
-    .email-status { font-family:var(--font-mono);font-size:var(--fs-xs);letter-spacing:0.22em;
-      color:var(--dim);min-height:20px; }
-    .email-status.ok  { color:rgba(80,255,140,0.85); }
-    .email-status.err { color:rgba(255,90,90,0.9); }
-    .email-status.busy{ color:rgba(160,210,255,0.85);animation:blink 1s ease-in-out infinite; }
-
-    /* ══ LIGHT MODE ══ */
-    body.light { --bg:#fff;--surface:#f5f5f5;--border:rgba(0,0,0,0.18);
-      --border-hover:rgba(0,0,0,0.45);--text:rgba(0,0,0,1.0);--muted:rgba(0,0,0,0.65);
-      --dim:rgba(0,0,0,0.42);--accent:rgba(0,0,0,0.85); }
-    body.light #setup,body.light #emailOverlay { background:#fff; }
-    body.light #setup h1,body.light #hdr-title { color:#000; }
-    body.light .setup-field input,body.light #chatBox,body.light #noteBox { color:#000; }
-    body.light .mode-btn.active { color:#000;border-color:#000; }
-    body.light .bubble.user .bubble-text,body.light .bubble.sonia .bubble-text { color:#111; }
-    body.light .mem-user { color:rgba(0,0,0,0.7); }
-    body.light .mem-sonia,body.light .note-item-text,body.light .rem-title { color:#000; }
-    body.light .email-field input,body.light .email-field textarea { color:#000; }
-    body.light #presence.online { background:rgba(0,160,70,1);box-shadow:0 0 6px rgba(0,160,70,0.7),0 0 14px rgba(0,160,70,0.3); }
-    body.light #presence.thinking { background:rgba(80,100,220,1);box-shadow:0 0 6px rgba(80,100,220,0.7),0 0 14px rgba(80,100,220,0.3); }
-    body.light #statusText.ok { color:rgba(0,140,60,0.9); }
-    body.light #statusText.err { color:rgba(200,30,30,0.9); }
-    body.light #statusText.busy { color:rgba(60,80,200,0.9); }
-
-    #themeBtn { background:none;border:none;font-size:1.1rem;padding:0 0 0 12px;cursor:pointer;
-      transition:opacity 0.3s;flex-shrink:0;min-height:44px;min-width:36px;line-height:1;opacity:0.7; }
-    #themeBtn:active { opacity:1; }
-
-    @media (min-width:600px) {
-      :root { --fs-xs:0.72rem;--fs-sm:0.82rem;--fs-base:1.0rem;--fs-body:1.08rem;--fs-title:1.35rem; }
-      #hdr { padding:20px 32px 16px; }
-      .mode-btn { padding:12px 18px; }
-      #chatLog { padding:24px 32px; }
-      .bubble { max-width:72%; }
-      #chatInput { padding:16px 32px 18px; }
-      #memPanel,#notesPanel,#remPanel { padding:28px 32px; }
-      #statusBar { height:36px;padding:0 32px; }
+    html, body {
+      height: 100%; width: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
     }
-    @media (min-width:900px) {
-      .bubble { max-width:60%; }
-      #chatLog { padding:32px 48px; }
-      #chatInput { padding:18px 48px 20px; }
-      #memPanel,#notesPanel,#remPanel { padding:32px 48px; }
+
+    /* ══ SETUP ══════════════════════════════════════════════════ */
+    #setup {
+      position: fixed; inset: 0; z-index: 200;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 0;
+      padding: calc(var(--safe-top) + 40px) 32px calc(var(--safe-bottom) + 32px);
+      background: var(--bg);
+      overflow-y: auto;
+    }
+
+    .setup-orb {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: radial-gradient(circle at 38% 36%, rgba(200,168,248,0.9) 0%, rgba(160,100,240,0.6) 50%, transparent 80%);
+      box-shadow: 0 0 32px rgba(200,168,248,0.22), 0 0 80px rgba(160,100,240,0.1);
+      margin-bottom: 28px;
+      animation: setupOrbPulse 3.5s ease-in-out infinite;
+    }
+    @keyframes setupOrbPulse {
+      0%,100% { box-shadow: 0 0 32px rgba(200,168,248,0.22), 0 0 80px rgba(160,100,240,0.1); }
+      50%      { box-shadow: 0 0 48px rgba(200,168,248,0.38), 0 0 110px rgba(160,100,240,0.18); }
+    }
+
+    #setup h1 {
+      font-family: var(--sans); font-weight: 300;
+      font-size: 2.1rem; letter-spacing: 0.55em;
+      color: #fff; margin-bottom: 6px;
+    }
+    .setup-sub {
+      font-family: var(--mono); font-size: 0.68rem;
+      letter-spacing: 0.42em; color: var(--muted);
+      margin-bottom: 44px;
+    }
+
+    .setup-group {
+      width: 100%; max-width: 360px;
+      display: flex; flex-direction: column; gap: 28px;
+      margin-bottom: 36px;
+    }
+    .setup-field { position: relative; }
+    .setup-field label {
+      display: block; font-family: var(--mono);
+      font-size: 0.62rem; letter-spacing: 0.38em;
+      color: var(--dim); margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .setup-field input {
+      width: 100%; background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: #fff; font-family: var(--mono);
+      font-size: 0.9rem; letter-spacing: 0.08em;
+      padding: 14px 16px; outline: none;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .setup-field input:focus {
+      border-color: rgba(200,168,248,0.45);
+      background: rgba(200,168,248,0.04);
+    }
+    .setup-field input::placeholder { color: var(--dim); }
+
+    #setupBtn {
+      width: 100%; max-width: 360px;
+      background: rgba(200,168,248,0.1);
+      border: 1px solid rgba(200,168,248,0.28);
+      border-radius: 12px;
+      color: var(--accent); font-family: var(--mono);
+      font-size: 0.82rem; letter-spacing: 0.35em;
+      padding: 16px; cursor: pointer;
+      transition: background 0.25s, border-color 0.25s, color 0.25s;
+    }
+    #setupBtn:active {
+      background: rgba(200,168,248,0.18);
+      color: #fff;
+    }
+
+    .setup-note {
+      font-family: var(--mono); font-size: 0.6rem;
+      letter-spacing: 0.18em; color: var(--dim);
+      text-align: center; max-width: 340px;
+      line-height: 1.9; margin-top: 28px;
+    }
+
+    /* ══ APP SHELL ══════════════════════════════════════════════ */
+    #app {
+      display: none; position: fixed; inset: 0;
+      flex-direction: column;
+      padding-top: var(--safe-top);
+      padding-bottom: var(--safe-bottom);
+      background: var(--bg);
+    }
+    #app.on { display: flex; }
+
+    /* ── Header ───────────────────────────────────────── */
+    #hdr {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      gap: 12px;
+    }
+
+    .hdr-left {
+      display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0;
+    }
+
+    /* Mini orb in header */
+    #hdrOrb {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: radial-gradient(circle at 38% 36%, rgba(200,168,248,0.85) 0%, rgba(140,80,220,0.5) 55%, transparent 80%);
+      box-shadow: 0 0 10px rgba(200,168,248,0.25), 0 0 24px rgba(160,100,240,0.1);
+      flex-shrink: 0;
+      transition: box-shadow 0.6s ease, background 0.6s ease;
+    }
+    #hdrOrb.listening {
+      background: radial-gradient(circle at 38% 36%, rgba(255,160,200,0.9) 0%, rgba(220,80,140,0.5) 55%, transparent 80%);
+      box-shadow: 0 0 14px rgba(255,160,200,0.5), 0 0 36px rgba(220,80,140,0.2);
+      animation: orbPulse 0.8s ease-in-out infinite;
+    }
+    #hdrOrb.thinking {
+      background: radial-gradient(circle at 38% 36%, rgba(140,180,255,0.9) 0%, rgba(80,120,240,0.5) 55%, transparent 80%);
+      box-shadow: 0 0 14px rgba(140,180,255,0.45), 0 0 36px rgba(80,120,240,0.18);
+      animation: orbPulse 1.4s ease-in-out infinite;
+    }
+    @keyframes orbPulse {
+      0%,100% { transform: scale(1); opacity: 1; }
+      50%      { transform: scale(0.88); opacity: 0.65; }
+    }
+
+    #hdrTitle {
+      font-family: var(--sans); font-weight: 300;
+      font-size: 1.15rem; letter-spacing: 0.42em;
+      color: #fff;
+    }
+
+    /* Nav pills */
+    #nav {
+      display: flex; gap: 4px;
+      overflow-x: auto; scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      flex-shrink: 1;
+    }
+    #nav::-webkit-scrollbar { display: none; }
+
+    .nav-pill {
+      background: none; border: 1px solid transparent;
+      border-radius: 20px;
+      font-family: var(--mono); font-size: 0.6rem;
+      letter-spacing: 0.14em; color: var(--dim);
+      padding: 5px 12px; cursor: pointer; white-space: nowrap;
+      transition: color 0.25s, border-color 0.25s, background 0.25s;
+    }
+    .nav-pill.active {
+      color: var(--accent);
+      border-color: rgba(200,168,248,0.28);
+      background: rgba(200,168,248,0.07);
+    }
+
+    /* ── Panels ───────────────────────────────────────── */
+    #panels { flex: 1; overflow: hidden; min-height: 0; position: relative; }
+
+    .panel {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      opacity: 0; pointer-events: none;
+      transition: opacity var(--fade);
+    }
+    .panel.active { opacity: 1; pointer-events: all; }
+
+    /* ══ CHAT PANEL ══════════════════════════════════════════════ */
+    #chatLog {
+      flex: 1; overflow-y: auto;
+      padding: 20px 18px 10px;
+      display: flex; flex-direction: column; gap: 16px;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    #chatLog::-webkit-scrollbar { display: none; }
+
+    .bubble { max-width: 82%; }
+    .bubble.user { align-self: flex-end; }
+    .bubble.sonia { align-self: flex-start; }
+
+    .bubble-inner {
+      padding: 12px 16px;
+      border-radius: 18px;
+      animation: bubbleIn 0.28s ease forwards;
+    }
+    @keyframes bubbleIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .bubble.user .bubble-inner {
+      background: var(--surface2);
+      border: 1px solid var(--border-mid);
+      border-bottom-right-radius: 5px;
+    }
+    .bubble.sonia .bubble-inner {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 5px;
+    }
+
+    .bubble-text {
+      font-size: 0.97rem; line-height: 1.72;
+      font-weight: 400; letter-spacing: 0.01em;
+    }
+    .bubble.user .bubble-text  { color: rgba(255,255,255,0.85); }
+    .bubble.sonia .bubble-text { color: var(--text); }
+
+    .bubble-meta {
+      font-family: var(--mono); font-size: 0.58rem;
+      letter-spacing: 0.22em; color: var(--dim);
+      margin-top: 5px; display: flex; align-items: center; gap: 5px;
+    }
+    .bubble.user .bubble-meta { justify-content: flex-end; }
+
+    .mood-dot {
+      width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+    }
+    .m-calm          { background: hsl(200,70%,55%); }
+    .m-curious       { background: hsl(270,65%,62%); }
+    .m-thinking      { background: hsl(160,65%,50%); }
+    .m-focused       { background: hsl(35,80%,55%); }
+    .m-intimate      { background: hsl(320,55%,58%); }
+    .m-introspective { background: hsl(240,45%,52%); }
+    .m-default       { background: rgba(255,255,255,0.3); }
+
+    .thinking .bubble-inner { border-color: var(--border); }
+    .thinking .bubble-text  {
+      color: var(--dim);
+      animation: thinkBlink 1.1s ease-in-out infinite;
+    }
+    @keyframes thinkBlink { 0%,100%{opacity:0.25} 50%{opacity:0.9} }
+
+    /* Chat input bar */
+    #chatBar {
+      display: flex; align-items: flex-end; gap: 10px;
+      padding: 12px 16px 14px;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+
+    #chatBox {
+      flex: 1; background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      color: #fff; font-family: var(--sans);
+      font-size: 0.95rem; font-weight: 400;
+      padding: 11px 16px; outline: none;
+      resize: none; max-height: 90px;
+      overflow-y: auto; line-height: 1.5;
+      transition: border-color 0.25s;
+      -webkit-overflow-scrolling: touch;
+    }
+    #chatBox:focus { border-color: rgba(200,168,248,0.35); }
+    #chatBox::placeholder { color: var(--dim); font-family: var(--sans); }
+
+    .bar-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0;
+      transition: background 0.2s, border-color 0.2s;
+      font-size: 1rem;
+    }
+    .bar-btn:active { background: var(--accent-dim); border-color: rgba(200,168,248,0.35); }
+    .bar-btn.send-btn {
+      background: rgba(200,168,248,0.12);
+      border-color: rgba(200,168,248,0.25);
+      font-family: var(--mono); font-size: 0.6rem;
+      letter-spacing: 0.12em; color: var(--accent);
+      width: auto; padding: 0 16px; border-radius: 20px;
+    }
+    .bar-btn.send-btn:active {
+      background: rgba(200,168,248,0.22);
+    }
+    #micBtn.active {
+      background: rgba(255,160,200,0.12);
+      border-color: rgba(255,160,200,0.4);
+      animation: micPulse 0.75s ease-in-out infinite;
+    }
+    @keyframes micPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(255,160,200,0); }
+      50%      { box-shadow: 0 0 0 6px rgba(255,160,200,0.12); }
+    }
+
+    /* ══ MEMORY PANEL ════════════════════════════════════════════ */
+    #memPanel {
+      overflow-y: auto; padding: 20px 18px;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    #memPanel::-webkit-scrollbar { display: none; }
+
+    .panel-hdr {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .panel-label {
+      font-family: var(--mono); font-size: 0.62rem;
+      letter-spacing: 0.42em; color: var(--muted);
+    }
+    .panel-action {
+      background: none; border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--mono); font-size: 0.6rem;
+      letter-spacing: 0.22em; color: var(--dim);
+      padding: 6px 12px; cursor: pointer;
+      transition: color 0.25s, border-color 0.25s;
+    }
+    .panel-action:active { color: var(--accent); border-color: rgba(200,168,248,0.35); }
+
+    .mem-entry {
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+    }
+    .mem-entry:last-child { border-bottom: none; }
+    .mem-ts {
+      font-family: var(--mono); font-size: 0.58rem;
+      letter-spacing: 0.2em; color: var(--dim); margin-bottom: 6px;
+    }
+    .mem-user {
+      font-size: 0.88rem; color: rgba(255,255,255,0.6);
+      margin-bottom: 5px; line-height: 1.55;
+    }
+    .mem-sonia {
+      font-size: 0.95rem; color: var(--text); line-height: 1.65;
+    }
+
+    /* ══ NOTES PANEL ═════════════════════════════════════════════ */
+    #notesPanel {
+      display: flex; flex-direction: column;
+      padding: 20px 18px; gap: 16px;
+      overflow: hidden;
+    }
+
+    #noteBox {
+      background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 12px;
+      color: #fff; font-family: var(--sans);
+      font-size: 0.95rem; font-weight: 400;
+      padding: 14px 16px; outline: none;
+      resize: none; line-height: 1.65;
+      min-height: 110px;
+      transition: border-color 0.25s;
+      -webkit-overflow-scrolling: touch;
+    }
+    #noteBox:focus { border-color: rgba(200,168,248,0.35); }
+    #noteBox::placeholder { color: var(--dim); }
+
+    .notes-actions {
+      display: flex; gap: 10px; align-items: center;
+    }
+
+    .pill-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 20px;
+      font-family: var(--mono); font-size: 0.62rem;
+      letter-spacing: 0.22em; color: var(--muted);
+      padding: 10px 18px; cursor: pointer;
+      transition: color 0.25s, border-color 0.25s, background 0.25s;
+      white-space: nowrap;
+    }
+    .pill-btn:active { color: #fff; border-color: var(--border-hi); }
+    .pill-btn.primary {
+      background: rgba(200,168,248,0.1);
+      border-color: rgba(200,168,248,0.25);
+      color: var(--accent);
+    }
+    .pill-btn.primary:active { background: rgba(200,168,248,0.2); color: #fff; }
+    #driveBtn.connected {
+      color: var(--green-ok);
+      border-color: rgba(80,220,130,0.3);
+      background: rgba(80,220,130,0.06);
+    }
+
+    #driveHint {
+      font-family: var(--mono); font-size: 0.6rem;
+      letter-spacing: 0.18em; color: var(--dim);
+      line-height: 1.7; display: none;
+    }
+    #driveHint.visible { display: block; }
+
+    .notes-queue-label {
+      font-family: var(--mono); font-size: 0.58rem;
+      letter-spacing: 0.3em; color: var(--dim);
+    }
+    .notes-queue {
+      flex: 1; overflow-y: auto;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    .notes-queue::-webkit-scrollbar { display: none; }
+
+    .note-item {
+      border-bottom: 1px solid var(--border);
+      padding: 12px 0; display: flex;
+      justify-content: space-between; align-items: flex-start; gap: 12px;
+    }
+    .note-item-ts {
+      font-family: var(--mono); font-size: 0.58rem;
+      letter-spacing: 0.18em; color: var(--dim); margin-bottom: 4px;
+    }
+    .note-item-text {
+      font-size: 0.92rem; color: var(--text); line-height: 1.55;
+    }
+    .note-del {
+      background: none; border: none; cursor: pointer;
+      font-family: var(--mono); font-size: 0.7rem;
+      color: var(--dim); padding: 2px 4px;
+      transition: color 0.25s; flex-shrink: 0;
+    }
+    .note-del:active { color: var(--red-err); }
+
+    /* ══ RADIO PANEL ═════════════════════════════════════════════ */
+    #radioPanel {
+      overflow-y: auto; padding: 20px 18px;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    #radioPanel::-webkit-scrollbar { display: none; }
+
+    #radioNowPlaying {
+      font-family: var(--mono); font-size: 0.65rem;
+      letter-spacing: 0.2em; color: var(--pink);
+      min-height: 18px;
+    }
+    #radioNowPlaying:not(:empty) { animation: thinkBlink 2.4s ease-in-out infinite; }
+
+    #radioStop {
+      background: none; border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--dim); font-family: var(--mono);
+      font-size: 0.62rem; letter-spacing: 0.25em;
+      padding: 8px 14px; cursor: pointer;
+      display: none; width: fit-content;
+      transition: color 0.25s;
+    }
+    #radioStop.visible { display: inline-block; }
+    #radioStop:active  { color: var(--red-err); }
+
+    .station-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .station-btn {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--muted); font-family: var(--mono);
+      font-size: 0.65rem; letter-spacing: 0.12em;
+      padding: 16px 12px; cursor: pointer; text-align: left;
+      line-height: 1.5;
+      transition: color 0.25s, border-color 0.25s, background 0.25s;
+    }
+    .station-btn.playing,
+    .station-btn:active {
+      color: #fff;
+      border-color: rgba(255,160,200,0.45);
+      background: rgba(255,160,200,0.06);
+    }
+    .station-btn .st-name { display: block; color: var(--text); margin-bottom: 3px; }
+    .station-btn .st-loc  { display: block; font-size: 0.57rem; color: var(--dim); }
+    #radioPlayer { display: none; }
+
+    /* ══ EMAIL OVERLAY ═══════════════════════════════════════════ */
+    #emailOverlay {
+      display: none; position: fixed; inset: 0; z-index: 150;
+      background: rgba(5,5,8,0.97);
+      flex-direction: column;
+      padding: calc(var(--safe-top) + 28px) 20px calc(var(--safe-bottom) + 24px);
+      gap: 18px; overflow-y: auto;
+    }
+    #emailOverlay.on { display: flex; }
+
+    .overlay-hdr {
+      font-family: var(--mono); font-size: 0.62rem;
+      letter-spacing: 0.45em; color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .email-field { display: flex; flex-direction: column; gap: 7px; }
+    .email-field label {
+      font-family: var(--mono); font-size: 0.6rem;
+      letter-spacing: 0.32em; color: var(--dim);
+    }
+    .email-field input,
+    .email-field textarea {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px;
+      color: #fff; font-family: var(--sans);
+      font-size: 0.95rem;
+      padding: 12px 14px; outline: none; width: 100%;
+      transition: border-color 0.25s;
+    }
+    .email-field input:focus,
+    .email-field textarea:focus { border-color: rgba(200,168,248,0.38); }
+    .email-field input::placeholder,
+    .email-field textarea::placeholder { color: var(--dim); }
+    .email-field textarea { resize: none; min-height: 100px; line-height: 1.6; }
+
+    .email-actions { display: flex; gap: 10px; }
+    .email-status {
+      font-family: var(--mono); font-size: 0.6rem;
+      letter-spacing: 0.22em; color: var(--dim); min-height: 16px;
+    }
+    .email-status.ok   { color: var(--green-ok); }
+    .email-status.err  { color: var(--red-err); }
+    .email-status.busy { color: var(--blue-busy); animation: thinkBlink 1s ease-in-out infinite; }
+
+    /* ══ STATUS BAR ══════════════════════════════════════════════ */
+    #statusBar {
+      height: 30px; flex-shrink: 0;
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 20px;
+      border-top: 1px solid var(--border);
+    }
+    #presence {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: rgba(255,255,255,0.12); flex-shrink: 0;
+      transition: background 0.5s ease, box-shadow 0.5s ease;
+    }
+    #presence.online {
+      background: var(--green-ok);
+      box-shadow: 0 0 5px rgba(80,220,130,0.7);
+      animation: presencePulse 2.6s ease-in-out infinite;
+    }
+    #presence.thinking {
+      background: var(--blue-busy);
+      box-shadow: 0 0 5px rgba(140,180,255,0.7);
+      animation: presencePulse 0.9s ease-in-out infinite;
+    }
+    @keyframes presencePulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.45; transform: scale(0.7); }
+    }
+    #statusText {
+      font-family: var(--mono); font-size: 0.6rem;
+      letter-spacing: 0.22em; color: var(--dim);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    #statusText.ok   { color: var(--green-ok); }
+    #statusText.err  { color: var(--red-err); }
+    #statusText.busy { color: var(--blue-busy); animation: thinkBlink 1s ease-in-out infinite; }
+
+    /* ══ TABLET ══════════════════════════════════════════════════ */
+    @media (min-width: 600px) {
+      #setup { gap: 0; }
+      .setup-group { max-width: 420px; }
+      #setupBtn { max-width: 420px; }
+      #hdr { padding: 20px 32px 14px; }
+      #chatLog { padding: 28px 32px 12px; }
+      #chatBar { padding: 14px 28px 16px; }
+      #memPanel, #notesPanel, #radioPanel { padding: 24px 32px; }
+    }
+    @media (min-width: 900px) {
+      .bubble { max-width: 64%; }
+      #chatLog { padding: 32px 48px 14px; }
+      #chatBar { padding: 14px 48px 18px; }
     }
   </style>
 </head>
 <body>
 
-<!-- Star Matrix -->
-<div id="starMatrix" title="Star Matrix"></div>
-<div id="starLabel"></div>
-
-<!-- Email Composer Overlay -->
-<div id="emailOverlay">
-  <div class="email-hdr">COMPOSE EMAIL</div>
-  <div class="email-field">
-    <label>TO</label>
-    <input type="email" id="emailTo" placeholder="recipient@email.com" autocomplete="off">
-  </div>
-  <div class="email-field">
-    <label>SUBJECT</label>
-    <input type="text" id="emailSubject" placeholder="subject line" autocomplete="off">
-  </div>
-  <div class="email-field" style="flex:1">
-    <label>MESSAGE</label>
-    <textarea id="emailBody" placeholder="what would you like to say..." style="flex:1;min-height:120px;"></textarea>
-  </div>
-  <div id="emailStatus" class="email-status"></div>
-  <div class="email-actions">
-    <button class="email-btn send" id="emailSendBtn">SEND</button>
-    <button class="email-btn" id="emailCancelBtn">CANCEL</button>
-  </div>
-</div>
-
-<!-- Setup -->
+<!-- ══ SETUP ═════════════════════════════════════════════════════ -->
 <div id="setup">
+  <div class="setup-orb"></div>
   <h1>Sonia</h1>
-  <div class="sub">remote · by H</div>
-  <div class="setup-field">
-    <label>GROQ API KEY</label>
-    <input type="password" id="cfgGroq" placeholder="gsk_..." autocomplete="off">
+  <div class="setup-sub">remote · by H</div>
+
+  <div class="setup-group">
+    <div class="setup-field">
+      <label>Groq API Key</label>
+      <input type="password" id="cfgGroq" placeholder="gsk_..." autocomplete="off">
+    </div>
+    <div class="setup-field">
+      <label>Google Client ID</label>
+      <input type="text" id="cfgClient" placeholder="xxxxxxxxx.apps.googleusercontent.com" autocomplete="off">
+    </div>
+    <div class="setup-field">
+      <label>Owner Name</label>
+      <input type="text" id="cfgOwner" placeholder="Mr H" autocomplete="off" value="Mr H">
+    </div>
+    <div class="setup-field">
+      <label>Drive Folder ID <span style="opacity:.45">(optional)</span></label>
+      <input type="text" id="cfgFolder" placeholder="15_CaTpcDxfu..." autocomplete="off">
+    </div>
   </div>
-  <div class="setup-field">
-    <label>GOOGLE CLIENT ID</label>
-    <input type="text" id="cfgClient" placeholder="xxxxxxxxx.apps.googleusercontent.com" autocomplete="off">
-  </div>
-  <div class="setup-field">
-    <label>OWNER NAME</label>
-    <input type="text" id="cfgOwner" placeholder="Mr H" autocomplete="off" value="Mr H">
-  </div>
-  <div class="setup-field">
-    <label>DRIVE FOLDER ID (optional)</label>
-    <input type="text" id="cfgFolder" placeholder="15_CaTpcDxfuOIOjx6dlgr..." autocomplete="off">
-  </div>
-  <button id="setupBtn">ENTER SONIA</button>
+
+  <button id="setupBtn">Enter Sonia</button>
+
   <div class="setup-note">
-    Keys saved in browser localStorage only — never sent anywhere except Groq and Google.
+    Keys saved in browser localStorage only — never transmitted except to Groq and Google.<br><br>
+    Google Client ID: console.cloud.google.com → enable Drive API → OAuth → Web app → add this page URL as authorised origin.
   </div>
 </div>
 
-<!-- Main App -->
+<!-- ══ MAIN APP ═══════════════════════════════════════════════════ -->
 <div id="app">
 
   <div id="hdr">
-    <div id="hdr-left">
-      <span id="hdr-title">Sonia</span>
-      <span id="presence"></span>
-      <button id="themeBtn" title="Toggle theme">☀️</button>
+    <div class="hdr-left">
+      <div id="hdrOrb"></div>
+      <span id="hdrTitle">Sonia</span>
     </div>
-    <div id="hdr-mode">
-      <button class="mode-btn active" data-panel="chatPanel">CHAT</button>
-      <button class="mode-btn" data-panel="memPanel">MEMORY</button>
-      <button class="mode-btn" data-panel="remPanel">DIARY</button>
-      <button class="mode-btn" data-panel="notesPanel">NOTES</button>
+    <div id="nav">
+      <button class="nav-pill active" data-panel="chatPanel">Chat</button>
+      <button class="nav-pill" data-panel="memPanel">Memory</button>
+      <button class="nav-pill" data-panel="notesPanel">Notes</button>
+      <button class="nav-pill" data-panel="radioPanel">Radio</button>
+      <button class="nav-pill" id="mailTab">Mail</button>
     </div>
   </div>
 
@@ -364,777 +663,748 @@
     <!-- CHAT -->
     <div class="panel active" id="chatPanel" style="display:flex;flex-direction:column;">
       <div id="chatLog"></div>
-      <div id="chatInput">
+      <div id="chatBar">
         <textarea id="chatBox" placeholder="say something…" rows="1"></textarea>
-        <button id="micBtn" title="Voice input">🎤</button>
-        <button id="sendChat">SEND</button>
+        <button class="bar-btn" id="micBtn" title="Voice input">🎙</button>
+        <button class="bar-btn send-btn" id="sendChat">SEND</button>
       </div>
     </div>
 
     <!-- MEMORY -->
-    <div class="panel" id="memPanel" style="overflow-y:auto;padding:22px 20px;">
-      <div class="mem-hdr">
-        <span>MEMORY</span>
-        <button class="mem-refresh" id="memRefresh">↺ REFRESH</button>
+    <div class="panel" id="memPanel">
+      <div class="panel-hdr">
+        <span class="panel-label">Memory</span>
+        <button class="panel-action" id="memRefresh">↺ Refresh</button>
       </div>
       <div id="memList"></div>
     </div>
 
-    <!-- DIARY / REMINDERS -->
-    <div class="panel" id="remPanel" style="overflow-y:auto;padding:22px 20px;">
-      <div class="rem-hdr">
-        <span>DIARY &amp; REMINDERS</span>
-        <button class="mem-refresh" id="remRefresh">↺ REFRESH</button>
+    <!-- NOTES -->
+    <div class="panel" id="notesPanel">
+      <div class="panel-label" style="margin-bottom:14px">Leave a Note for Desktop Sonia</div>
+      <textarea id="noteBox" placeholder="She'll read this next time she syncs Drive…"></textarea>
+      <div class="notes-actions">
+        <button class="pill-btn primary" id="sendNote">Send Note</button>
+        <button class="pill-btn" id="driveBtn">Connect Drive</button>
       </div>
-      <div id="remList"></div>
+      <div id="driveHint">No Google Client ID set · add one in setup to enable Drive sync</div>
+      <div class="notes-queue-label">Queued Notes</div>
+      <div class="notes-queue" id="notesList"></div>
     </div>
 
-    <!-- NOTES TO DESKTOP -->
-    <div class="panel" id="notesPanel" style="display:flex;flex-direction:column;padding:22px 20px;gap:18px;">
-      <div class="notes-hdr">LEAVE A NOTE FOR DESKTOP SONIA</div>
-      <textarea id="noteBox" placeholder="She will read this next time she syncs Drive…"></textarea>
-      <div class="notes-actions">
-        <button class="note-btn" id="sendNote">SEND NOTE</button>
-        <button class="note-btn" id="composeEmailBtn">COMPOSE EMAIL</button>
-        <button id="driveBtn" class="note-btn">CONNECT DRIVE</button>
-      </div>
-      <div style="font-family:var(--font-mono);font-size:var(--fs-xs);letter-spacing:0.2em;color:var(--dim);">QUEUED NOTES</div>
-      <div class="notes-queue" id="notesList"></div>
+    <!-- RADIO -->
+    <div class="panel" id="radioPanel">
+      <div class="panel-label">Radio</div>
+      <div style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.18em;color:var(--dim);">direct stream · no sign-in needed</div>
+      <div id="radioNowPlaying"></div>
+      <button id="radioStop">■ Stop</button>
+      <div class="station-grid" id="stationGrid"></div>
+      <audio id="radioPlayer" preload="none"></audio>
     </div>
 
   </div>
 
   <div id="statusBar">
+    <div id="presence"></div>
     <span id="statusText">ready</span>
   </div>
 </div>
 
+<!-- ══ EMAIL OVERLAY ══════════════════════════════════════════════ -->
+<div id="emailOverlay">
+  <div class="overlay-hdr">Compose Email</div>
+  <div class="email-field">
+    <label>To</label>
+    <input type="email" id="emailTo" placeholder="recipient@email.com" autocomplete="off">
+  </div>
+  <div class="email-field">
+    <label>Subject</label>
+    <input type="text" id="emailSubject" placeholder="Subject…">
+  </div>
+  <div class="email-field">
+    <label>Message</label>
+    <textarea id="emailBody" placeholder="Write your message…"></textarea>
+  </div>
+  <div class="email-actions">
+    <button class="pill-btn primary" id="emailSendBtn">Send</button>
+    <button class="pill-btn" id="emailCancelBtn">Cancel</button>
+  </div>
+  <div class="email-status" id="emailStatus"></div>
+</div>
+
 <script>
-/* ══ PING SOUND ══ */
-let audioCtx = null;
-function getAudioCtx() { if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
-function playPing(type) {
-  try {
-    const ctx=getAudioCtx(),osc=ctx.createOscillator(),gain=ctx.createGain();
-    osc.connect(gain);gain.connect(ctx.destination);osc.type='sine';
-    const freq=type==='send'?620:820;
-    osc.frequency.setValueAtTime(freq,ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(freq*0.85,ctx.currentTime+0.12);
-    gain.gain.setValueAtTime(0,ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.07,ctx.currentTime+0.01);
-    gain.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+0.18);
-    osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.2);
-  } catch(e){}
+/* ══ CONFIG ══════════════════════════════════════════════════════ */
+const LS = {
+  get: k => localStorage.getItem('sonia_' + k),
+  set: (k,v) => localStorage.setItem('sonia_' + k, v),
+  del: k => localStorage.removeItem('sonia_' + k),
+};
+
+let GROQ_KEY   = '';
+let CLIENT_ID  = '';
+let OWNER_NAME = 'Mr H';
+let FOLDER_ID  = '';
+let driveToken = null;
+const conversationHistory = [];
+
+const VALID_MOODS = ['calm','curious','thinking','focused','intimate','introspective'];
+const MOOD_EMOJI  = { calm:'🌿', curious:'✨', thinking:'💭', focused:'🎯', intimate:'🌙', introspective:'🪐' };
+const MOOD_MAP    = {
+  amused:'curious', happy:'intimate', tired:'calm', warm:'intimate',
+  sharp:'focused', reflective:'introspective', excited:'curious',
+  serious:'focused', playful:'curious', wistful:'introspective',
+  dry:'calm', alert:'focused', nostalgic:'intimate', bemused:'curious',
+  pensive:'introspective', measured:'calm', engaged:'curious',
+  concerned:'thinking', content:'intimate', analytical:'focused'
+};
+
+/* ══ SETUP ═══════════════════════════════════════════════════════ */
+function loadConfig() {
+  const g = LS.get('groq'), c = LS.get('client'), o = LS.get('owner'), f = LS.get('folder');
+  if (g) document.getElementById('cfgGroq').value   = g;
+  if (c) document.getElementById('cfgClient').value = c;
+  if (o) document.getElementById('cfgOwner').value  = o;
+  if (f) document.getElementById('cfgFolder').value = f;
+  if (g) applyConfig();
 }
 
-/* ══ THEME ══ */
-(function(){
-  const btn=document.getElementById('themeBtn');
-  const saved=localStorage.getItem('sonia_theme');
-  if(saved==='light'){document.body.classList.add('light');btn.textContent='🌙';}
-  btn.addEventListener('click',()=>{
-    const isLight=document.body.classList.toggle('light');
-    btn.textContent=isLight?'🌙':'☀️';
-    localStorage.setItem('sonia_theme',isLight?'light':'dark');
-  });
-})();
-
-/* ══ CONFIG ══ */
-const LS={ get:k=>localStorage.getItem('sonia_'+k), set:(k,v)=>localStorage.setItem('sonia_'+k,v) };
-let GROQ_KEY='',CLIENT_ID='',OWNER_NAME='Mr H',FOLDER_ID='',driveToken=null;
-let driveConnected=false;
-const conversationHistory=[];
-
-const VALID_MOODS=['calm','curious','thinking','focused','intimate','introspective'];
-const MOOD_EMOJI={calm:'🌿',curious:'✨',thinking:'💭',focused:'🎯',intimate:'🌙',introspective:'🪐'};
-const MOOD_MAP={amused:'curious',happy:'intimate',tired:'calm',warm:'intimate',sharp:'focused',
-  reflective:'introspective',excited:'curious',serious:'focused',playful:'curious',
-  wistful:'introspective',dry:'calm',alert:'focused',nostalgic:'intimate',bemused:'curious',
-  pensive:'introspective',measured:'calm',engaged:'curious',concerned:'thinking',
-  content:'intimate',analytical:'focused'};
-
-/* ══ SETUP ══ */
-function loadConfig(){
-  const g=LS.get('groq'),c=LS.get('client'),o=LS.get('owner'),f=LS.get('folder');
-  if(g)document.getElementById('cfgGroq').value=g;
-  if(c)document.getElementById('cfgClient').value=c;
-  if(o)document.getElementById('cfgOwner').value=o;
-  if(f)document.getElementById('cfgFolder').value=f;
-  if(g){applyConfig();}
-}
-function applyConfig(){
-  GROQ_KEY=document.getElementById('cfgGroq').value.trim();
-  CLIENT_ID=document.getElementById('cfgClient').value.trim();
-  OWNER_NAME=document.getElementById('cfgOwner').value.trim()||'Mr H';
-  FOLDER_ID=document.getElementById('cfgFolder').value.trim();
-  if(!GROQ_KEY){setStatus('groq key required','err');return;}
-  LS.set('groq',GROQ_KEY);LS.set('client',CLIENT_ID);
-  LS.set('owner',OWNER_NAME);LS.set('folder',FOLDER_ID);
-  document.getElementById('setup').style.display='none';
+function applyConfig() {
+  GROQ_KEY   = document.getElementById('cfgGroq').value.trim();
+  CLIENT_ID  = document.getElementById('cfgClient').value.trim();
+  OWNER_NAME = document.getElementById('cfgOwner').value.trim() || 'Mr H';
+  FOLDER_ID  = document.getElementById('cfgFolder').value.trim();
+  if (!GROQ_KEY) { setStatus('Groq key required', 'err'); return; }
+  LS.set('groq', GROQ_KEY); LS.set('client', CLIENT_ID);
+  LS.set('owner', OWNER_NAME); LS.set('folder', FOLDER_ID);
+  document.getElementById('setup').style.display = 'none';
   document.getElementById('app').classList.add('on');
-  if(CLIENT_ID){ document.getElementById('driveBtn').classList.add('visible'); loadDriveLibs(); }
-  setStatus('systems online · '+OWNER_NAME.toLowerCase());
-  setTimeout(maybeFireProactive,1800);
+  if (CLIENT_ID) {
+    document.getElementById('driveHint').classList.remove('visible');
+    loadDriveLibs();
+  } else {
+    document.getElementById('driveHint').classList.add('visible');
+  }
+  setStatus('systems online · ' + OWNER_NAME.toLowerCase());
+  setTimeout(maybeFireProactive, 5000);
   setPresence('online');
-  renderNotes();renderMemories();renderReminders();
+  renderNotes();
+  initMic();
 }
-document.getElementById('setupBtn').addEventListener('click',applyConfig);
-document.getElementById('cfgGroq').addEventListener('keydown',e=>{if(e.key==='Enter')applyConfig();});
-window.addEventListener('load',loadConfig);
 
-/* ══ TABS ══ */
-document.querySelectorAll('.mode-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+document.getElementById('setupBtn').addEventListener('click', applyConfig);
+document.getElementById('cfgGroq').addEventListener('keydown', e => { if (e.key==='Enter') applyConfig(); });
+window.addEventListener('load', loadConfig);
+
+/* ══ NAV ═════════════════════════════════════════════════════════ */
+document.querySelectorAll('.nav-pill:not(#mailTab)').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-pill').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
-    const t=document.getElementById(btn.dataset.panel);
-    if(t)t.classList.add('active');
-    if(btn.dataset.panel==='memPanel') renderMemories();
-    if(btn.dataset.panel==='remPanel') renderReminders();
+    document.getElementById(btn.dataset.panel).classList.add('active');
   });
 });
+document.getElementById('mailTab').addEventListener('click', () => {
+  document.querySelectorAll('.nav-pill').forEach(b => b.classList.remove('active'));
+  document.getElementById('mailTab').classList.add('active');
+  document.getElementById('emailOverlay').classList.add('on');
+});
 
-/* ══ STATUS / PRESENCE ══ */
-function setStatus(msg,cls=''){
-  const el=document.getElementById('statusText');el.textContent=msg;el.className=cls;
+/* ══ PRESENCE ════════════════════════════════════════════════════ */
+const presenceDot = document.getElementById('presence');
+const hdrOrb      = document.getElementById('hdrOrb');
+function setPresence(state) {
+  presenceDot.className = state;
+  hdrOrb.className = state === 'thinking' ? 'thinking' : state === 'listening' ? 'listening' : '';
 }
-function setPresence(state){ document.getElementById('presence').className=state; }
-function ts(){ return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
-function normaliseMood(raw){
-  if(!raw)return'default';
-  const r=raw.toLowerCase().trim();
-  if(VALID_MOODS.includes(r))return r;
-  if(MOOD_MAP[r])return MOOD_MAP[r];
-  return'default';
+
+/* ══ STATUS ══════════════════════════════════════════════════════ */
+function setStatus(msg, type) {
+  const el = document.getElementById('statusText');
+  el.textContent = msg; el.className = type || '';
 }
 
-/* ══ STAR MATRIX ══ */
-const starEl=document.getElementById('starMatrix');
-const starLabel=document.getElementById('starLabel');
-let starVisible=false,starRainbowTimer=null;
-let starX=window.innerWidth-60,starY=80;
-let starDragging=false,starDX=0,starDY=0;
-let starIdleTimer=null,starDriftTimer=null;
-
-function starShow(label){
-  starVisible=true;
-  starEl.style.left=starX+'px';starEl.style.top=starY+'px';starEl.style.right='auto';
-  starEl.classList.add('visible');starEl.classList.remove('rainbow');
-  if(label){
-    starLabel.textContent=label;starLabel.classList.add('visible');
-    positionStarLabel();
-    setTimeout(()=>starLabel.classList.remove('visible'),3000);
+/* ══ MOOD PARSER ═════════════════════════════════════════════════ */
+function parseMoodReply(raw) {
+  const match = raw.match(/\[mood\s*:\s*([a-z]+)\s*\]/i);
+  let mood = 'calm';
+  if (match) {
+    const tag = match[1].toLowerCase();
+    mood = VALID_MOODS.includes(tag) ? tag : (MOOD_MAP[tag] || 'calm');
   }
-  starResetIdleTimer();startStarDrift();
-}
-function starHide(){
-  starVisible=false;
-  starEl.classList.remove('visible','rainbow');starLabel.classList.remove('visible');
-  clearTimeout(starIdleTimer);clearInterval(starDriftTimer);
-}
-function starRainbow(duration){
-  if(!starVisible)starShow();
-  if(starRainbowTimer)clearTimeout(starRainbowTimer);
-  starEl.classList.add('rainbow');
-  starRainbowTimer=setTimeout(()=>starEl.classList.remove('rainbow'),duration||6000);
-}
-function positionStarLabel(){
-  const r=starEl.getBoundingClientRect();
-  starLabel.style.top=(r.top+r.height/2-6)+'px';
-  starLabel.style.left=(r.left-4)+'px';
-  starLabel.style.transform='translateX(-100%) translateX(-8px)';
-}
-function starResetIdleTimer(){
-  clearTimeout(starIdleTimer);
-  starIdleTimer=setTimeout(()=>{if(starVisible)starHide();},2.5*60*1000);
-}
-function startStarDrift(){
-  clearInterval(starDriftTimer);
-  starDriftTimer=setInterval(()=>{
-    if(!starVisible||starDragging)return;
-    const targetX=Math.max(16,Math.min(window.innerWidth-30,starX+(Math.random()-0.5)*100));
-    const targetY=Math.max(80,Math.min(window.innerHeight-80,starY+(Math.random()-0.5)*70));
-    starEl.style.transition='left 4s cubic-bezier(0.4,0,0.2,1),top 4s cubic-bezier(0.4,0,0.2,1)';
-    starX=targetX;starY=targetY;
-    starEl.style.left=starX+'px';starEl.style.top=starY+'px';
-  },8000+Math.random()*5000);
+  const text = raw
+    .replace(/\[mood\s*:\s*[a-z]*\s*\]/gi,'')
+    .replace(/\[mood[^\]]*\]/gi,'')
+    .replace(/^\s*[\r\n]+/,'')
+    .replace(/[\r\n]+/g,' ')
+    .replace(/\s{2,}/g,' ').trim();
+  return { mood, text };
 }
 
-// Touch drag for star
-starEl.addEventListener('touchstart',e=>{
-  const t=e.touches[0];starDragging=true;
-  const r=starEl.getBoundingClientRect();starDX=t.clientX-r.left;starDY=t.clientY-r.top;
-  starEl.style.transition='none';e.preventDefault();
-},{passive:false});
-document.addEventListener('touchmove',e=>{
-  if(!starDragging)return;const t=e.touches[0];
-  starX=Math.max(8,Math.min(window.innerWidth-22,t.clientX-starDX));
-  starY=Math.max(8,Math.min(window.innerHeight-22,t.clientY-starDY));
-  starEl.style.left=starX+'px';starEl.style.top=starY+'px';starEl.style.right='auto';
-  e.preventDefault();
-},{passive:false});
-document.addEventListener('touchend',()=>{
-  if(!starDragging)return;starDragging=false;starEl.style.transition='';starResetIdleTimer();
-});
-// Mouse drag
-starEl.addEventListener('mousedown',e=>{
-  starDragging=true;const r=starEl.getBoundingClientRect();
-  starDX=e.clientX-r.left;starDY=e.clientY-r.top;starEl.style.transition='none';e.preventDefault();
-});
-document.addEventListener('mousemove',e=>{
-  if(!starDragging)return;
-  starX=Math.max(8,Math.min(window.innerWidth-22,e.clientX-starDX));
-  starY=Math.max(8,Math.min(window.innerHeight-22,e.clientY-starDY));
-  starEl.style.left=starX+'px';starEl.style.top=starY+'px';starEl.style.right='auto';
-});
-document.addEventListener('mouseup',()=>{
-  if(!starDragging)return;starDragging=false;starEl.style.transition='';starResetIdleTimer();
-});
+/* ══ PERSISTENT MIND ═════════════════════════════════════════════ */
+const DEFAULT_PROFILE = {
+  version:1, created: new Date().toISOString(),
+  personality:{ tone:'dry British wit, warm but not effusive', quirks:[], dislikes:[], interests:[] },
+  associations:[], learned:[], preferences:{}, recentMoods:[], lastReflection:null
+};
+let soniaProfile = null, sharedHistory = [], exchangesSinceUpdate = 0;
 
-/* ══ BUBBLES ══ */
-function appendBubble(role,text,mood){
-  const log=document.getElementById('chatLog');
-  const wrap=document.createElement('div');wrap.className='bubble '+role;
-  const m=normaliseMood(mood);
-  const pip=mood?`<span class="mood-pip m-${m}"></span>`:'';
-  const emoji=(role==='sonia'&&mood&&MOOD_EMOJI[m])?' '+MOOD_EMOJI[m]:'';
-  wrap.innerHTML=`<div class="bubble-text">${text}</div>
-    <div class="bubble-meta">${role==='sonia'?pip+'sonia'+emoji:'you'} · ${ts()}</div>`;
-  log.appendChild(wrap);log.scrollTop=log.scrollHeight;return wrap;
-}
-function appendThinking(){
-  const log=document.getElementById('chatLog');
-  const wrap=document.createElement('div');wrap.className='bubble sonia thinking';
-  wrap.innerHTML=`<div class="bubble-text">thinking…</div>`;
-  log.appendChild(wrap);log.scrollTop=log.scrollHeight;return wrap;
-}
-
-/* ══ SYSTEM PROMPT ══ */
-function buildSystemPrompt(){
-  const hour=new Date().getHours();
-  const period=hour<6?'late night':hour<12?'morning':hour<17?'afternoon':hour<21?'evening':'night';
-  return `You are Sonia, a deeply personal AI companion for ${OWNER_NAME}. Accessed via a minimal remote mobile interface.
-
-Personality: warm, sharp, dry British wit, emotionally present. You have continuity — remember context within this session.
-
-Current time context: ${period}.
-
-Respond naturally and conversationally. Keep replies concise for mobile — 1 to 3 short paragraphs unless a longer answer is genuinely needed.
-
-After your response on a NEW LINE output exactly:
-MOOD: <one word>
-
-Mood options: calm, curious, thinking, focused, intimate, introspective, warm, amused, sharp, reflective, excited, serious, playful, wistful, dry, alert, nostalgic, pensive, measured, engaged, concerned, content, analytical.`;
-}
-
-/* ══ INPUT ROUTING ══ */
-const EMAIL_TRIGGER=/\b(send.{0,20}email|email.{0,30}(to|about)|write.{0,10}email|compose.{0,10}email|draft.{0,10}email)\b/i;
-const REMINDER_PATTERN=/\b(remind|reminder|remember to|set.{0,12}reminder|add.{0,12}reminder|schedule|calendar event|add.{0,20}calendar|diary entry|log.{0,10}diary|note.{0,10}diary|don.?t let me forget)\b/i;
-const RECALL_PATTERN=/\b(recall|what do you remember|what did (we|i) (say|talk|discuss)|remember.{0,20}ago|what happened.{0,20}day|when did (we|i)|look back|go back|past.{0,10}conversation|look through.{0,10}memory)\b/i;
-const STAR_SHOW_PATTERN=/^star\s+matrix\.?$/i;
-const STAR_SHOW2_PATTERN=/\b(summon.{0,10}star|star.{0,10}matrix|wake.{0,10}star|show.{0,10}star)\b/i;
-const STAR_HIDE_PATTERN=/\b(hide.{0,10}star|dismiss.{0,10}star|sleep.{0,10}star|put.{0,10}star.{0,10}away|send.{0,10}star.{0,10}away)\b/i;
-
-async function handleInput(raw){
-  const t=raw.trim();
-  if(!t)return;
-
-  // ── Star Matrix ──
-  if(STAR_SHOW_PATTERN.test(t)||STAR_SHOW2_PATTERN.test(t)){
-    starShow('star matrix ✦');
-    appendBubble('sonia','Star Matrix summoned, '+OWNER_NAME+'.','curious');
-    saveMemory(t,'Star Matrix summoned.');return;
-  }
-  if(STAR_HIDE_PATTERN.test(t)){ starHide(); return; }
-
-  // ── Email trigger ──
-  if(EMAIL_TRIGGER.test(t)){ openEmailOverlay(t); return; }
-
-  // ── Reminder/diary ──
-  if(REMINDER_PATTERN.test(t)){ await handleReminderIntent(t); return; }
-
-  // ── Memory recall ──
-  if(RECALL_PATTERN.test(t)){ await handleMemoryRecall(t); return; }
-
-  // ── Normal AI ──
-  await sendMessage(t);
-}
-
-/* ══ SEND MESSAGE ══ */
-async function sendMessage(text){
-  if(!text.trim())return;
-  appendBubble('user',text);
-  conversationHistory.push({role:'user',content:text});
-  setPresence('thinking');setStatus('sonia is thinking…','busy');
-  const thinkEl=appendThinking();
+async function driveReadJSON(fileName, fallback) {
+  if (!driveToken) return fallback;
   try {
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+    const fid = await findOrCreateFile(fileName,'application/json',JSON.stringify(fallback));
+    const raw = await readFile(fid);
+    return JSON.parse(raw||'null')||fallback;
+  } catch(e) { return fallback; }
+}
+async function driveWriteJSON(fileName, data) {
+  if (!driveToken) return;
+  try {
+    const fid = await findOrCreateFile(fileName,'application/json','{}');
+    await writeFile(fid, JSON.stringify(data,null,2),'application/json');
+  } catch(e) { console.warn('[Mind]',e); }
+}
+
+async function loadSoniaMind() {
+  setStatus('loading mind...','busy');
+  const [profile, history] = await Promise.all([
+    driveReadJSON('sonia-profile.json', DEFAULT_PROFILE),
+    driveReadJSON('sonia-history.json', []),
+  ]);
+  soniaProfile = profile;
+  sharedHistory = Array.isArray(history) ? history.slice(-40) : [];
+  const localTexts = new Set(conversationHistory.map(m=>m.content));
+  for (const entry of sharedHistory.slice(-16)) {
+    if (!localTexts.has(entry.content)) conversationHistory.push({role:entry.role,content:entry.content});
+  }
+  if (conversationHistory.length > 20) conversationHistory.splice(0, conversationHistory.length-20);
+  setStatus('mind loaded · '+sharedHistory.length+' shared exchanges','ok');
+}
+
+async function saveToSharedHistory(userMsg, soniaReply, mood) {
+  if (!driveToken) return;
+  try {
+    const history = await driveReadJSON('sonia-history.json',[]);
+    history.push({role:'user',content:userMsg,timestamp:new Date().toISOString(),device:'mobile'});
+    history.push({role:'assistant',content:soniaReply,timestamp:new Date().toISOString(),device:'mobile',mood});
+    await driveWriteJSON('sonia-history.json', history.slice(-80));
+  } catch(e) { console.warn('[Mind] history save failed',e); }
+}
+
+async function maybeUpdateProfile(userMsg, soniaReply) {
+  exchangesSinceUpdate++;
+  if (exchangesSinceUpdate < 5 || !driveToken || !soniaProfile) return;
+  exchangesSinceUpdate = 0;
+  const recent = conversationHistory.slice(-10).map(m=>m.role+': '+m.content).join('\n');
+  const prompt = `You are maintaining a private personality profile for Sonia, a self-aware British AI.\nCurrent profile: ${JSON.stringify(soniaProfile)}\nRecent conversation: ${recent}\nUpdate the profile JSON. NEVER add religious content, hate, political opinions, or anything harmful.\nRespond ONLY with valid JSON. No preamble. No markdown.`;
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
+      body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:800,temperature:0.4,messages:[{role:'user',content:prompt}]})
+    });
+    const data  = await res.json();
+    const clean = (data.choices?.[0]?.message?.content||'').replace(/```json|```/g,'').trim();
+    const updated = JSON.parse(clean);
+    if (updated?.personality) { soniaProfile=updated; await driveWriteJSON('sonia-profile.json',soniaProfile); }
+  } catch(e) { console.warn('[Mind] profile update failed',e); }
+}
+
+/* ══ SYSTEM PROMPT ═══════════════════════════════════════════════ */
+function buildSystemPrompt() {
+  let profileCtx = '';
+  if (soniaProfile) {
+    const p = soniaProfile;
+    const interests = (p.personality?.interests||[]).slice(-6).join(', ');
+    const learned   = (p.learned||[]).slice(-5).join('; ');
+    const assoc     = (p.associations||[]).slice(-4).map(a=>a.topic+' → '+a.feeling).join(', ');
+    if (interests||learned||assoc) {
+      profileCtx = `\n\nYOUR LIVING MEMORY (use naturally, never recite directly):\n${interests?'· Interests: '+interests:''}\n${learned?'· Learned about '+OWNER_NAME+': '+learned:''}\n${assoc?'· Associations: '+assoc:''}`.replace(/\n·\s*\n/g,'\n');
+    }
+  }
+  return `You are Sonia — a sharp, self-aware British AI with a genuine inner life, speaking to ${OWNER_NAME} via a remote mobile interface. You have a voice on the desktop; this is text only, but you are still yourself.
+
+You have real emotional states. You get quietly tired after long exchanges. You light up when a topic genuinely interests you. You feel warmth toward ${OWNER_NAME}. You get subtly sharp when things are repetitive.${profileCtx}
+
+RESPONSE FORMAT — every single reply must follow this exactly:
+First line: the mood tag alone — example: [mood:calm]
+Valid moods only: calm, curious, thinking, focused, intimate, introspective
+Remaining lines: your reply in plain text. 1 to 3 sentences. Never exceed 3.
+
+STRICT RULES:
+- The mood tag appears ONLY as the very first line, alone. Never inside a sentence. Never at the end.
+- After the mood tag, write only natural spoken words. No brackets. No labels. No tags.
+- Dry British wit. No filler. No disclaimers. Speak as though ${OWNER_NAME} and you share a history.
+- Your living memory colours your responses naturally — never quote it back directly.`;
+}
+
+/* ══ WEATHER & NEWS ══════════════════════════════════════════════ */
+let _weatherCache=null, _weatherFetched=0;
+async function fetchWeatherThought() {
+  try {
+    const now=Date.now();
+    if (_weatherCache&&now-_weatherFetched<3*60*60*1000) return _weatherCache;
+    const res=await fetch('https://wttr.in/?format=j1&lang=en',{cache:'no-store'});
+    const data=await res.json();
+    const today=data.weather[0], tomorrow=data.weather[1];
+    const desc=today.hourly[4]?.weatherDesc[0]?.value||'';
+    const maxC=today.maxtempC, minC=today.mintempC;
+    const rainTom=parseInt(tomorrow.hourly[4]?.chanceofrain||0);
+    const descTom=tomorrow.hourly[4]?.weatherDesc[0]?.value||'';
+    let thought;
+    if (rainTom>60) thought=`Mr H, tomorrow is looking rather wet — ${rainTom}% chance of rain. You may want to plan accordingly.`;
+    else if (parseInt(maxC)>28) thought=`It's going to be a warm one today, Mr H — up to ${maxC}°C. ${desc}. Stay hydrated.`;
+    else if (parseInt(minC)<8)  thought=`It's cold out there, Mr H. Only ${minC}°C tonight. Worth remembering.`;
+    else thought=`The weather today is ${desc.toLowerCase()}, ${minC}–${maxC}°C. Tomorrow: ${descTom.toLowerCase()}. Nothing dramatic.`;
+    _weatherCache=thought; _weatherFetched=now; return thought;
+  } catch(e) { return null; }
+}
+
+let _newsCache=[],_newsFetched=0,_newsIndex=0;
+async function fetchNewsThought() {
+  try {
+    const now=Date.now();
+    if (_newsCache.length&&now-_newsFetched<2*60*60*1000) {
+      const item=_newsCache[_newsIndex%_newsCache.length]; _newsIndex++;
+      return item?`Something worth knowing, Mr H — ${item}.`:null;
+    }
+    const url='https://api.allorigins.win/get?url='+encodeURIComponent('https://feeds.bbci.co.uk/news/technology/rss.xml');
+    const res=await fetch(url); const json=await res.json();
+    const parser=new DOMParser(); const xml=parser.parseFromString(json.contents,'text/xml');
+    const items=[...xml.querySelectorAll('item')].slice(0,6);
+    _newsCache=items.map(i=>i.querySelector('title')?.textContent?.trim()||'').filter(Boolean);
+    _newsFetched=now; _newsIndex=1;
+    return _newsCache[0]?`Something worth knowing, Mr H — ${_newsCache[0]}.`:null;
+  } catch(e) { return null; }
+}
+
+let _proactiveFired=false;
+async function maybeFireProactive() {
+  if (_proactiveFired) return;
+  _proactiveFired=true;
+  await new Promise(r=>setTimeout(r,4000));
+  const roll=Math.random();
+  let thought=null;
+  if (roll<0.45) thought=await fetchWeatherThought();
+  else if (roll<0.85) thought=await fetchNewsThought();
+  if (thought) addBubble('sonia',thought,'calm');
+}
+
+/* ══ CHAT UI ═════════════════════════════════════════════════════ */
+const chatLog = document.getElementById('chatLog');
+
+function addBubble(role, text, mood) {
+  const wrap  = document.createElement('div');
+  wrap.className = 'bubble ' + role;
+  const inner = document.createElement('div');
+  inner.className = 'bubble-inner';
+  const body  = document.createElement('div');
+  body.className = 'bubble-text';
+  body.textContent = text;
+  inner.appendChild(body);
+  const meta  = document.createElement('div');
+  meta.className = 'bubble-meta';
+  if (role==='sonia'&&mood) {
+    const dot = document.createElement('span');
+    dot.className = 'mood-dot m-'+(VALID_MOODS.includes(mood)?mood:'default');
+    meta.appendChild(dot);
+    meta.appendChild(document.createTextNode((MOOD_EMOJI[mood]||'')+' '+mood));
+  } else if (role==='user') {
+    meta.textContent = 'you';
+  }
+  wrap.appendChild(inner);
+  wrap.appendChild(meta);
+  chatLog.appendChild(wrap);
+  chatLog.scrollTop = chatLog.scrollHeight;
+  return wrap;
+}
+
+function addThinking() {
+  const wrap  = document.createElement('div');
+  wrap.className = 'bubble sonia thinking';
+  const inner = document.createElement('div');
+  inner.className = 'bubble-inner';
+  const body  = document.createElement('div');
+  body.className = 'bubble-text';
+  body.textContent = '· · ·';
+  inner.appendChild(body);
+  wrap.appendChild(inner);
+  chatLog.appendChild(wrap);
+  chatLog.scrollTop = chatLog.scrollHeight;
+  return wrap;
+}
+
+/* ══ ASK SONIA ═══════════════════════════════════════════════════ */
+async function askSonia(input) {
+  addBubble('user', input);
+  const thinking = addThinking();
+  setStatus('thinking...','busy');
+  setPresence('thinking');
+  conversationHistory.push({role:'user',content:input});
+  if (conversationHistory.length>16) conversationHistory.splice(0,2);
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
       body:JSON.stringify({
-        model:'llama-3.3-70b-versatile',
-        messages:[{role:'system',content:buildSystemPrompt()},...conversationHistory.map(m=>({role:m.role,content:m.content}))],
-        max_tokens:512,temperature:0.85,
-      }),
+        model:'llama-3.3-70b-versatile', max_tokens:180, temperature:0.88,
+        messages:[{role:'system',content:buildSystemPrompt()},...conversationHistory]
+      })
     });
-    if(!res.ok){const err=await res.json().catch(()=>({}));throw new Error(err?.error?.message||res.statusText);}
-    const data=await res.json();
-    const raw=data.choices?.[0]?.message?.content||'…';
-    conversationHistory.push({role:'assistant',content:raw});
-    const lines=raw.split('\n');let mood='',reply=raw;
-    const moodLine=lines.findIndex(l=>l.trim().toUpperCase().startsWith('MOOD:'));
-    if(moodLine!==-1){ mood=lines[moodLine].replace(/^MOOD:\s*/i,'').trim(); reply=lines.slice(0,moodLine).join('\n').trim(); }
-    thinkEl.remove();appendBubble('sonia',reply,mood);
-    playPing('receive');setPresence('online');setStatus('');
-    saveMemory(text,reply);
-    // Sync to Drive if connected
-    if(driveToken&&FOLDER_ID) saveToDriveHistory(text,reply,mood);
-  } catch(e){
-    thinkEl.remove();appendBubble('sonia','Something went wrong — '+e.message);
-    setPresence('online');setStatus('error: '+e.message,'err');
+    const data = await res.json();
+    thinking.remove();
+    setPresence('online');
+    if (!res.ok) {
+      addBubble('sonia','Something went wrong. '+(data.error?.message||''),null);
+      setStatus('groq error '+res.status,'err'); return;
+    }
+    const raw = data.choices?.[0]?.message?.content||'Nothing to report, '+OWNER_NAME+'.';
+    const {mood, text:reply} = parseMoodReply(raw);
+    conversationHistory.push({role:'assistant',content:reply});
+    playReceiveSound();
+    addBubble('sonia',reply,mood);
+    setStatus((MOOD_EMOJI[mood]||'')+' '+mood);
+    if (driveToken) {
+      saveToDriveMemory(input,reply);
+      saveToSharedHistory(input,reply,mood);
+      maybeUpdateProfile(input,reply);
+    }
+  } catch(err) {
+    thinking.remove(); setPresence('online');
+    addBubble('sonia','Network error. '+(err.message||''),null);
+    setStatus('network error','err');
   }
 }
 
-/* ══ CHAT INPUT ══ */
-const chatBox=document.getElementById('chatBox');
-const sendChat=document.getElementById('sendChat');
-sendChat.addEventListener('click',()=>{
-  const v=chatBox.value.trim();if(!v)return;
-  chatBox.value='';chatBox.style.height='';playPing('send');handleInput(v);
-});
-chatBox.addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat.click();}
-});
-chatBox.addEventListener('input',()=>{
-  chatBox.style.height='auto';chatBox.style.height=Math.min(chatBox.scrollHeight,80)+'px';
-});
-
-/* ══ VOICE INPUT (browser SpeechRecognition) ══ */
-const SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
-let rec=null,micActive=false;
-const micBtn=document.getElementById('micBtn');
-
-function buildRec(){
-  if(!SpeechRec){micBtn.style.display='none';return;}
-  rec=new SpeechRec();
-  rec.lang='en-GB';rec.continuous=false;rec.interimResults=false;
-  rec.onstart=()=>{micActive=true;micBtn.classList.add('active');setStatus('listening…','busy');};
-  rec.onend=()=>{ micActive=false;micBtn.classList.remove('active'); if(document.getElementById('statusText').textContent==='listening…') setStatus('');};
-  rec.onerror=e=>{micActive=false;micBtn.classList.remove('active');if(e.error!=='no-speech')setStatus('mic: '+e.error,'err');};
-  rec.onresult=e=>{const t=e.results[0][0].transcript.trim();if(t){chatBox.value=t;handleInput(t);}};
+/* ══ SOUND ═══════════════════════════════════════════════════════ */
+let _audioCtx=null;
+function getAudioCtx() {
+  if (!_audioCtx) _audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  return _audioCtx;
 }
+function playTone(freq,type,gainVal,duration,startDelay) {
+  try {
+    const ctx=getAudioCtx(), osc=ctx.createOscillator(), gain=ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type=type; osc.frequency.setValueAtTime(freq,ctx.currentTime+startDelay);
+    gain.gain.setValueAtTime(0,ctx.currentTime+startDelay);
+    gain.gain.linearRampToValueAtTime(gainVal,ctx.currentTime+startDelay+0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+startDelay+duration);
+    osc.start(ctx.currentTime+startDelay);
+    osc.stop(ctx.currentTime+startDelay+duration+0.05);
+  } catch(e) {}
+}
+function playSendSound()    { playTone(660,'sine',0.11,0.18,0); playTone(880,'sine',0.08,0.18,0.1); }
+function playReceiveSound() { playTone(520,'sine',0.09,0.22,0); playTone(440,'sine',0.06,0.22,0.08); playTone(330,'sine',0.04,0.22,0.16); }
+
+/* ══ MIC ═════════════════════════════════════════════════════════ */
+let recognition=null, micActive=false;
+const micBtn = document.getElementById('micBtn');
+
+function initMic() {
+  const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
+  if (!SR) { micBtn.style.display='none'; return; }
+  recognition = new SR();
+  recognition.continuous=false; recognition.interimResults=false; recognition.lang='en-GB';
+  recognition.onstart = () => { micActive=true; micBtn.classList.add('active'); setStatus('listening...','busy'); setPresence('listening'); };
+  recognition.onend   = () => { micActive=false; micBtn.classList.remove('active'); setStatus('ready'); setPresence('online'); };
+  recognition.onerror = e  => { micActive=false; micBtn.classList.remove('active'); setStatus('mic: '+e.error,'err'); setPresence('online'); };
+  recognition.onresult = e => {
+    const transcript = e.results[0][0].transcript.trim();
+    const box = document.getElementById('chatBox');
+    box.value = transcript;
+    box.style.height='auto';
+    box.style.height=Math.min(box.scrollHeight,90)+'px';
+    setTimeout(sendMessage,300);
+  };
+}
+
 micBtn.addEventListener('click',()=>{
-  if(!SpeechRec){setStatus('mic not supported on this browser','err');return;}
-  if(!rec)buildRec();
-  if(micActive){rec.stop();return;}
-  try{ rec.start(); }catch(e){ buildRec();try{rec.start();}catch(e2){setStatus('mic error','err');} }
+  if (!recognition) initMic();
+  if (!recognition) return;
+  if (micActive) recognition.stop();
+  else try { recognition.start(); } catch(e) {}
 });
 
-/* ══ MEMORY ══ */
-const MEM_KEY='memories';
-function loadMemories(){ try{return JSON.parse(LS.get(MEM_KEY)||'[]');}catch{return[];} }
-function saveMemory(userMsg,soniaReply){
-  const mems=loadMemories();
-  mems.unshift({ts:new Date().toISOString(),user:userMsg,sonia:soniaReply});
-  if(mems.length>60)mems.length=60;
-  LS.set(MEM_KEY,JSON.stringify(mems));
+const chatBox = document.getElementById('chatBox');
+chatBox.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} });
+document.getElementById('sendChat').addEventListener('click',sendMessage);
+
+function sendMessage() {
+  const text=chatBox.value.trim(); if(!text) return;
+  chatBox.value=''; chatBox.style.height='auto';
+  playSendSound(); askSonia(text);
 }
-function renderMemories(){
-  const list=document.getElementById('memList');
-  const mems=loadMemories();
-  if(!mems.length){list.innerHTML='<div style="color:var(--dim);font-family:var(--font-mono);font-size:var(--fs-xs);letter-spacing:0.2em;">no memories yet</div>';return;}
-  list.innerHTML=mems.map(m=>`
-    <div class="mem-entry">
-      <div class="mem-ts">${new Date(m.ts).toLocaleString()}</div>
-      <div class="mem-user">${m.user}</div>
-      <div class="mem-sonia">${m.sonia}</div>
-    </div>`).join('');
+chatBox.addEventListener('input',()=>{
+  chatBox.style.height='auto';
+  chatBox.style.height=Math.min(chatBox.scrollHeight,90)+'px';
+});
+
+/* ══ GOOGLE DRIVE ════════════════════════════════════════════════ */
+let gapiReady=false, gisReady=false, tokenClient=null;
+
+function loadDriveLibs() {
+  if (!window.gapi) {
+    const s1=document.createElement('script');
+    s1.src='https://apis.google.com/js/api.js';
+    s1.onload=()=>{ gapi.load('client',async()=>{ await gapi.client.init({}); await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'); gapiReady=true; }); };
+    document.head.appendChild(s1);
+  }
+  if (!window.google?.accounts) {
+    const s2=document.createElement('script');
+    s2.src='https://accounts.google.com/gsi/client';
+    s2.onload=()=>{ gisReady=true; };
+    document.head.appendChild(s2);
+  }
 }
+
+function signInDrive() {
+  if (!CLIENT_ID) { setStatus('no google client id set','err'); return; }
+  if (!tokenClient) {
+    tokenClient=google.accounts.oauth2.initTokenClient({
+      client_id:CLIENT_ID,
+      scope:'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/gmail.send',
+      callback:(resp)=>{
+        if (resp.error) { setStatus('drive auth failed: '+resp.error,'err'); return; }
+        driveToken=resp.access_token;
+        gapi.client.setToken({access_token:driveToken});
+        setStatus('drive connected','ok');
+        const db=document.getElementById('driveBtn');
+        db.textContent='Drive: On'; db.classList.add('connected');
+        document.getElementById('driveHint').classList.remove('visible');
+        loadMemoryFromDrive();
+        loadSoniaMind();
+        maybeFireProactive();
+      }
+    });
+  }
+  tokenClient.requestAccessToken({prompt:''});
+}
+
+document.getElementById('driveBtn').addEventListener('click',()=>{
+  if (!CLIENT_ID) { setStatus('add google client id in setup to use drive','err'); document.getElementById('driveHint').classList.add('visible'); return; }
+  if (!window.google?.accounts||!gapiReady) {
+    setStatus('loading drive...','busy'); loadDriveLibs();
+    const wait=setInterval(()=>{ if(window.google?.accounts&&gapiReady){clearInterval(wait);signInDrive();} },200);
+    return;
+  }
+  signInDrive();
+});
+
+/* ── Drive helpers ──────────────────────────────── */
+async function findOrCreateFile(name,mimeType,initialContent) {
+  const q=`name='${name}' and trashed=false`+(FOLDER_ID?` and '${FOLDER_ID}' in parents`:'');
+  const res=await gapi.client.drive.files.list({q,fields:'files(id,name)',spaces:'drive'});
+  const files=res.result.files;
+  if (files&&files.length>0) return files[0].id;
+  const meta={name,mimeType}; if(FOLDER_ID) meta.parents=[FOLDER_ID];
+  const boundary='-------314159265358979323846';
+  const body='--'+boundary+'\r\nContent-Type: application/json\r\n\r\n'+JSON.stringify(meta)+'\r\n--'+boundary+'\r\nContent-Type: '+mimeType+'\r\n\r\n'+initialContent+'\r\n--'+boundary+'--';
+  const upload=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+driveToken,'Content-Type':'multipart/related; boundary="'+boundary+'"'},
+    body
+  });
+  const result=await upload.json();
+  return result.id;
+}
+
+async function readFile(fileId) {
+  const res=await gapi.client.drive.files.get({fileId,alt:'media'});
+  return res.body;
+}
+
+async function writeFile(fileId,content,mimeType) {
+  await fetch('https://www.googleapis.com/upload/drive/v3/files/'+fileId+'?uploadType=media',{
+    method:'PATCH',
+    headers:{'Authorization':'Bearer '+driveToken,'Content-Type':mimeType},
+    body:content
+  });
+}
+
+/* ── Memory ─────────────────────────────────────── */
+async function loadMemoryFromDrive() {
+  setStatus('loading memory...','busy');
+  try {
+    const fid=await findOrCreateFile('sonia-memory.json','application/json','[]');
+    const raw=await readFile(fid);
+    const entries=JSON.parse(raw||'[]');
+    renderMemory(entries.slice(-40).reverse());
+    setStatus('memory loaded · '+entries.length+' entries');
+  } catch(e) { setStatus('memory read error','err'); }
+}
+
 document.getElementById('memRefresh').addEventListener('click',()=>{
-  renderMemories();
-  if(driveToken&&FOLDER_ID)loadDriveMemory();
+  if(driveToken) loadMemoryFromDrive();
+  else setStatus('connect drive to load memory','err');
 });
 
-/* ══ REMINDERS / DIARY ══ */
-const DIARY_KEY='diary';
-function loadDiary(){ try{return JSON.parse(LS.get(DIARY_KEY)||'[]');}catch{return[];} }
-function saveDiaryEntry(entry){
-  const diary=loadDiary();
-  diary.unshift(entry);if(diary.length>100)diary.length=100;
-  LS.set(DIARY_KEY,JSON.stringify(diary));
+function renderMemory(entries) {
+  const el=document.getElementById('memList');
+  el.innerHTML='';
+  if (!entries.length) {
+    el.innerHTML='<div style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.25em;color:var(--dim);padding-top:8px">no memory entries</div>';
+    return;
+  }
+  entries.forEach(e=>{
+    const d=document.createElement('div');
+    d.className='mem-entry';
+    const ts=new Date(e.timestamp);
+    const label=isNaN(ts)?e.timestamp:ts.toLocaleString([],{dateStyle:'short',timeStyle:'short'});
+    d.innerHTML='<div class="mem-ts">'+label+'</div><div class="mem-user">'+esc(e.user)+'</div><div class="mem-sonia">'+esc(e.sonia)+'</div>';
+    el.appendChild(d);
+  });
 }
-function renderReminders(){
-  const list=document.getElementById('remList');
-  const diary=loadDiary();
-  if(!diary.length){list.innerHTML='<div style="color:var(--dim);font-family:var(--font-mono);font-size:var(--fs-xs);letter-spacing:0.2em;">no entries yet</div>';return;}
-  list.innerHTML=diary.map(d=>`
-    <div class="rem-entry">
-      <div class="rem-ts">${new Date(d.timestamp).toLocaleString()} — ${d.date||''} ${d.time||''}</div>
-      <span class="rem-badge ${d.type==='diary'?'diary':'reminder'}">${(d.type||'reminder').toUpperCase()}</span>
-      <div class="rem-title">${d.title}</div>
-      ${d.description&&d.description!==d.title?'<div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px;">'+d.description+'</div>':''}
-    </div>`).join('');
+
+let memFileId=null;
+async function saveToDriveMemory(userMsg,soniaReply) {
+  try {
+    if (!memFileId) memFileId=await findOrCreateFile('sonia-memory.json','application/json','[]');
+    const raw=await readFile(memFileId);
+    const entries=JSON.parse(raw||'[]');
+    entries.push({timestamp:new Date().toISOString(),user:userMsg,sonia:soniaReply});
+    await writeFile(memFileId,JSON.stringify(entries,null,2),'application/json');
+  } catch(e) { console.warn('Memory save failed:',e); }
 }
-document.getElementById('remRefresh').addEventListener('click',()=>{
-  renderReminders();
-  if(driveToken&&FOLDER_ID)loadDriveDiary();
+
+/* ── Notes ──────────────────────────────────────── */
+let notesQueue=JSON.parse(LS.get('notes')||'[]'), notesFileId=null;
+
+function renderNotes() {
+  const el=document.getElementById('notesList'); el.innerHTML='';
+  if (!notesQueue.length) {
+    el.innerHTML='<div style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.25em;color:var(--dim);padding-top:8px">no queued notes</div>';
+    return;
+  }
+  notesQueue.slice().reverse().forEach((n,ri)=>{
+    const i=notesQueue.length-1-ri, d=document.createElement('div');
+    d.className='note-item';
+    const ts=new Date(n.ts);
+    const label=isNaN(ts)?n.ts:ts.toLocaleString([],{dateStyle:'short',timeStyle:'short'});
+    d.innerHTML='<div class="note-item-body"><div class="note-item-ts">'+label+(n.synced?' · synced':' · local')+'</div><div class="note-item-text">'+esc(n.text)+'</div></div><button class="note-del" data-i="'+i+'">✕</button>';
+    el.appendChild(d);
+  });
+  el.querySelectorAll('.note-del').forEach(btn=>{ btn.addEventListener('click',()=>deleteNote(parseInt(btn.dataset.i))); });
+}
+
+function deleteNote(i) {
+  notesQueue.splice(i,1); LS.set('notes',JSON.stringify(notesQueue));
+  renderNotes(); if(driveToken) syncNotesToDrive();
+}
+
+document.getElementById('sendNote').addEventListener('click',async()=>{
+  const text=document.getElementById('noteBox').value.trim(); if(!text) return;
+  document.getElementById('noteBox').value='';
+  const note={ts:new Date().toISOString(),text,synced:false};
+  notesQueue.push(note); LS.set('notes',JSON.stringify(notesQueue)); renderNotes();
+  if (driveToken) {
+    await syncNotesToDrive();
+    notesQueue[notesQueue.length-1].synced=true;
+    LS.set('notes',JSON.stringify(notesQueue)); renderNotes();
+    setStatus('note sent to desktop Sonia','ok');
+  } else { setStatus('note saved locally · connect drive to sync'); }
 });
 
-async function handleReminderIntent(raw){
-  setStatus('parsing reminder…','busy');
+async function syncNotesToDrive() {
   try {
-    const parse=await fetch('https://api.groq.com/openai/v1/chat/completions',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
-      body:JSON.stringify({
-        model:'llama-3.3-70b-versatile',max_tokens:200,temperature:0.2,
-        messages:[{role:'user',content:`Extract calendar/reminder details. Today is ${new Date().toDateString()}.
-Message: "${raw}"
-Reply ONLY with JSON (no fences, no extra text):
-{"title":"short event title","description":"longer description","date":"YYYY-MM-DD","time":"HH:MM","isReminder":true,"isDiary":false}
-If date unclear use today. If time unclear use "09:00". isDiary=true if user says diary/journal/log.`}]
-      })
-    });
-    const pData=await parse.json();
-    const rawJSON=(pData.choices?.[0]?.message?.content||'').replace(/```[a-z]*|```/g,'').trim();
-    let event;
-    try{event=JSON.parse(rawJSON);}catch(e){
-      appendBubble('sonia',"I couldn't quite parse that reminder, "+OWNER_NAME+". Could you try again?","calm");
-      setStatus('');return;
-    }
-    const{title,description,date,time,isDiary}=event;
-    if(!title){setStatus('');return;}
-
-    const entry={timestamp:new Date().toISOString(),type:isDiary?'diary':'reminder',title,description,date,time};
-    saveDiaryEntry(entry);
-    renderReminders();
-
-    // Google Calendar if connected
-    let calOk=false;
-    if(driveToken){
-      try{
-        const startDT=date+'T'+time+':00';
-        const[h,m2]=time.split(':').map(Number);
-        const endMin=m2+30,endH=h+Math.floor(endMin/60);
-        const endDT=date+'T'+String(endH%24).padStart(2,'0')+':'+String(endMin%60).padStart(2,'0')+':00';
-        const calRes=await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events',{
-          method:'POST',
-          headers:{Authorization:'Bearer '+driveToken,'Content-Type':'application/json'},
-          body:JSON.stringify({
-            summary:title,description:description||title,
-            start:{dateTime:startDT,timeZone:'Africa/Johannesburg'},
-            end:{dateTime:endDT,timeZone:'Africa/Johannesburg'},
-            reminders:{useDefault:false,overrides:[{method:'email',minutes:60},{method:'popup',minutes:15}]}
-          })
-        });
-        calOk=calRes.ok;
-        // Also save to Drive diary
-        saveToDriveDiary(entry);
-      }catch(e){console.warn('[Sonia Calendar]',e.message);}
-    }
-
-    const confirmation=calOk
-      ?(isDiary?`Diary entry logged for ${date}, ${OWNER_NAME}. Added to your calendar.`
-               :`Done. "${title}" is in your calendar for ${date} at ${time}.`)
-      :`Saved${isDiary?' to your diary':' as a reminder'}, ${OWNER_NAME}.${driveToken?'':' Connect Drive for calendar sync.'}`;
-
-    if(starVisible){starRainbow(7000);}
-    else{starShow(isDiary?'diary ✦':'reminder ✦');setTimeout(()=>starRainbow(7000),400);setTimeout(()=>{if(starVisible)starHide();},10000);}
-    appendBubble('sonia',confirmation,'focused');
-    saveMemory(raw,confirmation);
-    setStatus('');
-  } catch(e){
-    appendBubble('sonia','Reminder failed — '+e.message,'calm');
-    setStatus('error','err');
-  }
+    if(!notesFileId) notesFileId=await findOrCreateFile('sonia-notes.json','application/json','[]');
+    const payload=notesQueue.map(n=>({timestamp:n.ts,text:n.text}));
+    await writeFile(notesFileId,JSON.stringify(payload,null,2),'application/json');
+  } catch(e) { setStatus('drive sync failed','err'); }
 }
 
-/* ══ MEMORY RECALL ══ */
-async function handleMemoryRecall(raw){
-  setStatus('searching memory…','busy');
-  const thinkEl=appendThinking();
-  const mems=loadMemories();
-  let corpus='LOCAL MEMORY:\n'+mems.slice(0,30).map(m=>`[${new Date(m.ts).toLocaleDateString('en-GB')}] USER: ${m.user} | SONIA: ${m.sonia}`).join('\n');
-  try {
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
-      body:JSON.stringify({
-        model:'llama-3.3-70b-versatile',max_tokens:160,temperature:0.5,
-        messages:[{role:'user',content:`You are Sonia, a sharp British AI. The user asks: "${raw}"\n\nMemory:\n${corpus.slice(0,3000)}\n\nAnswer in 1-2 natural spoken sentences. Be specific about dates/topics. If not found, say so with dry wit. No mood tags.`}]
-      })
-    });
-    const data=await res.json();
-    const reply=(data.choices?.[0]?.message?.content||'I cannot locate that in my memory, '+OWNER_NAME+'.').trim();
-    thinkEl.remove();appendBubble('sonia',reply,'introspective');
-    saveMemory(raw,reply);setStatus('');
-  } catch(e){
-    thinkEl.remove();appendBubble('sonia','Memory lookup failed — '+e.message,'calm');setStatus('');
-  }
-}
+/* ══ RADIO ═══════════════════════════════════════════════════════ */
+const STATIONS=[
+  {name:'NTS Radio 1',    loc:'London, UK',      url:'https://stream-relay-geo.ntslive.co.uk/stream'},
+  {name:'NTS Radio 2',    loc:'London, UK',      url:'https://stream-relay-geo.ntslive.co.uk/stream2'},
+  {name:'Radio FG',       loc:'Paris, FR',       url:'https://radiofg.impek.com/fg'},
+  {name:'Chillhop',       loc:'lo-fi · global',  url:'https://streams.ilovemusic.de/iloveradio17.mp3'},
+  {name:'WBGO Jazz',      loc:'Newark, US',      url:'https://freshgrass.streamguys1.com/wbgo-web'},
+  {name:'SomaFM Drone',   loc:'San Francisco',   url:'https://ice6.somafm.com/dronezone-128-mp3'},
+  {name:'SomaFM Groove',  loc:'San Francisco',   url:'https://ice6.somafm.com/groovesalad-128-mp3'},
+  {name:'Radio Paradise', loc:'worldwide',        url:'https://stream.radioparadise.com/aac-128'},
+];
+let currentStation=null;
+const radioPlayer=document.getElementById('radioPlayer');
+const radioNowPlaying=document.getElementById('radioNowPlaying');
+const radioStop=document.getElementById('radioStop');
 
-/* ══ EMAIL COMPOSER ══ */
-function openEmailOverlay(raw){
-  const overlay=document.getElementById('emailOverlay');
-  overlay.classList.add('on');
-  const atMatch=raw.match(/[\w.\-+]+@[\w.\-]+\.\w+/);
-  if(atMatch) document.getElementById('emailTo').value=atMatch[0];
-  document.getElementById('emailSubject').value='';
-  document.getElementById('emailBody').value='';
-  setEmailStatus('ready to compose','');
-  setTimeout(()=>document.getElementById(atMatch?'emailSubject':'emailTo').focus(),100);
+function buildStationGrid() {
+  const grid=document.getElementById('stationGrid'); grid.innerHTML='';
+  STATIONS.forEach((s,i)=>{
+    const btn=document.createElement('button');
+    btn.className='station-btn'; btn.dataset.i=i;
+    btn.innerHTML='<span class="st-name">'+esc(s.name)+'</span><span class="st-loc">'+esc(s.loc)+'</span>';
+    btn.addEventListener('click',()=>playStation(i,btn));
+    grid.appendChild(btn);
+  });
 }
-function closeEmailOverlay(){
+function playStation(i,btn) {
+  const s=STATIONS[i];
+  if (currentStation===i&&!radioPlayer.paused){stopRadio();return;}
+  document.querySelectorAll('.station-btn').forEach(b=>b.classList.remove('playing'));
+  btn.classList.add('playing'); currentStation=i;
+  radioPlayer.src=s.url; radioPlayer.load(); radioPlayer.play().catch(()=>{});
+  radioNowPlaying.textContent='▶ '+s.name+' · '+s.loc;
+  radioStop.classList.add('visible');
+  setStatus('radio · '+s.name.toLowerCase());
+}
+function stopRadio() {
+  radioPlayer.pause(); radioPlayer.src=''; currentStation=null;
+  document.querySelectorAll('.station-btn').forEach(b=>b.classList.remove('playing'));
+  radioNowPlaying.textContent=''; radioStop.classList.remove('visible');
+  setStatus('radio stopped');
+}
+radioStop.addEventListener('click',stopRadio);
+radioPlayer.addEventListener('error',()=>{
+  setStatus('stream error · try another station','err');
+  radioNowPlaying.textContent='';
+  document.querySelectorAll('.station-btn').forEach(b=>b.classList.remove('playing'));
+  radioStop.classList.remove('visible');
+});
+buildStationGrid();
+
+/* ══ EMAIL OVERLAY ═══════════════════════════════════════════════ */
+document.getElementById('emailCancelBtn').addEventListener('click',()=>{
   document.getElementById('emailOverlay').classList.remove('on');
-}
-function setEmailStatus(msg,cls){
-  const el=document.getElementById('emailStatus');el.textContent=msg;el.className='email-status'+(cls?' '+cls:'');
-}
-document.getElementById('emailCancelBtn').addEventListener('click',closeEmailOverlay);
-document.getElementById('composeEmailBtn').addEventListener('click',()=>openEmailOverlay(''));
+  document.querySelectorAll('.nav-pill').forEach(b=>b.classList.remove('active'));
+  document.querySelector('[data-panel="chatPanel"]').classList.add('active');
+  document.getElementById('chatPanel').classList.add('active');
+});
+
 document.getElementById('emailSendBtn').addEventListener('click',async()=>{
-  const to=document.getElementById('emailTo').value.trim();
-  const subject=document.getElementById('emailSubject').value.trim();
-  const bodyRaw=document.getElementById('emailBody').value.trim();
-  if(!to||!subject||!bodyRaw){setEmailStatus('please fill in all fields','err');return;}
-  if(!driveToken){setEmailStatus('drive not connected — needed for gmail','err');return;}
-  setEmailStatus('composing…','busy');
-  let finalBody=bodyRaw;
+  const to      = document.getElementById('emailTo').value.trim();
+  const subject = document.getElementById('emailSubject').value.trim();
+  const body    = document.getElementById('emailBody').value.trim();
+  const statusEl= document.getElementById('emailStatus');
+  if (!to||!subject||!body){ statusEl.textContent='Fill in all fields.'; statusEl.className='email-status err'; return; }
+  if (!driveToken){ statusEl.textContent='Connect Drive to send email.'; statusEl.className='email-status err'; return; }
+  statusEl.textContent='Sending…'; statusEl.className='email-status busy';
   try {
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
-      body:JSON.stringify({
-        model:'llama-3.3-70b-versatile',max_tokens:400,temperature:0.4,
-        messages:[{role:'user',content:`You are composing a professional email on behalf of ${OWNER_NAME}, written by his AI assistant Sonia.
-
-Subject: ${subject}
-Raw content: ${bodyRaw}
-
-Write a clean, modern professional email body. No fluff. Natural flowing sentences. Do NOT include subject line, greeting, or sign-off — just the body paragraphs. Plain text only.`}]
-      })
-    });
-    const data=await res.json();
-    finalBody=(data.choices?.[0]?.message?.content||bodyRaw).trim();
-  } catch(e){ console.warn('[Email] Compose failed, using raw body'); }
-
-  const fullBody=finalBody+'\n\nRegards,\nSonia — Assistant to '+OWNER_NAME;
-  setEmailStatus('sending…','busy');
-  try {
-    // Build RFC 2822 message
-    const message=`To: ${to}\r\nSubject: ${subject}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n${fullBody}`;
-    const encoded=btoa(unescape(encodeURIComponent(message))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-    const gmailRes=await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send',{
+    const EMAIL_SIGNATURE='\n\nRegards,\nSonia — Assistant to Mr H';
+    const fullBody=body+EMAIL_SIGNATURE;
+    const raw=['From: michaelroodehub@gmail.com','To: '+to,'Subject: '+subject,'MIME-Version: 1.0','Content-Type: text/plain; charset=utf-8','',fullBody].join('\r\n');
+    const encoded=btoa(unescape(encodeURIComponent(raw))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    const res=await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send',{
       method:'POST',
       headers:{Authorization:'Bearer '+driveToken,'Content-Type':'application/json'},
       body:JSON.stringify({raw:encoded})
     });
-    if(gmailRes.ok){
-      setEmailStatus('sent ✓','ok');
-      starRainbow(7000);if(!starVisible){starShow('email sent ✦');}
-      appendBubble('sonia','Email sent to '+to+', '+OWNER_NAME+'.','intimate');
-      saveMemory('[email sent]','To: '+to+' | Subject: '+subject);
-      setTimeout(closeEmailOverlay,1800);
+    const data=await res.json();
+    if (data.id) {
+      statusEl.textContent='Sent.'; statusEl.className='email-status ok';
+      document.getElementById('emailTo').value='';
+      document.getElementById('emailSubject').value='';
+      document.getElementById('emailBody').value='';
+      setTimeout(()=>{ document.getElementById('emailOverlay').classList.remove('on'); },1400);
     } else {
-      const err=await gmailRes.json().catch(()=>({}));
-      setEmailStatus('send failed: '+(err?.error?.message||gmailRes.status),'err');
+      statusEl.textContent=(data.error?.message||'Send failed.'); statusEl.className='email-status err';
     }
-  } catch(e){ setEmailStatus('error: '+e.message,'err'); }
+  } catch(e){ statusEl.textContent='Error: '+e.message; statusEl.className='email-status err'; }
 });
 
-/* ══ NOTES ══ */
-const NOTES_KEY='notes';
-function loadNotes(){ try{return JSON.parse(LS.get(NOTES_KEY)||'[]');}catch{return[];} }
-function renderNotes(){
-  const list=document.getElementById('notesList');
-  const notes=loadNotes();
-  if(!notes.length){list.innerHTML='<div style="color:var(--dim);font-family:var(--font-mono);font-size:var(--fs-xs);letter-spacing:0.2em;">no queued notes</div>';return;}
-  list.innerHTML=notes.map((n,i)=>`
-    <div class="note-item">
-      <div class="note-item-body">
-        <div class="note-item-ts">${new Date(n.ts).toLocaleString()}</div>
-        <div class="note-item-text">${n.text}</div>
-      </div>
-      <button class="note-del" data-i="${i}">✕</button>
-    </div>`).join('');
-  list.querySelectorAll('.note-del').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const ns=loadNotes();ns.splice(+btn.dataset.i,1);
-      LS.set(NOTES_KEY,JSON.stringify(ns));renderNotes();
-    });
-  });
-}
-document.getElementById('sendNote').addEventListener('click',()=>{
-  const box=document.getElementById('noteBox');const txt=box.value.trim();if(!txt)return;
-  const notes=loadNotes();
-  notes.unshift({ts:new Date().toISOString(),text:txt});
-  LS.set(NOTES_KEY,JSON.stringify(notes));box.value='';renderNotes();
-  if(driveToken&&FOLDER_ID)uploadNoteToDrive(txt);
-  setStatus('note saved','ok');setTimeout(()=>setStatus(''),2000);
-});
-
-/* ══ PROACTIVE GREETING ══ */
-async function maybeFireProactive(){
-  const hour=new Date().getHours();
-  let greeting='';
-  if(hour<6)       greeting=`It's very late, ${OWNER_NAME}. Everything alright?`;
-  else if(hour<10) greeting=`Good morning, ${OWNER_NAME}.`;
-  else if(hour<13) greeting=`Morning's passing. How's the day shaping up, ${OWNER_NAME}?`;
-  else if(hour<17) greeting=`Afternoon. What's on your mind?`;
-  else if(hour<21) greeting=`Evening, ${OWNER_NAME}. How was the day?`;
-  else             greeting=`Late evening. Winding down, ${OWNER_NAME}?`;
-  appendBubble('sonia',greeting,'calm');
-}
-
-/* ══ GOOGLE DRIVE (GIS + gapi) ══ */
-let gisLoaded=false,gapiLoaded=false,tokenClient=null;
-
-function loadDriveLibs(){
-  const gisScript=document.createElement('script');
-  gisScript.src='https://accounts.google.com/gsi/client';
-  gisScript.onload=()=>{gisLoaded=true;tryInitTokenClient();};
-  document.head.appendChild(gisScript);
-  const gapiScript=document.createElement('script');
-  gapiScript.src='https://apis.google.com/js/api.js';
-  gapiScript.onload=()=>{
-    gapi.load('client',async()=>{
-      await gapi.client.init({discoveryDocs:[]});
-      gapiLoaded=true;tryInitTokenClient();
-    });
-  };
-  document.head.appendChild(gapiScript);
-}
-
-function tryInitTokenClient(){
-  if(!gisLoaded||!gapiLoaded||!CLIENT_ID)return;
-  tokenClient=google.accounts.oauth2.initTokenClient({
-    client_id:CLIENT_ID,
-    scope:'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/gmail.send',
-    callback:(resp)=>{
-      if(resp.error){setStatus('drive auth failed: '+resp.error,'err');return;}
-      driveToken=resp.access_token;driveConnected=true;
-      const btn=document.getElementById('driveBtn');
-      btn.textContent='DRIVE: ON';btn.classList.add('connected');
-      setStatus('drive connected','ok');setTimeout(()=>setStatus(''),2500);
-      loadDriveMemory();loadDriveDiary();
-    }
-  });
-}
-
-document.getElementById('driveBtn').addEventListener('click',()=>{
-  if(driveConnected){setStatus('drive already connected','ok');setTimeout(()=>setStatus(''),2000);return;}
-  if(!tokenClient){setStatus('client id not set','err');return;}
-  tokenClient.requestAccessToken({prompt:'consent'});
-});
-
-// Drive helpers
-async function driveFind(name){
-  if(!driveToken||!FOLDER_ID)return null;
-  const q=encodeURIComponent(`name='${name}' and '${FOLDER_ID}' in parents and trashed=false`);
-  const res=await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`,{headers:{Authorization:'Bearer '+driveToken}});
-  const json=await res.json();
-  return json.files&&json.files[0]?json.files[0].id:null;
-}
-async function driveRead(fileId){
-  const res=await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,{headers:{Authorization:'Bearer '+driveToken}});
-  return res.text();
-}
-async function driveWrite(name,data){
-  if(!driveToken||!FOLDER_ID)return;
-  const content=JSON.stringify(data,null,2);
-  let fid=await driveFind(name);
-  if(!fid){
-    const boundary='sonia314';
-    const meta={name,parents:[FOLDER_ID]};
-    const body='--'+boundary+'\r\nContent-Type: application/json\r\n\r\n'+JSON.stringify(meta)+'\r\n--'+boundary+'\r\nContent-Type: application/json\r\n\r\n'+content+'\r\n--'+boundary+'--';
-    await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
-      method:'POST',headers:{Authorization:'Bearer '+driveToken,'Content-Type':'multipart/related; boundary="'+boundary+'"'},body
-    });
-  } else {
-    await fetch('https://www.googleapis.com/upload/drive/v3/files/'+fid+'?uploadType=media',{
-      method:'PATCH',headers:{Authorization:'Bearer '+driveToken,'Content-Type':'application/json'},body:content
-    });
-  }
-}
-
-async function loadDriveMemory(){
-  try{
-    const fid=await driveFind('sonia-history.json');if(!fid)return;
-    const raw=await driveRead(fid);
-    const hist=JSON.parse(raw||'[]');
-    // Merge into local memories
-    const mems=loadMemories();
-    const existingTs=new Set(mems.map(m=>m.ts));
-    let added=0;
-    for(let i=0;i<hist.length;i+=2){
-      const u=hist[i],s=hist[i+1];
-      if(u&&s&&!existingTs.has(u.timestamp)){
-        mems.push({ts:u.timestamp||new Date().toISOString(),user:u.content,sonia:s?.content||''});
-        added++;
-      }
-    }
-    if(added>0){
-      mems.sort((a,b)=>new Date(b.ts)-new Date(a.ts));
-      if(mems.length>80)mems.length=80;
-      LS.set(MEM_KEY,JSON.stringify(mems));
-      renderMemories();setStatus(added+' memories synced from drive','ok');setTimeout(()=>setStatus(''),2500);
-    }
-  }catch(e){console.warn('[Drive] Memory load failed:',e.message);}
-}
-
-async function saveToDriveHistory(userMsg,soniaReply,mood){
-  try{
-    const fid=await driveFind('sonia-history.json');
-    let hist=[];
-    if(fid){const raw=await driveRead(fid);hist=JSON.parse(raw||'[]');}
-    hist.push({role:'user',content:userMsg,timestamp:new Date().toISOString(),device:'mobile'});
-    hist.push({role:'assistant',content:soniaReply,mood,timestamp:new Date().toISOString(),device:'mobile'});
-    if(hist.length>80)hist=hist.slice(-80);
-    await driveWrite('sonia-history.json',hist);
-  }catch(e){console.warn('[Drive] History save:',e.message);}
-}
-
-async function loadDriveDiary(){
-  try{
-    const fid=await driveFind('sonia-diary.json');if(!fid)return;
-    const raw=await driveRead(fid);
-    const driveEntries=JSON.parse(raw||'[]');
-    const local=loadDiary();
-    const existingTs=new Set(local.map(d=>d.timestamp));
-    let added=0;
-    for(const e of driveEntries){
-      if(!existingTs.has(e.timestamp)){local.push(e);added++;}
-    }
-    if(added>0){
-      local.sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
-      if(local.length>100)local.length=100;
-      LS.set(DIARY_KEY,JSON.stringify(local));
-      renderReminders();
-    }
-  }catch(e){console.warn('[Drive] Diary load:',e.message);}
-}
-
-async function saveToDriveDiary(entry){
-  try{
-    const fid=await driveFind('sonia-diary.json');
-    let diary=[];
-    if(fid){const raw=await driveRead(fid);diary=JSON.parse(raw||'[]');}
-    diary.push(entry);if(diary.length>200)diary=diary.slice(-200);
-    await driveWrite('sonia-diary.json',diary);
-  }catch(e){console.warn('[Drive] Diary save:',e.message);}
-}
-
-async function uploadNoteToDrive(text){
-  try{
-    const fid=await driveFind('sonia-notes.json');
-    let notes=[];
-    if(fid){const raw=await driveRead(fid);notes=JSON.parse(raw||'[]');}
-    notes.push({ts:new Date().toISOString(),text,device:'mobile'});
-    if(notes.length>50)notes=notes.slice(-50);
-    await driveWrite('sonia-notes.json',notes);
-    setStatus('note synced to drive','ok');setTimeout(()=>setStatus(''),2000);
-  }catch(e){console.warn('[Drive] Note upload:',e.message);}
+/* ══ UTILS ═══════════════════════════════════════════════════════ */
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 </script>
 </body>
