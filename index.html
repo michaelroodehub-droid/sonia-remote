@@ -3,54 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Sonia — Remote Workspace</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <title>Sonia — Remote</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-    /* ══ TRON CYBERPUNK THEME VARIABLES ══════════════════════════ */
-    :root, data-theme="dark" {
-      --bg:          #030305;
-      --surface:     #09090e;
-      --surface2:    #11111a;
-      --border:      rgba(200,168,248,0.1);
-      --border-mid:  rgba(200,168,248,0.2);
-      --border-hi:   rgba(200,168,248,0.45);
-      --text:        rgba(255,255,255,0.95);
-      --muted:       rgba(255,255,255,0.60);
-      --dim:         rgba(255,255,255,0.35);
-      --accent:      #00ffcc; /* Cyber Cyan Neon */
-      --accent-glow: rgba(0,255,204,0.25);
-      --neon-purple: #cc66ff;
-      --pink:        #ff007f;
-      --green-ok:    #00ff66;
-      --red-err:     #ff3333;
-      --blue-busy:   #00ccff;
-      --sans:        'Space Grotesk', -apple-system, sans-serif;
-      --tech:        'Orbitron', sans-serif;
-      --mono:        'JetBrains Mono', monospace;
+    :root {
+      --bg:          #050508;
+      --surface:     #0c0c12;
+      --surface2:    #13131c;
+      --border:      rgba(255,255,255,0.08);
+      --border-mid:  rgba(255,255,255,0.14);
+      --border-hi:   rgba(255,255,255,0.28);
+      --text:        rgba(255,255,255,0.92);
+      --muted:       rgba(255,255,255,0.50);
+      --dim:         rgba(255,255,255,0.28);
+      --accent:      #c8a8f8;
+      --accent-dim:  rgba(200,168,248,0.18);
+      --pink:        rgba(255,160,200,0.85);
+      --green-ok:    rgba(80,220,130,0.85);
+      --red-err:     rgba(255,80,80,0.75);
+      --blue-busy:   rgba(140,180,255,0.75);
+      --fade:        0.38s cubic-bezier(0.4,0,0.2,1);
+      --mono:        'Share Tech Mono', 'Courier New', monospace;
+      --sans:        'Inter', -apple-system, sans-serif;
       --safe-top:    env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
-    }
-
-    /* ══ STARK HIGH-CONTRAST WHITE MODE ══════════════════════════ */
-    [data-theme="light"] {
-      --bg:          #ffffff;
-      --surface:     #f4f4f7;
-      --surface2:    #ebebef;
-      --border:      rgba(0,0,0,0.08);
-      --border-mid:  rgba(0,0,0,0.15);
-      --border-hi:   rgba(0,0,0,0.85);
-      --text:        #050508;
-      --muted:       #4a4a52;
-      --dim:         #8a8a93;
-      --accent:      #7000ff; /* Electric deep violet */
-      --accent-glow: rgba(112,0,255,0.15);
-      --neon-purple: #b000ff;
-      --pink:        #d00060;
-      --green-ok:    #00aa44;
-      --red-err:     #cc0000;
-      --blue-busy:   #0088cc;
+      --r:           14px;
     }
 
     html, body {
@@ -60,491 +39,696 @@
       font-family: var(--sans);
       overflow: hidden;
       -webkit-font-smoothing: antialiased;
-      transition: background 0.4s ease, color 0.4s ease;
     }
 
-    /* ══ CORE LAYOUT SHIFT: NAVIGATION DOCK ════════════════════════ */
-    #masterWrapper {
-      display: flex;
-      width: 100%; height: 100%;
-      padding-top: var(--safe-top);
-      padding-bottom: var(--safe-bottom);
-    }
-
-    /* Left panel-dock navigation */
-    #sidebarDock {
-      width: 86px;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 24px 0;
-      justify-content: space-between;
-      z-index: 100;
-    }
-
-    .dock-logo-zone {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-    }
-
-    #hdrOrb {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, var(--accent) 0%, var(--neon-purple) 60%, transparent 100%);
-      box-shadow: 0 0 20px var(--accent-glow);
-      cursor: pointer;
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    #hdrOrb:hover { transform: scale(1.1); }
-    #hdrOrb.listening {
-      background: radial-gradient(circle at 35% 35%, var(--pink) 0%, #ff00c8 60%, transparent 100%);
-      box-shadow: 0 0 25px rgba(255,0,127,0.6);
-      animation: corePulse 0.6s ease-in-out infinite alternate;
-    }
-    #hdrOrb.thinking {
-      background: radial-gradient(circle at 35% 35%, var(--blue-busy) 0%, #0044ff 60%, transparent 100%);
-      box-shadow: 0 0 25px rgba(0,204,255,0.6);
-      animation: corePulse 1.2s ease-in-out infinite alternate;
-    }
-    @keyframes corePulse {
-      from { transform: scale(0.92); opacity: 0.8; }
-      to { transform: scale(1.08); opacity: 1; }
-    }
-
-    #dockNav {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      width: 100%;
-      align-items: center;
-    }
-
-    .dock-btn {
-      background: none; border: none;
-      width: 56px; height: 56px;
-      border-radius: 16px;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      color: var(--dim);
-      font-family: var(--tech); font-size: 0.62rem;
-      font-weight: 600; letter-spacing: 0.05em;
-      gap: 4px; cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .dock-btn svg {
-      width: 20px; height: 20px; fill: currentColor;
-      transition: transform 0.25s ease;
-    }
-    .dock-btn:hover, .dock-btn.active {
-      color: var(--accent);
-      background: var(--surface2);
-      box-shadow: inset 0 0 12px rgba(0,255,204,0.05);
-    }
-    .dock-btn.active svg { transform: scale(1.1); }
-
-    .dock-foot {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      align-items: center;
-    }
-
-    /* Appearance Switch Trigger */
-    #modeSwitch {
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      color: var(--muted);
-      transition: all 0.25s ease;
-    }
-    #modeSwitch:hover { color: var(--accent); border-color: var(--border-hi); }
-
-    /* Main view chassis */
-    #viewChassis {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      background: var(--bg);
-      position: relative;
-    }
-
-    /* ══ SETUP OVERLAY ═══════════════════════════════════════════ */
+    /* ══ SETUP ══════════════════════════════════════════════════ */
     #setup {
       position: fixed; inset: 0; z-index: 200;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      padding: 40px 24px;
+      gap: 0;
+      padding: calc(var(--safe-top) + 40px) 32px calc(var(--safe-bottom) + 32px);
       background: var(--bg);
       overflow-y: auto;
     }
-    .setup-card {
-      width: 100%; max-width: 460px;
-      background: var(--surface);
-      border: 1px solid var(--border-mid);
-      border-radius: 24px; padding: 40px 32px;
-      box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+
+    .setup-orb {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: radial-gradient(circle at 38% 36%, rgba(200,168,248,0.9) 0%, rgba(160,100,240,0.6) 50%, transparent 80%);
+      box-shadow: 0 0 32px rgba(200,168,248,0.22), 0 0 80px rgba(160,100,240,0.1);
+      margin-bottom: 28px;
+      animation: setupOrbPulse 3.5s ease-in-out infinite;
     }
+    @keyframes setupOrbPulse {
+      0%,100% { box-shadow: 0 0 32px rgba(200,168,248,0.22), 0 0 80px rgba(160,100,240,0.1); }
+      50%      { box-shadow: 0 0 48px rgba(200,168,248,0.38), 0 0 110px rgba(160,100,240,0.18); }
+    }
+
     #setup h1 {
-      font-family: var(--tech); font-weight: 800;
-      font-size: 2.6rem; letter-spacing: -0.03em;
-      color: var(--text); margin-bottom: 4px;
+      font-family: var(--sans); font-weight: 300;
+      font-size: 2.1rem; letter-spacing: 0.55em;
+      color: #fff; margin-bottom: 6px;
     }
     .setup-sub {
-      font-family: var(--mono); font-size: 0.75rem;
-      letter-spacing: 0.25em; color: var(--accent);
-      text-transform: uppercase; margin-bottom: 32px;
+      font-family: var(--mono); font-size: 0.68rem;
+      letter-spacing: 0.42em; color: var(--muted);
+      margin-bottom: 44px;
     }
-    .setup-field { position: relative; margin-bottom: 24px; }
+
+    .setup-group {
+      width: 100%; max-width: 360px;
+      display: flex; flex-direction: column; gap: 28px;
+      margin-bottom: 36px;
+    }
+    .setup-field { position: relative; }
     .setup-field label {
-      display: block; font-family: var(--tech);
-      font-size: 0.7rem; letter-spacing: 0.15em;
-      color: var(--muted); margin-bottom: 8px;
-      text-transform: uppercase; font-weight: 600;
+      display: block; font-family: var(--mono);
+      font-size: 0.62rem; letter-spacing: 0.38em;
+      color: var(--dim); margin-bottom: 10px;
+      text-transform: uppercase;
     }
     .setup-field input {
       width: 100%; background: var(--surface2);
-      border: 1px solid var(--border-mid); border-radius: 12px;
-      color: #fff; font-family: var(--mono); font-size: 1rem;
-      padding: 16px; outline: none;
-      transition: all 0.25s ease;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: #fff; font-family: var(--mono);
+      font-size: 0.9rem; letter-spacing: 0.08em;
+      padding: 14px 16px; outline: none;
+      transition: border-color 0.25s, background 0.25s;
     }
-    [data-theme="light"] .setup-field input { color: #000; }
     .setup-field input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 14px var(--accent-glow);
+      border-color: rgba(200,168,248,0.45);
+      background: rgba(200,168,248,0.04);
     }
+    .setup-field input::placeholder { color: var(--dim); }
+
     #setupBtn {
-      width: 100%; background: var(--accent);
-      border: none; border-radius: 14px;
-      color: var(--bg); font-family: var(--tech);
-      font-size: 0.95rem; font-weight: 800; letter-spacing: 0.15em;
-      padding: 18px; cursor: pointer; margin-top: 10px;
-      transition: all 0.25s ease;
+      width: 100%; max-width: 360px;
+      background: rgba(200,168,248,0.1);
+      border: 1px solid rgba(200,168,248,0.28);
+      border-radius: 12px;
+      color: var(--accent); font-family: var(--mono);
+      font-size: 0.82rem; letter-spacing: 0.35em;
+      padding: 16px; cursor: pointer;
+      transition: background 0.25s, border-color 0.25s, color 0.25s;
     }
-    #setupBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--accent-glow); }
-
-    /* ══ PANELS ARCHITECTURE ══════════════════════════════════════ */
-    #panelsContainer { flex: 1; position: relative; overflow: hidden; }
-    .panel {
-      position: absolute; inset: 0;
-      display: none; flex-direction: column;
-      opacity: 0; transition: opacity 0.3s ease;
-    }
-    .panel.active { display: flex; opacity: 1; }
-
-    /* ── CHAT PANEL ───────────────────────────────────── */
-    #chatLog {
-      flex: 1; overflow-y: auto;
-      padding: 32px 40px;
-      display: flex; flex-direction: column; gap: 24px;
-    }
-    .bubble { max-width: 78%; display: flex; flex-direction: column; }
-    .bubble.user { align-self: flex-end; align-items: flex-end; }
-    .bubble.sonia { align-self: flex-start; align-items: flex-start; }
-
-    .bubble-inner {
-      padding: 16px 22px; border-radius: 20px;
-      font-size: 1.1rem; line-height: 1.6; font-weight: 400;
-    }
-    .bubble.user .bubble-inner {
-      background: var(--surface2); border: 1px solid var(--border-mid);
-      color: var(--text); border-bottom-right-radius: 4px;
-    }
-    .bubble.sonia .bubble-inner {
-      background: var(--surface); border: 1px solid var(--border);
-      color: var(--text); border-bottom-left-radius: 4px;
-    }
-    .bubble-meta {
-      font-family: var(--mono); font-size: 0.68rem;
-      letter-spacing: 0.1em; color: var(--dim); margin-top: 6px;
-      display: flex; align-items: center; gap: 6px;
+    #setupBtn:active {
+      background: rgba(200,168,248,0.18);
+      color: #fff;
     }
 
-    /* Dynamic Action/Input Bar */
-    #chatBar {
-      display: flex; align-items: center; gap: 16px;
-      padding: 24px 40px; border-top: 1px solid var(--border);
+    .setup-note {
+      font-family: var(--mono); font-size: 0.6rem;
+      letter-spacing: 0.18em; color: var(--dim);
+      text-align: center; max-width: 340px;
+      line-height: 1.9; margin-top: 28px;
+    }
+
+    /* ══ APP SHELL ══════════════════════════════════════════════ */
+    #app {
+      display: none; position: fixed; inset: 0;
+      flex-direction: column;
+      padding-top: var(--safe-top);
+      padding-bottom: var(--safe-bottom);
       background: var(--bg);
     }
-    .chat-box-container {
-      flex: 1; position: relative;
-      background: var(--surface);
+    #app.on { display: flex; }
+
+    /* ── Header ───────────────────────────────────────── */
+    #hdr {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      gap: 12px;
+    }
+
+    .hdr-left {
+      display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0;
+    }
+
+    #hdrOrb {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: radial-gradient(circle at 38% 36%, rgba(200,168,248,0.85) 0%, rgba(140,80,220,0.5) 55%, transparent 80%);
+      box-shadow: 0 0 10px rgba(200,168,248,0.25), 0 0 24px rgba(160,100,240,0.1);
+      flex-shrink: 0;
+      transition: box-shadow 0.6s ease, background 0.6s ease;
+    }
+    #hdrOrb.listening {
+      background: radial-gradient(circle at 38% 36%, rgba(255,160,200,0.9) 0%, rgba(220,80,140,0.5) 55%, transparent 80%);
+      box-shadow: 0 0 14px rgba(255,160,200,0.5), 0 0 36px rgba(220,80,140,0.2);
+      animation: orbPulse 0.8s ease-in-out infinite;
+    }
+    #hdrOrb.thinking {
+      background: radial-gradient(circle at 38% 36%, rgba(140,180,255,0.9) 0%, rgba(80,120,240,0.5) 55%, transparent 80%);
+      box-shadow: 0 0 14px rgba(140,180,255,0.45), 0 0 36px rgba(80,120,240,0.18);
+      animation: orbPulse 1.4s ease-in-out infinite;
+    }
+    @keyframes orbPulse {
+      0%,100% { transform: scale(1); opacity: 1; }
+      50%      { transform: scale(0.88); opacity: 0.65; }
+    }
+
+    #hdrTitle {
+      font-family: var(--sans); font-weight: 300;
+      font-size: 1.15rem; letter-spacing: 0.42em;
+      color: #fff;
+    }
+
+    #nav {
+      display: flex; gap: 4px;
+      overflow-x: auto; scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      flex-shrink: 1;
+    }
+    #nav::-webkit-scrollbar { display: none; }
+
+    .nav-pill {
+      background: none; border: 1px solid transparent;
+      border-radius: 20px;
+      font-family: var(--mono); font-size: 0.6rem;
+      letter-spacing: 0.14em; color: var(--dim);
+      padding: 5px 12px; cursor: pointer; white-space: nowrap;
+      transition: color 0.25s, border-color 0.25s, background 0.25s;
+    }
+    .nav-pill.active {
+      color: var(--accent);
+      border-color: rgba(200,168,248,0.28);
+      background: rgba(200,168,248,0.07);
+    }
+
+    /* ── Panels ───────────────────────────────────────── */
+    #panels { flex: 1; overflow: hidden; min-height: 0; position: relative; }
+
+    .panel {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      opacity: 0; pointer-events: none;
+      transition: opacity var(--fade);
+    }
+    .panel.active { opacity: 1; pointer-events: all; }
+
+    /* ══ CHAT PANEL ══════════════════════════════════════════════ */
+    #chatLog {
+      flex: 1; overflow-y: auto;
+      padding: 20px 18px 10px;
+      display: flex; flex-direction: column; gap: 16px;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    #chatLog::-webkit-scrollbar { display: none; }
+
+    .bubble { max-width: 82%; }
+    .bubble.user { align-self: flex-end; }
+    .bubble.sonia { align-self: flex-start; }
+
+    .bubble-inner {
+      padding: 12px 16px;
+      border-radius: 18px;
+      animation: bubbleIn 0.28s ease forwards;
+    }
+    @keyframes bubbleIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .bubble.user .bubble-inner {
+      background: var(--surface2);
       border: 1px solid var(--border-mid);
-      border-radius: 16px; display: flex; align-items: center;
+      border-bottom-right-radius: 5px;
     }
+    .bubble.sonia .bubble-inner {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 5px;
+    }
+
+    .bubble-text {
+      font-size: 0.97rem; line-height: 1.72;
+      font-weight: 400; letter-spacing: 0.01em;
+    }
+    .bubble.user .bubble-text  { color: rgba(255,255,255,0.85); }
+    .bubble.sonia .bubble-text { color: var(--text); }
+
+    .bubble-meta {
+      font-family: var(--mono); font-size: 0.58rem;
+      letter-spacing: 0.22em; color: var(--dim);
+      margin-top: 5px; display: flex; align-items: center; gap: 5px;
+    }
+    .bubble.user .bubble-meta { justify-content: flex-end; }
+
+    .mood-dot {
+      width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+    }
+    .m-calm          { background: hsl(200,70%,55%); }
+    .m-curious       { background: hsl(270,65%,62%); }
+    .m-thinking      { background: hsl(160,65%,50%); }
+    .m-focused       { background: hsl(35,80%,55%); }
+    .m-intimate      { background: hsl(320,55%,58%); }
+    .m-introspective { background: hsl(240,45%,52%); }
+    .m-default       { background: rgba(255,255,255,0.3); }
+
+    .thinking .bubble-inner { border-color: var(--border); }
+    .thinking .bubble-text  {
+      color: var(--dim);
+      animation: thinkBlink 1.1s ease-in-out infinite;
+    }
+    @keyframes thinkBlink { 0%,100%{opacity:0.25} 50%{opacity:0.9} }
+
+    #chatBar {
+      display: flex; align-items: flex-end; gap: 10px;
+      padding: 12px 16px 14px;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+
     #chatBox {
-      flex: 1; background: none; border: none;
-      color: var(--text); font-family: var(--sans);
-      font-size: 1.1rem; padding: 16px; outline: none;
-      resize: none; max-height: 140px; display: block;
+      flex: 1; background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      color: #fff; font-family: var(--sans);
+      font-size: 0.95rem; font-weight: 400;
+      padding: 11px 16px; outline: none;
+      resize: none; max-height: 90px;
+      overflow-y: auto; line-height: 1.5;
+      transition: border-color 0.25s;
+      -webkit-overflow-scrolling: touch;
     }
+    #chatBox:focus { border-color: rgba(200,168,248,0.35); }
+    #chatBox::placeholder { color: var(--dim); font-family: var(--sans); }
+
     .bar-btn {
-      background: none; border: none; color: var(--muted);
-      width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: all 0.2s ease;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0;
+      transition: background 0.2s, border-color 0.2s;
+      font-size: 1rem;
     }
-    .bar-btn:hover { color: var(--accent); }
+    .bar-btn:active { background: var(--accent-dim); border-color: rgba(200,168,248,0.35); }
     .bar-btn.send-btn {
-      background: var(--accent); color: var(--bg);
-      border-radius: 12px; margin-right: 8px; width: 40px; height: 40px;
+      background: rgba(200,168,248,0.12);
+      border-color: rgba(200,168,248,0.25);
+      font-family: var(--mono); font-size: 0.6rem;
+      letter-spacing: 0.12em; color: var(--accent);
+      width: auto; padding: 0 16px; border-radius: 20px;
     }
-    #micBtn.active { color: var(--pink); animation: corePulse 0.5s ease-in-out infinite alternate; }
+    .bar-btn.send-btn:active {
+      background: rgba(200,168,248,0.22);
+    }
+    #micBtn.active {
+      background: rgba(255,160,200,0.12);
+      border-color: rgba(255,160,200,0.4);
+      animation: micPulse 0.75s ease-in-out infinite;
+    }
+    @keyframes micPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(255,160,200,0); }
+      50%      { box-shadow: 0 0 0 6px rgba(255,160,200,0.12); }
+    }
 
-    /* ── GENERAL PANEL FORM STYLING ───────────────────── */
-    .panel-view-wrapper {
-      flex: 1; overflow-y: auto; padding: 40px;
+    /* ══ MEMORY PANEL ════════════════════════════════════════════ */
+    #memPanel {
+      overflow-y: auto; padding: 20px 18px;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
     }
-    .giant-title {
-      font-family: var(--tech); font-weight: 800; font-size: 2.2rem;
-      letter-spacing: -0.02em; margin-bottom: 8px;
+    #memPanel::-webkit-scrollbar { display: none; }
+
+    .panel-hdr {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
     }
-    .panel-subtitle {
-      font-family: var(--mono); font-size: 0.8rem; color: var(--accent);
-      text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 40px;
+    .panel-label {
+      font-family: var(--mono); font-size: 0.62rem;
+      letter-spacing: 0.42em; color: var(--muted);
+    }
+    .panel-action {
+      background: none; border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--mono); font-size: 0.6rem;
+      letter-spacing: 0.22em; color: var(--dim);
+      padding: 6px 12px; cursor: pointer;
+      transition: color 0.25s, border-color 0.25s;
+    }
+    .panel-action:active { color: var(--accent); border-color: rgba(200,168,248,0.35); }
+
+    .mem-entry {
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+    }
+    .mem-entry:last-child { border-bottom: none; }
+    .mem-ts {
+      font-family: var(--mono); font-size: 0.58rem;
+      letter-spacing: 0.2em; color: var(--dim); margin-bottom: 6px;
+    }
+    .mem-user {
+      font-size: 0.88rem; color: rgba(255,255,255,0.6);
+      margin-bottom: 5px; line-height: 1.55;
+    }
+    .mem-sonia {
+      font-size: 0.95rem; color: var(--text); line-height: 1.65;
     }
 
-    /* ── NOTES CONFIGURATION ─────────────────────────── */
+    /* ══ NOTES PANEL ═════════════════════════════════════════════ */
+    #notesPanel {
+      display: flex; flex-direction: column;
+      padding: 20px 18px; gap: 16px;
+      overflow: hidden;
+    }
+
     #noteBox {
-      width: 100%; background: var(--surface);
-      border: 1px solid var(--border-mid); border-radius: 16px;
-      color: var(--text); font-family: var(--sans); font-size: 1.1rem;
-      padding: 20px; outline: none; resize: none; min-height: 150px;
-      margin-bottom: 20px; transition: border-color 0.25s;
+      background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 12px;
+      color: #fff; font-family: var(--sans);
+      font-size: 0.95rem; font-weight: 400;
+      padding: 14px 16px; outline: none;
+      resize: none; line-height: 1.65;
+      min-height: 110px;
+      transition: border-color 0.25s;
+      -webkit-overflow-scrolling: touch;
     }
-    #noteBox:focus { border-color: var(--accent); }
-    .actions-row { display: flex; gap: 16px; margin-bottom: 40px; }
-    .action-pill {
-      background: var(--surface2); border: 1px solid var(--border-mid);
-      color: var(--text); font-family: var(--tech); font-size: 0.8rem;
-      font-weight: 600; letter-spacing: 0.1em; padding: 14px 28px;
-      border-radius: 12px; cursor: pointer; transition: all 0.25s ease;
-    }
-    .action-pill:hover { border-color: var(--accent); color: var(--accent); }
-    .action-pill.primary { background: var(--accent); color: var(--bg); border: none; }
-    .action-pill.connected { border-color: var(--green-ok); color: var(--green-ok); }
+    #noteBox:focus { border-color: rgba(200,168,248,0.35); }
+    #noteBox::placeholder { color: var(--dim); }
 
-    .note-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 16px; padding: 20px; margin-bottom: 12px;
-      display: flex; justify-content: space-between; align-items: flex-start;
+    .notes-actions {
+      display: flex; gap: 10px; align-items: center;
     }
-    .note-card-ts { font-family: var(--mono); font-size: 0.7rem; color: var(--dim); margin-bottom: 6px; }
-    .note-card-text { font-size: 1.05rem; line-height: 1.5; }
 
-    /* ── RADIO STATIONS GRID ─────────────────────────── */
-    .radio-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px;
+    .pill-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 20px;
+      font-family: var(--mono); font-size: 0.62rem;
+      letter-spacing: 0.22em; color: var(--muted);
+      padding: 10px 18px; cursor: pointer;
+      transition: color 0.25s, border-color 0.25s, background 0.25s;
+      white-space: nowrap;
     }
-    .station-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 16px; padding: 20px; text-align: left; cursor: pointer;
-      transition: all 0.25s ease;
+    .pill-btn:active { color: #fff; border-color: var(--border-hi); }
+    .pill-btn.primary {
+      background: rgba(200,168,248,0.1);
+      border-color: rgba(200,168,248,0.25);
+      color: var(--accent);
     }
-    .station-card:hover, .station-card.playing {
-      border-color: var(--accent); background: var(--surface2);
+    .pill-btn.primary:active { background: rgba(200,168,248,0.2); color: #fff; }
+    #driveBtn.connected {
+      color: var(--green-ok);
+      border-color: rgba(80,220,130,0.3);
+      background: rgba(80,220,130,0.06);
     }
-    .st-name { font-family: var(--tech); font-weight: 600; font-size: 0.95rem; margin-bottom: 4px; display: block; }
-    .st-loc { font-family: var(--mono); font-size: 0.72rem; color: var(--dim); display: block; }
 
-    /* ── EMAIL OVERLAY LAYOUT ────────────────────────── */
+    #driveHint {
+      font-family: var(--mono); font-size: 0.6rem;
+      letter-spacing: 0.18em; color: var(--dim);
+      line-height: 1.7; display: none;
+    }
+    #driveHint.visible { display: block; }
+
+    .notes-queue-label {
+      font-family: var(--mono); font-size: 0.58rem;
+      letter-spacing: 0.3em; color: var(--dim);
+    }
+    .notes-queue {
+      flex: 1; overflow-y: auto;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    .notes-queue::-webkit-scrollbar { display: none; }
+
+    .note-item {
+      border-bottom: 1px solid var(--border);
+      padding: 12px 0; display: flex;
+      justify-content: space-between; align-items: flex-start; gap: 12px;
+    }
+    .note-item-ts {
+      font-family: var(--mono); font-size: 0.58rem;
+      letter-spacing: 0.18em; color: var(--dim); margin-bottom: 4px;
+    }
+    .note-item-text {
+      font-size: 0.92rem; color: var(--text); line-height: 1.55;
+    }
+    .note-del {
+      background: none; border: none; cursor: pointer;
+      font-family: var(--mono); font-size: 0.7rem;
+      color: var(--dim); padding: 2px 4px;
+      transition: color 0.25s; flex-shrink: 0;
+    }
+    .note-del:active { color: var(--red-err); }
+
+    /* ══ RADIO PANEL ═════════════════════════════════════════════ */
+    #radioPanel {
+      overflow-y: auto; padding: 20px 18px;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    #radioPanel::-webkit-scrollbar { display: none; }
+
+    #radioNowPlaying {
+      font-family: var(--mono); font-size: 0.65rem;
+      letter-spacing: 0.2em; color: var(--pink);
+      min-height: 18px;
+    }
+    #radioNowPlaying:not(:empty) { animation: thinkBlink 2.4s ease-in-out infinite; }
+
+    #radioStop {
+      background: none; border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--dim); font-family: var(--mono);
+      font-size: 0.62rem; letter-spacing: 0.25em;
+      padding: 8px 14px; cursor: pointer;
+      display: none; width: fit-content;
+      transition: color 0.25s;
+    }
+    #radioStop.visible { display: inline-block; }
+    #radioStop:active  { color: var(--red-err); }
+
+    .station-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .station-btn {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--muted); font-family: var(--mono);
+      font-size: 0.65rem; letter-spacing: 0.12em;
+      padding: 16px 12px; cursor: pointer; text-align: left;
+      line-height: 1.5;
+      transition: color 0.25s, border-color 0.25s, background 0.25s;
+    }
+    .station-btn.playing,
+    .station-btn:active {
+      color: #fff;
+      border-color: rgba(255,160,200,0.45);
+      background: rgba(255,160,200,0.06);
+    }
+    .station-btn .st-name { display: block; color: var(--text); margin-bottom: 3px; }
+    .station-btn .st-loc  { display: block; font-size: 0.57rem; color: var(--dim); }
+    #radioPlayer { display: none; }
+
+    /* ══ EMAIL OVERLAY ═══════════════════════════════════════════ */
     #emailOverlay {
-      display: none; position: absolute; inset: 0; background: var(--bg);
-      z-index: 110; flex-direction: column; padding: 40px;
+      display: none; position: fixed; inset: 0; z-index: 150;
+      background: var(--bg);
+      flex-direction: column;
+      padding: calc(var(--safe-top) + 24px) 24px calc(var(--safe-bottom) + 24px);
+      gap: 20px; overflow-y: auto;
     }
     #emailOverlay.on { display: flex; }
-    .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
-    .form-group label { font-family: var(--tech); font-size: 0.75rem; letter-spacing: 0.1em; color: var(--muted); }
-    .form-group input, .form-group textarea {
-      background: var(--surface); border: 1px solid var(--border-mid);
-      border-radius: 12px; color: var(--text); font-family: var(--sans);
-      font-size: 1.05rem; padding: 14px; outline: none;
-    }
-    .form-group textarea { min-height: 160px; resize: none; }
 
-    /* ── STATUS BASE BAR ──────────────────────────────── */
+    .overlay-hdr {
+      font-family: var(--mono); font-size: 0.65rem;
+      letter-spacing: 0.45em; color: var(--accent);
+      text-transform: uppercase; margin-bottom: 4px;
+    }
+    .email-field { display: flex; flex-direction: column; gap: 8px; }
+    .email-field label {
+      font-family: var(--mono); font-size: 0.6rem;
+      letter-spacing: 0.32em; color: var(--dim);
+      text-transform: uppercase;
+    }
+    .email-field input,
+    .email-field textarea {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 12px;
+      color: #fff; font-family: var(--sans);
+      font-size: 0.95rem; font-weight: 400;
+      padding: 14px 16px; outline: none; width: 100%;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .email-field input:focus,
+    .email-field textarea:focus { 
+      border-color: rgba(200,168,248,0.38); 
+      background: rgba(200,168,248,0.02);
+    }
+    .email-field input::placeholder,
+    .email-field textarea::placeholder { color: var(--dim); }
+    .email-field textarea { resize: none; min-height: 160px; line-height: 1.65; }
+
+    .email-actions { display: flex; gap: 12px; align-items: center; margin-top: 4px; }
+    .email-status {
+      font-family: var(--mono); font-size: 0.6rem;
+      letter-spacing: 0.22em; color: var(--dim); min-height: 16px;
+    }
+    .email-status.ok   { color: var(--green-ok); }
+    .email-status.err  { color: var(--red-err); }
+    .email-status.busy { color: var(--blue-busy); animation: thinkBlink 1s ease-in-out infinite; }
+
+    /* ══ STATUS BAR ══════════════════════════════════════════════ */
     #statusBar {
-      height: 36px; border-top: 1px solid var(--border);
-      display: flex; align-items: center; padding: 0 40px; gap: 12px;
-      background: var(--surface);
+      height: 30px; flex-shrink: 0;
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 20px;
+      border-top: 1px solid var(--border);
     }
-    #presence { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); }
-    #presence.online { background: var(--green-ok); box-shadow: 0 0 8px var(--green-ok); }
-    #presence.thinking { background: var(--blue-busy); box-shadow: 0 0 8px var(--blue-busy); }
-    #statusText { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); text-transform: lowercase; }
+    #presence {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: rgba(255,255,255,0.12); flex-shrink: 0;
+      transition: background 0.5s ease, box-shadow 0.5s ease;
+    }
+    #presence.online {
+      background: var(--green-ok);
+      box-shadow: 0 0 5px rgba(80,220,130,0.7);
+      animation: presencePulse 2.6s ease-in-out infinite;
+    }
+    #presence.thinking {
+      background: var(--blue-busy);
+      box-shadow: 0 0 5px rgba(140,180,255,0.7);
+      animation: presencePulse 0.9s ease-in-out infinite;
+    }
+    @keyframes presencePulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.45; transform: scale(0.7); }
+    }
+    #statusText {
+      font-family: var(--mono); font-size: 0.6rem;
+      letter-spacing: 0.22em; color: var(--dim);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    #statusText.ok   { color: var(--green-ok); }
+    #statusText.err  { color: var(--red-err); }
+    #statusText.busy { color: var(--blue-busy); animation: thinkBlink 1s ease-in-out infinite; }
 
-    /* Responsive Scaling for Compact Viewports */
-    @media (max-width: 768px) {
-      #masterWrapper { flex-direction: column-reverse; }
-      #sidebarDock {
-        width: 100%; height: 72px; flex-direction: row;
-        padding: 0 24px; border-right: none; border-top: 1px solid var(--border);
-      }
-      #dockNav { flex-direction: row; justify-content: space-around; }
-      .dock-logo-zone, .dock-foot { display: none; }
-      #chatLog, #chatBar, .panel-view-wrapper, #statusBar { padding: 16px; }
-      .bubble { max-width: 90%; }
+    /* ══ TABLET ══════════════════════════════════════════════════ */
+    @media (min-width: 600px) {
+      #setup { gap: 0; }
+      .setup-group { max-width: 420px; }
+      #setupBtn { max-width: 420px; }
+      #hdr { padding: 20px 32px 14px; }
+      #chatLog { padding: 28px 32px 12px; }
+      #chatBar { padding: 14px 28px 16px; }
+      #memPanel, #notesPanel, #radioPanel { padding: 24px 32px; }
+      #emailOverlay { padding: calc(var(--safe-top) + 36px) 44px; gap: 24px; }
+    }
+    @media (min-width: 900px) {
+      .bubble { max-width: 64%; }
+      #chatLog { padding: 32px 48px 14px; }
+      #chatBar { padding: 14px 48px 18px; }
     }
   </style>
 </head>
 <body>
 
-<div id="masterWrapper">
+<div id="setup">
+  <div class="setup-orb"></div>
+  <h1>Sonia</h1>
+  <div class="setup-sub">remote · by H</div>
 
-  <aside id="sidebarDock">
-    <div class="dock-logo-zone">
-      <div id="hdrOrb" title="Sonia Core Status Matrix"></div>
+  <div class="setup-group">
+    <div class="setup-field">
+      <label>Groq API Key</label>
+      <input type="password" id="cfgGroq" placeholder="gsk_..." autocomplete="off">
     </div>
-
-    <nav id="dockNav">
-      <button class="dock-btn active" data-panel="chatPanel">
-        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
-        CHAT
-      </button>
-      <button class="dock-btn" data-panel="memPanel">
-        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 12 10 10-4.48 10-12S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-        MIND
-      </button>
-      <button class="dock-btn" data-panel="notesPanel">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-        NOTES
-      </button>
-      <button class="dock-btn" data-panel="radioPanel">
-        <svg viewBox="0 0 24 24"><path d="M3.24 6.15C2.51 6.43 2 7.15 2 8v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-.85-.51-1.57-1.24-1.85L4.64 3.12c-.24-.09-.5-.12-.75-.09C3.13 3.11 2.5 3.75 2.5 4.5c0 .54.29 1 .74 1.25l-.01.01zm16.76 3.42V18h-2v-2h-2v2H4V9.57l16 4.07z"/></svg>
-        RADIO
-      </button>
-      <button class="dock-btn" id="mailTab">
-        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-        MAIL
-      </button>
-    </nav>
-
-    <div class="dock-foot">
-      <button id="modeSwitch" title="Toggle Stark/OLED Vision Matrix">🌓</button>
+    <div class="setup-field">
+      <label>Google Client ID</label>
+      <input type="text" id="cfgClient" placeholder="xxxxxxxxx.apps.googleusercontent.com" autocomplete="off">
     </div>
-  </aside>
-
-  <main id="viewChassis">
-
-    <div id="panelsContainer">
-
-      <div class="panel active" id="chatPanel">
-        <div id="chatLog"></div>
-        <div id="chatBar">
-          <div class="chat-box-container">
-            <textarea id="chatBox" placeholder="Transmit thought line to Sonia…" rows="1"></textarea>
-            <button class="bar-btn" id="micBtn" title="Voice Input Node">🎙</button>
-          </div>
-          <button class="bar-btn send-btn" id="sendChat" title="Fire Signal">➔</button>
-        </div>
-      </div>
-
-      <div class="panel" id="memPanel">
-        <div class="panel-view-wrapper">
-          <h2 class="giant-title">Sonia Mind Profile</h2>
-          <div class="panel-subtitle">Long-term Core Cognition Vectors</div>
-          <div class="actions-row">
-            <button class="action-pill" id="memRefresh">↺ Sync Cognition</button>
-          </div>
-          <div id="memList"></div>
-        </div>
-      </div>
-
-      <div class="panel" id="notesPanel">
-        <div class="panel-view-wrapper">
-          <h2 class="giant-title">Workspace Notes</h2>
-          <div class="panel-subtitle">Direct Cloud File Pipeline to Desktop Client</div>
-          <textarea id="noteBox" placeholder="Write logs here. Sonia checks this JSON cluster next time she builds her environmental profile context on desktop..."></textarea>
-          <div class="actions-row">
-            <button class="action-pill primary" id="sendNote">Broadcast Note</button>
-            <button class="action-pill" id="driveBtn">Mount Drive Core</button>
-          </div>
-          <div id="driveHint" style="font-family:var(--mono); font-size:0.75rem; color:var(--red-err); margin-bottom:24px; display:none;">
-            OAuth Client Token Signature Identity Profile missing from initial config matrix.
-          </div>
-          <h3 class="panel-subtitle" style="margin-bottom:20px;">Local & Sync Queue Log</h3>
-          <div id="notesList"></div>
-        </div>
-      </div>
-
-      <div class="panel" id="radioPanel">
-        <div class="panel-view-wrapper">
-          <h2 class="giant-title">Fluid Frequencies</h2>
-          <div class="panel-subtitle">Global Live Sound Design Pipelines</div>
-          <div id="radioNowPlaying" style="font-family:var(--mono); font-size:0.9rem; color:var(--accent); margin-bottom:24px;"></div>
-          <div class="actions-row">
-            <button class="action-pill" id="radioStop" style="display:none; color:var(--red-err);">■ Cut Transmission</button>
-          </div>
-          <div class="radio-grid" id="stationGrid"></div>
-          <audio id="radioPlayer" preload="none"></audio>
-        </div>
-      </div>
-
+    <div class="setup-field">
+      <label>Owner Name</label>
+      <input type="text" id="cfgOwner" placeholder="Mr H" autocomplete="off" value="Mr H">
     </div>
-
-    <div id="statusBar">
-      <div id="presence"></div>
-      <span id="statusText">System Idle</span>
+    <div class="setup-field">
+      <label>Drive Folder ID <span style="opacity:.45">(optional)</span></label>
+      <input type="text" id="cfgFolder" placeholder="15_CaTpcDxfu..." autocomplete="off">
     </div>
+  </div>
 
-    <div id="emailOverlay">
-      <h2 class="giant-title">Email Dispatch Node</h2>
-      <div class="panel-subtitle">Authenticated Workspace Communication Core</div>
-      <div class="form-group">
-        <label>Recipient Pipeline</label>
-        <input type="email" id="emailTo" placeholder="address@target.domain" autocomplete="off">
-      </div>
-      <div class="form-group">
-        <label>Transmission Flag / Subject</label>
-        <input type="text" id="emailSubject" placeholder="Identify context cluster...">
-      </div>
-      <div class="form-group">
-        <label>Payload Body</label>
-        <textarea id="emailBody" placeholder="Input raw message string components..."></textarea>
-      </div>
-      <div class="actions-row">
-        <button class="action-pill primary" id="emailSendBtn">Dispatch Payload</button>
-        <button class="action-pill" id="emailCancelBtn">Purge Core Buffer</button>
-      </div>
-      <div class="email-status" id="emailStatus" style="font-family:var(--mono); font-size:0.8rem;"></div>
-    </div>
+  <button id="setupBtn">Enter Sonia</button>
 
-  </main>
+  <div class="setup-note">
+    Keys saved in browser localStorage only — never transmitted except to Groq and Google.<br><br>
+    Google Client ID: console.cloud.google.com → enable Drive API → OAuth → Web app → add this page URL as authorised origin.
+  </div>
 </div>
 
-<div id="setup">
-  <div class="setup-card">
-    <h1>Sonia Remote</h1>
-    <div class="setup-sub">Workspace Terminal Matrix</div>
-    <div class="setup-group">
-      <div class="setup-field">
-        <label>Groq Compute Token Signature</label>
-        <input type="password" id="cfgGroq" placeholder="gsk_..." autocomplete="off">
-      </div>
-      <div class="setup-field">
-        <label>Google Cloud OAuth Client ID Key</label>
-        <input type="text" id="cfgClient" placeholder="xxxx.apps.googleusercontent.com" autocomplete="off">
-      </div>
-      <div class="setup-field">
-        <label>Operator/Owner Profile Identifier</label>
-        <input type="text" id="cfgOwner" placeholder="Mr H" autocomplete="off" value="Mr H">
-      </div>
-      <div class="setup-field">
-        <label>Target Drive Directory ID (Optional Context Node)</label>
-        <input type="text" id="cfgFolder" placeholder="15_CaTpcDxfu..." autocomplete="off">
+<div id="app">
+
+  <div id="hdr">
+    <div class="hdr-left">
+      <div id="hdrOrb"></div>
+      <span id="hdrTitle">Sonia</span>
+    </div>
+    <div id="nav">
+      <button class="nav-pill active" data-panel="chatPanel">Chat</button>
+      <button class="nav-pill" data-panel="memPanel">Memory</button>
+      <button class="nav-pill" data-panel="notesPanel">Notes</button>
+      <button class="nav-pill" data-panel="radioPanel">Radio</button>
+      <button class="nav-pill" id="mailTab">Mail</button>
+    </div>
+  </div>
+
+  <div id="panels">
+
+    <div class="panel active" id="chatPanel" style="display:flex;flex-direction:column;">
+      <div id="chatLog"></div>
+      <div id="chatBar">
+        <textarea id="chatBox" placeholder="say something…" rows="1"></textarea>
+        <button class="bar-btn" id="micBtn" title="Voice input">🎙</button>
+        <button class="bar-btn send-btn" id="sendChat">SEND</button>
       </div>
     </div>
-    <button id="setupBtn">Initialize System Matrix</button>
+
+    <div class="panel" id="memPanel">
+      <div class="panel-hdr">
+        <span class="panel-label">Memory</span>
+        <button class="panel-action" id="memRefresh">↺ Refresh</button>
+      </div>
+      <div id="memList"></div>
+    </div>
+
+    <div class="panel" id="notesPanel">
+      <div class="panel-label" style="margin-bottom:14px">Leave a Note for Desktop Sonia</div>
+      <textarea id="noteBox" placeholder="She'll read this next time she syncs Drive…"></textarea>
+      <div class="notes-actions">
+        <button class="pill-btn primary" id="sendNote">Send Note</button>
+        <button class="pill-btn" id="driveBtn">Connect Drive</button>
+      </div>
+      <div id="driveHint">No Google Client ID set · add one in setup to enable Drive sync</div>
+      <div class="notes-queue-label">Queued Notes</div>
+      <div class="notes-queue" id="notesList"></div>
+    </div>
+
+    <div class="panel" id="radioPanel">
+      <div class="panel-label">Radio</div>
+      <div style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.18em;color:var(--dim);">direct stream · no sign-in needed</div>
+      <div id="radioNowPlaying"></div>
+      <button id="radioStop">■ Stop</button>
+      <div class="station-grid" id="stationGrid"></div>
+      <audio id="radioPlayer" preload="none"></audio>
+    </div>
+
+  </div>
+
+  <div id="statusBar">
+    <div id="presence"></div>
+    <span id="statusText">ready</span>
+  </div>
+</div>
+
+<div id="emailOverlay">
+  <div class="overlay-hdr">Compose Email</div>
+  <div class="email-field">
+    <label>To</label>
+    <input type="email" id="emailTo" placeholder="recipient@email.com" autocomplete="off">
+  </div>
+  <div class="email-field">
+    <label>Subject</label>
+    <input type="text" id="emailSubject" placeholder="Subject…">
+  </div>
+  <div class="email-field">
+    <label>Message</label>
+    <textarea id="emailBody" placeholder="Write your message…"></textarea>
+  </div>
+  <div class="email-actions">
+    <button class="pill-btn primary" id="emailSendBtn">Send</button>
+    <button class="pill-btn" id="emailCancelBtn">Cancel</button>
+    <div class="email-status" id="emailStatus"></div>
   </div>
 </div>
 
 <script>
-/* ══ BROWSER ENCRYPTED LAYER PERSISTENCE ════════════════════════ */
+/* ══ CONFIG ══════════════════════════════════════════════════════ */
 const LS = {
   get: k => localStorage.getItem('sonia_' + k),
   set: (k,v) => localStorage.setItem('sonia_' + k, v),
@@ -569,25 +753,7 @@ const MOOD_MAP    = {
   concerned:'thinking', content:'intimate', analytical:'focused'
 };
 
-/* ══ CORE SWITCH MATRIX: APPEARANCE MODE LOGIC ═════════════════ */
-const modeSwitch = document.getElementById('modeSwitch');
-let currentTheme = LS.get('theme') || 'dark';
-document.documentElement.setAttribute('data-theme', currentTheme);
-
-modeSwitch.addEventListener('click', () => {
-  currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', currentTheme);
-  LS.set('theme', currentTheme);
-});
-
-/* ══ AUTO-EXPAND TEXTAREA LOGIC ══════════════════════════════════ */
-const chatBox = document.getElementById('chatBox');
-chatBox.addEventListener('input', () => {
-  chatBox.style.height = 'auto';
-  chatBox.style.height = Math.min(chatBox.scrollHeight, 140) + 'px';
-});
-
-/* ══ SYSTEM CONFIGURATION SETUP MANAGER ═══════════════════════════ */
+/* ══ SETUP ═══════════════════════════════════════════════════════ */
 function loadConfig() {
   const g = LS.get('groq'), c = LS.get('client'), o = LS.get('owner'), f = LS.get('folder');
   if (g) document.getElementById('cfgGroq').value   = g;
@@ -602,18 +768,19 @@ function applyConfig() {
   CLIENT_ID  = document.getElementById('cfgClient').value.trim();
   OWNER_NAME = document.getElementById('cfgOwner').value.trim() || 'Mr H';
   FOLDER_ID  = document.getElementById('cfgFolder').value.trim();
-  if (!GROQ_KEY) { setStatus('Groq key matrix failure', 'err'); return; }
+  if (!GROQ_KEY) { setStatus('Groq key required', 'err'); return; }
   LS.set('groq', GROQ_KEY); LS.set('client', CLIENT_ID);
   LS.set('owner', OWNER_NAME); LS.set('folder', FOLDER_ID);
   document.getElementById('setup').style.display = 'none';
+  document.getElementById('app').classList.add('on');
   if (CLIENT_ID) {
-    document.getElementById('driveHint').style.display = 'none';
+    document.getElementById('driveHint').classList.remove('visible');
     loadDriveLibs();
   } else {
-    document.getElementById('driveHint').style.display = 'block';
+    document.getElementById('driveHint').classList.add('visible');
   }
-  setStatus('systems online · operator context: ' + OWNER_NAME.toLowerCase());
-  setTimeout(maybeFireProactive, 4000);
+  setStatus('systems online · ' + OWNER_NAME.toLowerCase());
+  setTimeout(maybeFireProactive, 5000);
   setPresence('online');
   renderNotes();
   initMic();
@@ -623,35 +790,36 @@ document.getElementById('setupBtn').addEventListener('click', applyConfig);
 document.getElementById('cfgGroq').addEventListener('keydown', e => { if (e.key==='Enter') applyConfig(); });
 window.addEventListener('load', loadConfig);
 
-/* ══ NAVIGATION ARCHITECTURE PIPELINES ═══════════════════════════ */
-document.querySelectorAll('.dock-btn:not(#mailTab)').forEach(btn => {
+/* ══ NAV ═════════════════════════════════════════════════════════ */
+document.querySelectorAll('.nav-pill:not(#mailTab)').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.dock-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.nav-pill').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('emailOverlay').classList.remove('on');
     btn.classList.add('active');
     document.getElementById(btn.dataset.panel).classList.add('active');
   });
 });
 document.getElementById('mailTab').addEventListener('click', () => {
-  document.querySelectorAll('.dock-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-pill').forEach(b => b.classList.remove('active'));
   document.getElementById('mailTab').classList.add('active');
   document.getElementById('emailOverlay').classList.add('on');
 });
 
+/* ══ PRESENCE ════════════════════════════════════════════════════ */
+const presenceDot = document.getElementById('presence');
+const hdrOrb      = document.getElementById('hdrOrb');
 function setPresence(state) {
-  const presenceDot = document.getElementById('presence');
-  const hdrOrb      = document.getElementById('hdrOrb');
   presenceDot.className = state;
   hdrOrb.className = state === 'thinking' ? 'thinking' : state === 'listening' ? 'listening' : '';
 }
 
+/* ══ STATUS ══════════════════════════════════════════════════════ */
 function setStatus(msg, type) {
   const el = document.getElementById('statusText');
   el.textContent = msg; el.className = type || '';
 }
 
-/* ══ PARSE COGNITIVE INTENT & MOOD TAG MATRIX ═════════════════════ */
+/* ══ MOOD PARSER ═════════════════════════════════════════════════ */
 function parseMoodReply(raw) {
   const match = raw.match(/\[mood\s*:\s*([a-z]+)\s*\]/i);
   let mood = 'calm';
@@ -668,7 +836,7 @@ function parseMoodReply(raw) {
   return { mood, text };
 }
 
-/* ══ THE PERSISTENT MIND MATRIX: COMPLETE DRIVE ENGINE ═══════════ */
+/* ══ PERSISTENT MIND ═════════════════════════════════════════════ */
 const DEFAULT_PROFILE = {
   version:1, created: new Date().toISOString(),
   personality:{ tone:'dry British wit, warm but not effusive', quirks:[], dislikes:[], interests:[] },
@@ -689,11 +857,11 @@ async function driveWriteJSON(fileName, data) {
   try {
     const fid = await findOrCreateFile(fileName,'application/json','{}');
     await writeFile(fid, JSON.stringify(data,null,2),'application/json');
-  } catch(e) { console.warn('[Mind Sync Error]',e); }
+  } catch(e) { console.warn('[Mind]',e); }
 }
 
 async function loadSoniaMind() {
-  setStatus('loading mind matrix...','busy');
+  setStatus('loading mind...','busy');
   const [profile, history] = await Promise.all([
     driveReadJSON('sonia-profile.json', DEFAULT_PROFILE),
     driveReadJSON('sonia-history.json', []),
@@ -705,7 +873,7 @@ async function loadSoniaMind() {
     if (!localTexts.has(entry.content)) conversationHistory.push({role:entry.role,content:entry.content});
   }
   if (conversationHistory.length > 20) conversationHistory.splice(0, conversationHistory.length-20);
-  setStatus('mind matrix synced · '+sharedHistory.length+' shared memory lines active','ok');
+  setStatus('mind loaded · '+sharedHistory.length+' shared exchanges','ok');
 }
 
 async function saveToSharedHistory(userMsg, soniaReply, mood) {
@@ -715,7 +883,7 @@ async function saveToSharedHistory(userMsg, soniaReply, mood) {
     history.push({role:'user',content:userMsg,timestamp:new Date().toISOString(),device:'mobile'});
     history.push({role:'assistant',content:soniaReply,timestamp:new Date().toISOString(),device:'mobile',mood});
     await driveWriteJSON('sonia-history.json', history.slice(-80));
-  } catch(e) { console.warn('[Memory Trace Logging Blocked]',e); }
+  } catch(e) { console.warn('[Mind] history save failed',e); }
 }
 
 async function maybeUpdateProfile(userMsg, soniaReply) {
@@ -733,9 +901,10 @@ async function maybeUpdateProfile(userMsg, soniaReply) {
     const clean = (data.choices?.[0]?.message?.content||'').replace(/```json|```/g,'').trim();
     const updated = JSON.parse(clean);
     if (updated?.personality) { soniaProfile=updated; await driveWriteJSON('sonia-profile.json',soniaProfile); }
-  } catch(e) { console.warn('[Profile Optimization Halted]',e); }
+  } catch(e) { console.warn('[Mind] profile update failed',e); }
 }
 
+/* ══ SYSTEM PROMPT ═══════════════════════════════════════════════ */
 function buildSystemPrompt() {
   let profileCtx = '';
   if (soniaProfile) {
@@ -763,7 +932,7 @@ STRICT RULES:
 - Your living memory colours your responses naturally — never quote it back directly.`;
 }
 
-/* ══ LOCALIZED LOGISTICS EXTENSION: ENVIRONMENTAL INJECTIONS ═══ */
+/* ══ WEATHER & NEWS ══════════════════════════════════════════════ */
 let _weatherCache=null, _weatherFetched=0;
 async function fetchWeatherThought() {
   try {
@@ -815,7 +984,7 @@ async function maybeFireProactive() {
   if (thought) addBubble('sonia',thought,'calm');
 }
 
-/* ══ CHAT VIEW RENDERING PIPELINE ════════════════════════════════ */
+/* ══ CHAT UI ═════════════════════════════════════════════════════ */
 const chatLog = document.getElementById('chatLog');
 
 function addBubble(role, text, mood) {
@@ -849,19 +1018,21 @@ function addThinking() {
   wrap.className = 'bubble sonia thinking';
   const inner = document.createElement('div');
   inner.className = 'bubble-inner';
-  inner.style.color = 'var(--dim)';
-  inner.textContent = '⚡ Checking vectors...';
+  const body  = document.createElement('div');
+  body.className = 'bubble-text';
+  body.textContent = '· · ·';
+  inner.appendChild(body);
   wrap.appendChild(inner);
   chatLog.appendChild(wrap);
   chatLog.scrollTop = chatLog.scrollHeight;
   return wrap;
 }
 
-/* ══ RECOMPILING INFERENCE PIPELINE REQUESTS ══════════════════════ */
+/* ══ ASK SONIA ═══════════════════════════════════════════════════ */
 async function askSonia(input) {
   addBubble('user', input);
   const thinking = addThinking();
-  setStatus('Processing network frames...','busy');
+  setStatus('thinking...','busy');
   setPresence('thinking');
   conversationHistory.push({role:'user',content:input});
   if (conversationHistory.length>16) conversationHistory.splice(0,2);
@@ -879,9 +1050,9 @@ async function askSonia(input) {
     setPresence('online');
     if (!res.ok) {
       addBubble('sonia','Something went wrong. '+(data.error?.message||''),null);
-      setStatus('groq configuration failure '+res.status,'err'); return;
+      setStatus('groq error '+res.status,'err'); return;
     }
-    const raw = data.choices?.[0]?.message?.content||'Matrix returned empty frame, '+OWNER_NAME+'.';
+    const raw = data.choices?.[0]?.message?.content||'Nothing to report, '+OWNER_NAME+'.';
     const {mood, text:reply} = parseMoodReply(raw);
     conversationHistory.push({role:'assistant',content:reply});
     playReceiveSound();
@@ -894,12 +1065,12 @@ async function askSonia(input) {
     }
   } catch(err) {
     thinking.remove(); setPresence('online');
-    addBubble('sonia','Network failure. Matrix interface interrupted. '+(err.message||''),null);
-    setStatus('io layer error','err');
+    addBubble('sonia','Network error. '+(err.message||''),null);
+    setStatus('network error','err');
   }
 }
 
-/* ══ LO-FI COSMIC AUDIO ARCHITECTURE SYNTHESIZER ═════════════════ */
+/* ══ SOUND ═══════════════════════════════════════════════════════ */
 let _audioCtx=null;
 function getAudioCtx() {
   if (!_audioCtx) _audioCtx=new(window.AudioContext||window.webkitAudioContext)();
@@ -917,10 +1088,10 @@ function playTone(freq,type,gainVal,duration,startDelay) {
     osc.stop(ctx.currentTime+startDelay+duration+0.05);
   } catch(e) {}
 }
-function playSendSound()    { playTone(880,'sine',0.06,0.12,0); playTone(1200,'sine',0.04,0.15,0.05); }
-function playReceiveSound() { playTone(600,'sine',0.05,0.2,0); playTone(400,'sine',0.03,0.15,0.06); }
+function playSendSound()    { playTone(660,'sine',0.11,0.18,0); playTone(880,'sine',0.08,0.18,0.1); }
+function playReceiveSound() { playTone(520,'sine',0.09,0.22,0); playTone(440,'sine',0.06,0.22,0.08); playTone(330,'sine',0.04,0.22,0.16); }
 
-/* ══ SPEECH CORE INPUT INTERACTION ═══════════════════════════════ */
+/* ══ MIC ═════════════════════════════════════════════════════════ */
 let recognition=null, micActive=false;
 const micBtn = document.getElementById('micBtn');
 
@@ -929,12 +1100,15 @@ function initMic() {
   if (!SR) { micBtn.style.display='none'; return; }
   recognition = new SR();
   recognition.continuous=false; recognition.interimResults=false; recognition.lang='en-GB';
-  recognition.onstart = () => { micActive=true; micBtn.classList.add('active'); setStatus('Aural sensor hot...','busy'); setPresence('listening'); };
-  recognition.onend   = () => { micActive=false; micBtn.classList.remove('active'); setStatus('Ready'); setPresence('online'); };
-  recognition.onerror = e  => { micActive=false; micBtn.classList.remove('active'); setStatus('Mic error: '+e.error,'err'); setPresence('online'); };
+  recognition.onstart = () => { micActive=true; micBtn.classList.add('active'); setStatus('listening...','busy'); setPresence('listening'); };
+  recognition.onend   = () => { micActive=false; micBtn.classList.remove('active'); setStatus('ready'); setPresence('online'); };
+  recognition.onerror = e  => { micActive=false; micBtn.classList.remove('active'); setStatus('mic: '+e.error,'err'); setPresence('online'); };
   recognition.onresult = e => {
     const transcript = e.results[0][0].transcript.trim();
-    chatBox.value = transcript;
+    const box = document.getElementById('chatBox');
+    box.value = transcript;
+    box.style.height='auto';
+    box.style.height=Math.min(box.scrollHeight,90)+'px';
     setTimeout(sendMessage,300);
   };
 }
@@ -946,6 +1120,7 @@ micBtn.addEventListener('click',()=>{
   else try { recognition.start(); } catch(e) {}
 });
 
+const chatBox = document.getElementById('chatBox');
 chatBox.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} });
 document.getElementById('sendChat').addEventListener('click',sendMessage);
 
@@ -954,8 +1129,12 @@ function sendMessage() {
   chatBox.value=''; chatBox.style.height='auto';
   playSendSound(); askSonia(text);
 }
+chatBox.addEventListener('input',()=>{
+  chatBox.style.height='auto';
+  chatBox.style.height=Math.min(chatBox.scrollHeight,90)+'px';
+});
 
-/* ══ GOOGLE DRIVE GRAPH LAYER PIPELINES ══════════════════════════ */
+/* ══ GOOGLE DRIVE ════════════════════════════════════════════════ */
 let gapiReady=false, gisReady=false, tokenClient=null;
 
 function loadDriveLibs() {
@@ -974,19 +1153,19 @@ function loadDriveLibs() {
 }
 
 function signInDrive() {
-  if (!CLIENT_ID) { setStatus('Identity client specification missing','err'); return; }
+  if (!CLIENT_ID) { setStatus('no google client id set','err'); return; }
   if (!tokenClient) {
     tokenClient=google.accounts.oauth2.initTokenClient({
       client_id:CLIENT_ID,
       scope:'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/gmail.send',
       callback:(resp)=>{
-        if (resp.error) { setStatus('Drive handshake failure: '+resp.error,'err'); return; }
+        if (resp.error) { setStatus('drive auth failed: '+resp.error,'err'); return; }
         driveToken=resp.access_token;
         gapi.client.setToken({access_token:driveToken});
-        setStatus('Drive partition mounted successfully','ok');
+        setStatus('drive connected','ok');
         const db=document.getElementById('driveBtn');
-        db.textContent='Drive Array Online'; db.classList.add('connected');
-        document.getElementById('driveHint').style.display = 'none';
+        db.textContent='Drive: On'; db.classList.add('connected');
+        document.getElementById('driveHint').classList.remove('visible');
         loadMemoryFromDrive();
         loadSoniaMind();
         maybeFireProactive();
@@ -997,15 +1176,16 @@ function signInDrive() {
 }
 
 document.getElementById('driveBtn').addEventListener('click',()=>{
-  if (!CLIENT_ID) { setStatus('Configure Google Client parameters first','err'); document.getElementById('driveHint').style.display='block'; return; }
+  if (!CLIENT_ID) { setStatus('add google client id in setup to use drive','err'); document.getElementById('driveHint').classList.add('visible'); return; }
   if (!window.google?.accounts||!gapiReady) {
-    setStatus('Spawning cloud worker nodes...','busy'); loadDriveLibs();
+    setStatus('loading drive...','busy'); loadDriveLibs();
     const wait=setInterval(()=>{ if(window.google?.accounts&&gapiReady){clearInterval(wait);signInDrive();} },200);
     return;
   }
   signInDrive();
 });
 
+/* ── Drive helpers ──────────────────────────────── */
 async function findOrCreateFile(name,mimeType,initialContent) {
   const q=`name='${name}' and trashed=false`+(FOLDER_ID?` and '${FOLDER_ID}' in parents`:'');
   const res=await gapi.client.drive.files.list({q,fields:'files(id,name)',spaces:'drive'});
@@ -1019,7 +1199,7 @@ async function findOrCreateFile(name,mimeType,initialContent) {
     headers:{'Authorization':'Bearer '+driveToken,'Content-Type':'multipart/related; boundary="'+boundary+'"'},
     body
   });
-  const result=upload.ok ? await upload.json() : {};
+  const result=await upload.json();
   return result.id;
 }
 
@@ -1036,34 +1216,36 @@ async function writeFile(fileId,content,mimeType) {
   });
 }
 
-/* ── REWRITING INTEGRATED CLOUD DRIVE DATA LOGICS ───────────────── */
+/* ── Memory ─────────────────────────────────────── */
 async function loadMemoryFromDrive() {
-  setStatus('Parsing structural logs...','busy');
+  setStatus('loading memory...','busy');
   try {
     const fid=await findOrCreateFile('sonia-memory.json','application/json','[]');
     const raw=await readFile(fid);
     const entries=JSON.parse(raw||'[]');
     renderMemory(entries.slice(-40).reverse());
-    setStatus('Cognitive frame sync successful');
-  } catch(e) { setStatus('Memory mapping block read error','err'); }
+    setStatus('memory loaded · '+entries.length+' entries');
+  } catch(e) { setStatus('memory read error','err'); }
 }
 
 document.getElementById('memRefresh').addEventListener('click',()=>{
   if(driveToken) loadMemoryFromDrive();
-  else setStatus('No active authenticated drive core found','err');
+  else setStatus('connect drive to load memory','err');
 });
 
 function renderMemory(entries) {
-  const el=document.getElementById('memList'); el.innerHTML='';
+  const el=document.getElementById('memList');
+  el.innerHTML='';
   if (!entries.length) {
-    el.innerHTML='<div style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">Cognitive database vector register clean.</div>';
+    el.innerHTML='<div style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.25em;color:var(--dim);padding-top:8px">no memory entries</div>';
     return;
   }
   entries.forEach(e=>{
-    const d=document.createElement('div'); d.className='note-card';
+    const d=document.createElement('div');
+    d.className='mem-entry';
     const ts=new Date(e.timestamp);
-    const label=isNaN(ts)?e.timestamp:ts.toLocaleString();
-    d.innerHTML=`<div><div class="note-card-ts">${label}</div><div class="note-card-text" style="color:var(--accent);">User: ${esc(e.user)}</div><div class="note-card-text">Sonia: ${esc(e.sonia)}</div></div>`;
+    const label=isNaN(ts)?e.timestamp:ts.toLocaleString([],{dateStyle:'short',timeStyle:'short'});
+    d.innerHTML='<div class="mem-ts">'+label+'</div><div class="mem-user">'+esc(e.user)+'</div><div class="mem-sonia">'+esc(e.sonia)+'</div>';
     el.appendChild(d);
   });
 }
@@ -1076,29 +1258,30 @@ async function saveToDriveMemory(userMsg,soniaReply) {
     const entries=JSON.parse(raw||'[]');
     entries.push({timestamp:new Date().toISOString(),user:userMsg,sonia:soniaReply});
     await writeFile(memFileId,JSON.stringify(entries,null,2),'application/json');
-  } catch(e) { console.warn('Drive persistent trace write fault:',e); }
+  } catch(e) { console.warn('Memory save failed:',e); }
 }
 
-/* ── DRIVE INTER-WORKSPACE SHUTTLE NOTES PIPELINE ─────────────── */
+/* ── Notes ──────────────────────────────────────── */
 let notesQueue=JSON.parse(LS.get('notes')||'[]'), notesFileId=null;
 
 function renderNotes() {
   const el=document.getElementById('notesList'); el.innerHTML='';
   if (!notesQueue.length) {
-    el.innerHTML='<div style="font-family:var(--mono); font-size:0.8rem; color:var(--dim);">Note matrix registry completely clear.</div>';
+    el.innerHTML='<div style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.25em;color:var(--dim);padding-top:8px">no queued notes</div>';
     return;
   }
   notesQueue.slice().reverse().forEach((n,ri)=>{
     const i=notesQueue.length-1-ri, d=document.createElement('div');
-    d.className='note-card';
+    d.className='note-item';
     const ts=new Date(n.ts);
-    const label=isNaN(ts)?n.ts:ts.toLocaleString();
-    d.innerHTML=`<div><div class="note-card-ts">${label} — ${n.synced?'SYNCED TO DRIVE CLUSTER':'LOCAL ONLY'}</div><div class="note-card-text">${esc(n.text)}</div></div><button class="action-pill" style="padding:6px 12px; margin-top:8px; border-color:var(--red-err); color:var(--red-err);" onclick="deleteNote(${i})">Purge</button>`;
+    const label=isNaN(ts)?n.ts:ts.toLocaleString([],{dateStyle:'short',timeStyle:'short'});
+    d.innerHTML='<div class="note-item-body"><div class="note-item-ts">'+label+(n.synced?' · synced':' · local')+'</div><div class="note-item-text">'+esc(n.text)+'</div></div><button class="note-del" data-i="'+i+'">✕</button>';
     el.appendChild(d);
   });
+  el.querySelectorAll('.note-del').forEach(btn=>{ btn.addEventListener('click',()=>deleteNote(parseInt(btn.dataset.i))); });
 }
 
-async function deleteNote(i) {
+function deleteNote(i) {
   notesQueue.splice(i,1); LS.set('notes',JSON.stringify(notesQueue));
   renderNotes(); if(driveToken) syncNotesToDrive();
 }
@@ -1112,8 +1295,8 @@ document.getElementById('sendNote').addEventListener('click',async()=>{
     await syncNotesToDrive();
     notesQueue[notesQueue.length-1].synced=true;
     LS.set('notes',JSON.stringify(notesQueue)); renderNotes();
-    setStatus('Note frame pushed to remote cluster registry','ok');
-  } else { setStatus('Cached note localized — awaiting drive mount core'); }
+    setStatus('note sent to desktop Sonia','ok');
+  } else { setStatus('note saved locally · connect drive to sync'); }
 });
 
 async function syncNotesToDrive() {
@@ -1121,19 +1304,19 @@ async function syncNotesToDrive() {
     if(!notesFileId) notesFileId=await findOrCreateFile('sonia-notes.json','application/json','[]');
     const payload=notesQueue.map(n=>({timestamp:n.ts,text:n.text}));
     await writeFile(notesFileId,JSON.stringify(payload,null,2),'application/json');
-  } catch(e) { setStatus('Remote synchronization frame rejected','err'); }
+  } catch(e) { setStatus('drive sync failed','err'); }
 }
 
-/* ══ FLUID FREQUENCY SIGNAL DISTRIBUTION GRID ═══════════════════ */
+/* ══ RADIO ═══════════════════════════════════════════════════════ */
 const STATIONS=[
-  {name:'NTS Radio 1',    loc:'London, UK',      url:'https://stream-relay-geo.ntslive.co.uk/stream'},
-  {name:'NTS Radio 2',    loc:'London, UK',      url:'https://stream-relay-geo.ntslive.co.uk/stream2'},
-  {name:'Radio FG',       loc:'Paris, FR',       url:'https://radiofg.impek.com/fg'},
-  {name:'Chillhop Network', loc:'lo-fi · global',  url:'https://streams.ilovemusic.de/iloveradio17.mp3'},
-  {name:'WBGO Jazz',      loc:'Newark, US',      url:'https://freshgrass.streamguys1.com/wbgo-web'},
-  {name:'SomaFM Drone',   loc:'San Francisco',   url:'https://ice6.somafm.com/dronezone-128-mp3'},
-  {name:'SomaFM Groove',  loc:'San Francisco',   url:'https://ice6.somafm.com/groovesalad-128-mp3'},
-  {name:'Radio Paradise', loc:'worldwide',        url:'https://stream.radioparadise.com/aac-128'},
+  {name='NTS Radio 1',    loc:'London, UK',      url:'https://stream-relay-geo.ntslive.co.uk/stream'},
+  {name='NTS Radio 2',    loc:'London, UK',      url:'https://stream-relay-geo.ntslive.co.uk/stream2'},
+  {name='Radio FG',       loc:'Paris, FR',       url:'https://radiofg.impek.com/fg'},
+  {name='Chillhop',       loc:'lo-fi · global',  url:'https://streams.ilovemusic.de/iloveradio17.mp3'},
+  {name='WBGO Jazz',      loc:'Newark, US',      url:'https://freshgrass.streamguys1.com/wbgo-web'},
+  {name='SomaFM Drone',   loc:'San Francisco',   url:'https://ice6.somafm.com/dronezone-128-mp3'},
+  {name='SomaFM Groove',  loc:'San Francisco',   url:'https://ice6.somafm.com/groovesalad-128-mp3'},
+  {name='Radio Paradise', loc:'worldwide',        url:'https://stream.radioparadise.com/aac-128'},
 ];
 let currentStation=null;
 const radioPlayer=document.getElementById('radioPlayer');
@@ -1143,8 +1326,8 @@ const radioStop=document.getElementById('radioStop');
 function buildStationGrid() {
   const grid=document.getElementById('stationGrid'); grid.innerHTML='';
   STATIONS.forEach((s,i)=>{
-    const btn=document.createElement('div');
-    btn.className='station-card'; btn.dataset.i=i;
+    const btn=document.createElement('button');
+    btn.className='station-btn'; btn.dataset.i=i;
     btn.innerHTML='<span class="st-name">'+esc(s.name)+'</span><span class="st-loc">'+esc(s.loc)+'</span>';
     btn.addEventListener('click',()=>playStation(i,btn));
     grid.appendChild(btn);
@@ -1153,32 +1336,32 @@ function buildStationGrid() {
 function playStation(i,btn) {
   const s=STATIONS[i];
   if (currentStation===i&&!radioPlayer.paused){stopRadio();return;}
-  document.querySelectorAll('.station-card').forEach(b=>b.classList.remove('playing'));
+  document.querySelectorAll('.station-btn').forEach(b=>b.classList.remove('playing'));
   btn.classList.add('playing'); currentStation=i;
   radioPlayer.src=s.url; radioPlayer.load(); radioPlayer.play().catch(()=>{});
-  radioNowPlaying.textContent='📡 Receiving Pipeline Frame // '+s.name.toUpperCase();
-  radioStop.style.display = 'inline-block';
-  setStatus('audio pipeline hot · '+s.name.toLowerCase());
+  radioNowPlaying.textContent='▶ '+s.name+' · '+s.loc;
+  radioStop.classList.add('visible');
+  setStatus('radio · '+s.name.toLowerCase());
 }
 function stopRadio() {
   radioPlayer.pause(); radioPlayer.src=''; currentStation=null;
-  document.querySelectorAll('.station-card').forEach(b=>b.classList.remove('playing'));
-  radioNowPlaying.textContent=''; radioStop.style.display = 'none';
-  setStatus('audio pipeline terminated');
+  document.querySelectorAll('.station-btn').forEach(b=>b.classList.remove('playing'));
+  radioNowPlaying.textContent=''; radioStop.classList.remove('visible');
+  setStatus('radio stopped');
 }
 radioStop.addEventListener('click',stopRadio);
 radioPlayer.addEventListener('error',()=>{
-  setStatus('Frequency transmission drop error','err');
+  setStatus('stream error · try another station','err');
   radioNowPlaying.textContent='';
-  document.querySelectorAll('.station-card').forEach(b=>b.classList.remove('playing'));
-  radioStop.style.display = 'none';
+  document.querySelectorAll('.station-btn').forEach(b=>b.classList.remove('playing'));
+  radioStop.classList.remove('visible');
 });
 buildStationGrid();
 
-/* ══ AUTHENTICATED EMAIL TERMINAL UTILITY DISPATCHER ══════════════ */
+/* ══ EMAIL OVERLAY ═══════════════════════════════════════════════ */
 document.getElementById('emailCancelBtn').addEventListener('click',()=>{
   document.getElementById('emailOverlay').classList.remove('on');
-  document.querySelectorAll('.dock-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.nav-pill').forEach(b=>b.classList.remove('active'));
   document.querySelector('[data-panel="chatPanel"]').classList.add('active');
   document.getElementById('chatPanel').classList.add('active');
 });
@@ -1188,9 +1371,9 @@ document.getElementById('emailSendBtn').addEventListener('click',async()=>{
   const subject = document.getElementById('emailSubject').value.trim();
   const body    = document.getElementById('emailBody').value.trim();
   const statusEl= document.getElementById('emailStatus');
-  if (!to||!subject||!body){ statusEl.textContent='Incomplete pipeline parameters.'; statusEl.className='email-status err'; return; }
-  if (!driveToken){ statusEl.textContent='Mount drive engine core first.'; statusEl.className='email-status err'; return; }
-  statusEl.textContent='Encoding data packets…'; statusEl.className='email-status busy';
+  if (!to||!subject||!body){ statusEl.textContent='Fill in all fields.'; statusEl.className='email-status err'; return; }
+  if (!driveToken){ statusEl.textContent='Connect Drive to send email.'; statusEl.className='email-status err'; return; }
+  statusEl.textContent='Sending…'; statusEl.className='email-status busy';
   try {
     const EMAIL_SIGNATURE='\n\nRegards,\nSonia — Assistant to Mr H';
     const fullBody=body+EMAIL_SIGNATURE;
@@ -1203,18 +1386,21 @@ document.getElementById('emailSendBtn').addEventListener('click',async()=>{
     });
     const data=await res.json();
     if (data.id) {
-      statusEl.textContent='Payload dispatched into mail loop system.'; statusEl.className='email-status ok';
+      statusEl.textContent='Sent.'; statusEl.className='email-status ok';
       document.getElementById('emailTo').value='';
       document.getElementById('emailSubject').value='';
       document.getElementById('emailBody').value='';
       setTimeout(()=>{ document.getElementById('emailOverlay').classList.remove('on'); },1400);
     } else {
-      statusEl.textContent=(data.error?.message||'System handshake rejection.'); statusEl.className='email-status err';
+      statusEl.textContent=(data.error?.message||'Send failed.'); statusEl.className='email-status err';
     }
-  } catch(e){ statusEl.textContent='IO Failure: '+e.message; statusEl.className='email-status err'; }
+  } catch(e){ statusEl.textContent='Error: '+e.message; statusEl.className='email-status err'; }
 });
 
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+/* ══ UTILS ═══════════════════════════════════════════════════════ */
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 </script>
 </body>
 </html>
