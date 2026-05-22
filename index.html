@@ -46,17 +46,17 @@ html,body{
   overflow-y:auto;
 }
 .setup-inner{width:100%;max-width:420px}
-.setup-name{font-family:var(--mono);font-size:2.8rem;font-weight:700;letter-spacing:-0.03em;margin-bottom:4px}
-.setup-sub{font-family:var(--mono);font-size:0.72rem;letter-spacing:0.2em;color:var(--sub);text-transform:uppercase;margin-bottom:40px}
+.setup-name{font-family:var(--mono);font-size:2.8rem;font-weight:700;letter-spacing:-0.03em;margin-bottom:4px;color:var(--text)}
+.setup-sub{font-family:var(--mono);font-size:0.72rem;letter-spacing:0.2em;color:var(--text);opacity:0.7;text-transform:uppercase;margin-bottom:40px}
 .sf{margin-bottom:18px}
-.sf label{display:block;font-family:var(--mono);font-size:0.68rem;letter-spacing:0.18em;color:var(--sub);text-transform:uppercase;margin-bottom:8px}
+.sf label{display:block;font-family:var(--mono);font-size:0.68rem;letter-spacing:0.18em;color:var(--text);opacity:0.8;text-transform:uppercase;margin-bottom:8px}
 .sf input{
   width:100%;background:transparent;border:none;border-bottom:1px solid var(--line-hi);
   color:var(--text);font-family:var(--mono);font-size:0.95rem;
   padding:12px 0;outline:none;transition:border-color 0.2s;border-radius:0;
 }
 .sf input:focus{border-bottom-color:var(--text)}
-.sf input::placeholder{color:var(--sub)}
+.sf input::placeholder{color:var(--text);opacity:0.4}
 #setupBtn{
   width:100%;margin-top:32px;background:transparent;
   border:1px solid var(--line-hi);color:var(--text);
@@ -84,7 +84,7 @@ html,body{
   flex-shrink:0;
 }
 .top-left{display:flex;align-items:center;gap:14px}
-.top-name{font-family:var(--mono);font-weight:700;font-size:1.05rem;letter-spacing:0.05em}
+.top-name{font-family:var(--mono);font-weight:700;font-size:1.05rem;letter-spacing:0.05em;color:var(--text)}
  
 /* ── ORB ── */
 #orb{
@@ -105,7 +105,7 @@ html,body{
   width:34px;height:34px;border-radius:50%;
   background:transparent;border:1px solid var(--line);
   cursor:pointer;display:flex;align-items:center;justify-content:center;
-  font-size:13px;color:var(--text);opacity:0.6;transition:opacity 0.2s;
+  font-size:13px;color:var(--text);opacity:0.8;transition:opacity 0.2s;
 }
 #modeBtn:hover{opacity:1}
  
@@ -121,12 +121,12 @@ html,body{
   display:flex;align-items:center;gap:10px;
   padding:0 20px;flex-shrink:0;
 }
-#presenceDot{width:6px;height:6px;border-radius:50%;background:var(--sub);flex-shrink:0;transition:background 0.3s,box-shadow 0.3s}
-#presenceDot.online{background:#00d47e;box-shadow:0 0 6px #00d47e}
-#presenceDot.thinking{background:var(--orb-think);box-shadow:0 0 6px var(--orb-think)}
-#presenceDot.listening{background:var(--orb-listen);box-shadow:0 0 6px var(--orb-listen)}
-#presenceDot.syncing{background:var(--green);box-shadow:0 0 8px var(--green)}
-#statusTxt{font-family:var(--mono);font-size:0.65rem;color:var(--text);opacity:0.5;text-transform:uppercase;letter-spacing:0.1em}
+#presenceDot{width:6px;height:6px;border-radius:50%;background:var(--text);opacity:0.4;flex-shrink:0;transition:background 0.3s,box-shadow 0.3s}
+#presenceDot.online{background:#00d47e;box-shadow:0 0 6px #00d47e;opacity:1}
+#presenceDot.thinking{background:var(--orb-think);box-shadow:0 0 6px var(--orb-think);opacity:1}
+#presenceDot.listening{background:var(--orb-listen);box-shadow:0 0 6px var(--orb-listen);opacity:1}
+#presenceDot.syncing{background:var(--green);box-shadow:0 0 8px var(--green);opacity:1}
+#statusTxt{font-family:var(--mono);font-size:0.65rem;color:var(--text);opacity:0.75;text-transform:uppercase;letter-spacing:0.1em}
 #statusStrip.syncing #statusTxt{color:var(--green);opacity:1}
  
 /* ── BOTTOM NAV ── */
@@ -140,9 +140,9 @@ html,body{
   flex:1;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:5px;
   cursor:pointer;border:none;background:none;
-  color:var(--text);opacity:0.3;
+  color:var(--text);opacity:0.5;
   font-family:var(--mono);font-size:0.6rem;
-  letter-spacing:0.1em;text-transform:uppercase;font-weight:400;
+  letter-spacing:0.1em;text-transform:uppercase;font-weight:700;
   transition:opacity 0.2s,color 0.2s;
   border-right:1px solid var(--line);padding:0;
 }
@@ -151,7 +151,7 @@ html,body{
 .nav-item.active{opacity:1}
 .nav-item.active svg{transform:scale(1.05)}
 /* Tron green when syncing */
-#bottomNav.syncing .nav-item{color:var(--green);opacity:0.4}
+#bottomNav.syncing .nav-item{color:var(--green);opacity:0.5}
 #bottomNav.syncing .nav-item.active{opacity:1}
  
 /* ── CHAT PANEL ── */
@@ -167,17 +167,17 @@ html,body{
 @keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .msg-who{
   font-family:var(--mono);font-size:0.62rem;letter-spacing:0.14em;
-  text-transform:uppercase;color:var(--text);opacity:0.35;
-  margin-bottom:6px;font-weight:400;
+  text-transform:uppercase;color:var(--text);opacity:0.6;
+  margin-bottom:6px;font-weight:700;
 }
 .msg.user .msg-who{text-align:right}
-.msg-text{font-family:var(--sans);font-size:1.05rem;line-height:1.65;font-weight:400;color:var(--text)}
-.msg.user .msg-text{text-align:right;opacity:0.75}
+.msg-text{font-family:var(--sans);font-size:1.05rem;line-height:1.65;font-weight:500;color:var(--text)}
+.msg.user .msg-text{text-align:right;opacity:0.85}
 .thinking-dots{display:flex;gap:5px;align-items:center;padding:4px 0}
-.thinking-dots span{width:6px;height:6px;border-radius:50%;background:var(--text);opacity:0.3;animation:dot 1.2s ease-in-out infinite}
+.thinking-dots span{width:6px;height:6px;border-radius:50%;background:var(--text);opacity:0.4;animation:dot 1.2s ease-in-out infinite}
 .thinking-dots span:nth-child(2){animation-delay:0.2s}
 .thinking-dots span:nth-child(3){animation-delay:0.4s}
-@keyframes dot{0%,80%,100%{opacity:0.2;transform:scale(0.7)}40%{opacity:0.8;transform:scale(1)}}
+@keyframes dot{0%,80%,100%{opacity:0.2;transform:scale(0.7)}40%{opacity:0.9;transform:scale(1)}}
  
 /* ── CHAT INPUT ── */
 #chatInputWrap{
@@ -190,15 +190,15 @@ html,body{
   flex:1;background:transparent;border:none;outline:none;
   color:var(--text);font-family:var(--sans);font-size:1rem;
   resize:none;max-height:120px;line-height:1.55;
-  padding:0;overflow-y:auto;font-weight:400;
+  padding:0;overflow-y:auto;font-weight:500;
   caret-color:var(--text);
 }
-#chatBox::placeholder{color:var(--text);opacity:0.3}
+#chatBox::placeholder{color:var(--text);opacity:0.45}
 #micBtn{
   width:34px;height:34px;border-radius:50%;flex-shrink:0;
   background:transparent;border:1px solid var(--line);
   cursor:pointer;display:flex;align-items:center;justify-content:center;
-  color:var(--text);opacity:0.5;transition:opacity 0.2s,border-color 0.2s,color 0.2s;
+  color:var(--text);opacity:0.7;transition:opacity 0.2s,border-color 0.2s,color 0.2s;
   align-self:flex-end;
 }
 #micBtn:hover{opacity:1}
@@ -206,7 +206,7 @@ html,body{
 #sendBtn{
   width:34px;height:34px;flex-shrink:0;border-radius:50%;
   background:transparent;border:1px solid var(--line);
-  color:var(--text);opacity:0.5;cursor:pointer;
+  color:var(--text);opacity:0.7;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   transition:opacity 0.2s;align-self:flex-end;
 }
@@ -217,15 +217,15 @@ html,body{
 /* ── PANEL CONTENT ── */
 .panel-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:24px 20px;overscroll-behavior:contain}
 .panel-head{margin-bottom:28px}
-.panel-title{font-family:var(--mono);font-weight:700;font-size:1.4rem;letter-spacing:-0.01em;margin-bottom:4px}
-.panel-sub{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.15em;color:var(--text);opacity:0.4;text-transform:uppercase}
+.panel-title{font-family:var(--mono);font-weight:700;font-size:1.4rem;letter-spacing:-0.01em;margin-bottom:4px;color:var(--text)}
+.panel-sub{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.15em;color:var(--text);opacity:0.65;text-transform:uppercase}
  
 .btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px}
 .pill{
   background:transparent;border:1px solid var(--line-hi);
-  color:var(--text);opacity:0.6;
+  color:var(--text);opacity:0.8;
   font-family:var(--mono);font-size:0.72rem;
-  font-weight:400;letter-spacing:0.12em;text-transform:uppercase;
+  font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
   padding:10px 18px;cursor:pointer;transition:opacity 0.2s,border-color 0.2s;
   white-space:nowrap;border-radius:0;
 }
@@ -236,26 +236,26 @@ html,body{
 .pill.danger{border-color:#ff3d5a;color:#ff3d5a;opacity:1}
  
 .mem-card,.note-card{border-top:1px solid var(--line);padding:16px 0}
-.card-ts{font-family:var(--mono);font-size:0.62rem;color:var(--text);opacity:0.35;margin-bottom:8px;letter-spacing:0.08em}
-.card-text{font-size:0.95rem;line-height:1.6;color:var(--text);font-weight:400}
-.empty-state{font-family:var(--mono);font-size:0.75rem;color:var(--text);opacity:0.3;padding:32px 0;letter-spacing:0.08em}
+.card-ts{font-family:var(--mono);font-size:0.62rem;color:var(--text);opacity:0.6;margin-bottom:8px;letter-spacing:0.08em}
+.card-text{font-size:0.95rem;line-height:1.6;color:var(--text);font-weight:500}
+.empty-state{font-family:var(--mono);font-size:0.75rem;color:var(--text);opacity:0.5;padding:32px 0;letter-spacing:0.08em}
  
 #noteBox{
   width:100%;background:transparent;
   border:none;border-bottom:1px solid var(--line);
   color:var(--text);font-family:var(--sans);font-size:1rem;
   padding:12px 0;outline:none;resize:none;min-height:100px;
-  margin-bottom:18px;line-height:1.6;border-radius:0;
+  margin-bottom:18px;line-height:1.6;border-radius:0;font-weight:500;
 }
-#noteBox::placeholder{color:var(--text);opacity:0.3}
+#noteBox::placeholder{color:var(--text);opacity:0.4}
 #driveHint{font-family:var(--mono);font-size:0.72rem;color:#ff3d5a;padding:12px 0;margin-bottom:18px;display:none}
  
-.now-playing{font-family:var(--mono);font-size:0.78rem;color:var(--text);opacity:0.6;margin-bottom:20px;min-height:20px;letter-spacing:0.06em}
+.now-playing{font-family:var(--mono);font-size:0.78rem;color:var(--text);opacity:0.85;margin-bottom:20px;min-height:20px;letter-spacing:0.06em;font-weight:700}
 .station-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;border:1px solid var(--line)}
 .station-card{background:var(--bg);padding:16px 14px;cursor:pointer;transition:background 0.15s;border:none}
-.station-card:active,.station-card.playing{background:rgba(255,255,255,0.05)}
-.st-name{font-family:var(--mono);font-size:0.82rem;font-weight:700;display:block;margin-bottom:3px}
-.st-loc{font-family:var(--mono);font-size:0.62rem;color:var(--text);opacity:0.35;display:block}
+.station-card:active,.station-card.playing{background:rgba(255,255,255,0.06)}
+.st-name{font-family:var(--mono);font-size:0.82rem;font-weight:700;display:block;margin-bottom:3px;color:var(--text)}
+.st-loc{font-family:var(--mono);font-size:0.62rem;color:var(--text);opacity:0.6;display:block}
  
 /* ── EMAIL OVERLAY ── */
 #emailOverlay{
@@ -266,27 +266,27 @@ html,body{
 #emailOverlay.on{display:flex}
 .email-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:24px 20px 40px}
 .form-group{margin-bottom:20px}
-.form-group label{display:block;font-family:var(--mono);font-size:0.65rem;letter-spacing:0.15em;color:var(--text);opacity:0.4;text-transform:uppercase;margin-bottom:8px}
+.form-group label{display:block;font-family:var(--mono);font-size:0.65rem;letter-spacing:0.15em;color:var(--text);opacity:0.75;text-transform:uppercase;margin-bottom:8px;font-weight:700}
 .form-group input,.form-group textarea{
   width:100%;background:transparent;border:none;border-bottom:1px solid var(--line);
   color:var(--text);font-family:var(--sans);font-size:1rem;
-  padding:12px 0;outline:none;border-radius:0;transition:border-color 0.2s;
+  padding:12px 0;outline:none;border-radius:0;transition:border-color 0.2s;font-weight:500;
 }
 .form-group input:focus,.form-group textarea:focus{border-bottom-color:var(--line-hi)}
-.form-group input::placeholder,.form-group textarea::placeholder{color:var(--text);opacity:0.3}
+.form-group input::placeholder,.form-group textarea::placeholder{color:var(--text);opacity:0.4}
 #emailHeader{
   height:var(--top-h);display:flex;align-items:center;justify-content:space-between;
   padding:0 20px;border-bottom:1px solid var(--line);flex-shrink:0;
 }
-.email-title{font-family:var(--mono);font-weight:700;font-size:1rem;letter-spacing:0.05em}
+.email-title{font-family:var(--mono);font-weight:700;font-size:1rem;letter-spacing:0.05em;color:var(--text)}
 #emailBackBtn{
   width:34px;height:34px;border-radius:50%;background:transparent;
   border:1px solid var(--line);cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  font-size:16px;color:var(--text);opacity:0.6;
+  font-size:16px;color:var(--text);opacity:0.8;
 }
 .form-group textarea{min-height:160px;resize:none;line-height:1.6}
-#emailStatus{font-family:var(--mono);font-size:0.72rem;color:var(--text);opacity:0.5;margin-top:8px;min-height:18px}
+#emailStatus{font-family:var(--mono);font-size:0.72rem;color:var(--text);opacity:0.75;margin-top:8px;min-height:18px}
  
 ::-webkit-scrollbar{width:2px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -438,11 +438,11 @@ let theme=LS.get('theme')||'dark';
 function applyTheme(t){
   const r=document.documentElement.style;
   if(t==='light'){
-    r.setProperty('--bg','#f2f2f2');
-    r.setProperty('--text','#0a0a0a');
-    r.setProperty('--sub','rgba(0,0,0,0.45)');
-    r.setProperty('--line','rgba(0,0,0,0.1)');
-    r.setProperty('--line-hi','rgba(0,0,0,0.25)');
+    r.setProperty('--bg','#f0f0f0');
+    r.setProperty('--text','#080808');
+    r.setProperty('--sub','rgba(0,0,0,0.5)');
+    r.setProperty('--line','rgba(0,0,0,0.12)');
+    r.setProperty('--line-hi','rgba(0,0,0,0.3)');
   } else {
     r.setProperty('--bg','#000000');
     r.setProperty('--text','#ffffff');
@@ -609,7 +609,7 @@ async function handleNASA(text) {
   if (ISS_INTENT.test(text))        fact = await fetchISS();
   else if (NEO_INTENT.test(text))   fact = await fetchNEO();
   else if (ROVER_INTENT.test(text)) fact = await fetchMarsRover();
-  else                               fact = await fetchAPOD(); // default to APOD
+  else                               fact = await fetchAPOD();
   return fact;
 }
  
@@ -622,7 +622,6 @@ async function fetchWikipedia(query) {
     const search = encodeURIComponent(clean);
     const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${search}`);
     if (!res.ok) {
-      // Try search endpoint as fallback
       const sr = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${search}&format=json&origin=*&srlimit=1`);
       const sd = await sr.json();
       const title = sd?.query?.search?.[0]?.title;
@@ -637,14 +636,13 @@ async function fetchWikipedia(query) {
   } catch(e) { return null; }
 }
  
-/* ── WOLFRAM ALPHA (via allorigins CORS proxy) ── */
+/* ── WOLFRAM ALPHA ── */
 const WOLFRAM_INTENT = /\b(calculate|compute|convert|how many|how far|how long|distance|temperature|speed|mass|weight|solve|what is \d|maths?|math|formula|equation|calories|nutrition|population|height of|age of|size of|orbital|gravity|light year)\b/i;
 const SPACE_WOLFRAM  = /\b(planet|moon|star|galaxy|nebula|comet|orbit|light.?year|parsec|solar|milky way|andromeda|black hole|supernova|exoplanet)\b/i;
  
 async function fetchWolfram(query) {
   try {
     const q = encodeURIComponent(query);
-    // Use allorigins as a CORS proxy since Wolfram doesn't allow direct browser calls
     const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`http://api.wolframalpha.com/v1/result?appid=${WOLFRAM_ID}&i=${q}&units=metric`)}`;
     const res = await fetch(proxyUrl);
     const d = await res.json();
@@ -656,7 +654,6 @@ async function fetchWolfram(query) {
  
 /* ── SMART INTENT ROUTER ── */
 async function routeToExternalAPI(text) {
-  // Decide which API to call based on what's in the message
   const isSpace   = NASA_INTENTS.test(text) || SPACE_WOLFRAM.test(text);
   const isWolfram = WOLFRAM_INTENT.test(text) && !isSpace;
   const isWiki    = WIKI_INTENT.test(text) && !isSpace && !isWolfram;
@@ -745,7 +742,6 @@ async function sendMessage(){
   const t=addThinking(); setPresence('thinking'); setStatus('thinking…');
   conversationHistory.push({role:'user',content:text});
  
-  // ── Check external APIs first ──────────────────────────────────
   let externalContext = '';
   try {
     const ext = await routeToExternalAPI(text);
