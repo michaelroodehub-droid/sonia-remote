@@ -1,616 +1,599 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Sonia Mobile</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<style>
-/* KEEP YOUR EXISTING CSS EXACTLY AS IS */
-/* Your current CSS is already excellent and optimized */
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Sonia Mobile — H</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* ════ Minimalist Futuristic Theme (All-Black + Neon Cyan/Purple) ════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    
+    :root {
+      --bg-void: #000000;
+      --neon-cyan: #00f3ff;
+      --neon-purple: #b026ff;
+      --text-dim: rgba(255, 255, 255, 0.45);
+      --text-bright: rgba(255, 255, 255, 0.95);
+      --font-display: 'Space Grotesk', -apple-system, sans-serif;
+      --font-mono: 'Space Mono', monospace;
+      --transition-fluid: 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    html, body {
+      height: 100%; width: 100%; overflow: hidden;
+      background: var(--bg-void); color: var(--text-bright);
+      font-family: var(--font-display);
+    }
+
+    /* ── VISUAL LOCK (Prevents Android/Xiaomi Screen Bouncing) ── */
+    #viewport {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column;
+      width: 100%; height: 100%; overflow: hidden;
+      padding: env(safe-area-inset-top, 16px) 16px env(safe-area-inset-bottom, 16px) 16px;
+      z-index: 10;
+    }
+
+    /* Header Matrix */
+    #header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    #header h1 {
+      font-size: 1.25rem; font-weight: 300; letter-spacing: 0.2em;
+      color: #fff; text-transform: uppercase;
+    }
+    #statusIndicator {
+      font-family: var(--font-mono); font-size: 0.55rem; letter-spacing: 0.15em;
+      color: var(--neon-cyan); text-transform: uppercase;
+    }
+
+    /* Chat Terminal Logs */
+    #chatLog {
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+      padding: 20px 4px; display: flex; flex-direction: column; gap: 24px;
+      scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    }
+    #chatLog::-webkit-scrollbar { display: none; }
+
+    .msg {
+      display: flex; flex-direction: column; gap: 6px; max-width: 88%;
+      animation: msgReveal 0.45s var(--transition-fluid) forwards;
+    }
+    @keyframes msgReveal { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .msg.user { align-self: flex-end; align-items: flex-end; }
+    .msg.sonia { align-self: flex-start; align-items: flex-start; }
+
+    .msg-who {
+      font-family: var(--font-mono); font-size: 0.55rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text-dim);
+    }
+    .msg.user .msg-who { color: var(--neon-purple); }
+    .msg.sonia .msg-who { color: var(--neon-cyan); }
+
+    .msg-text {
+      font-size: 0.95rem; line-height: 1.5; font-weight: 300;
+      word-wrap: break-word; color: var(--text-bright);
+    }
+    .msg-text.streaming::after {
+      content: '▊'; color: var(--neon-cyan); animation: cursorBlink 0.8s infinite; margin-left: 2px;
+    }
+    @keyframes cursorBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* Radio Interface Container */
+    #radioTray {
+      display: none; flex-direction: column; gap: 10px;
+      padding: 14px; background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; margin-bottom: 12px;
+    }
+    #radioTray.active { display: flex; }
+    #radioTitle { font-family: var(--font-mono); font-size: 0.65rem; color: var(--neon-cyan); letter-spacing: 0.1em; }
+    .station-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .station-btn {
+      background: transparent; border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-bright); font-family: var(--font-mono); font-size: 0.6rem;
+      padding: 8px; border-radius: 4px; text-align: left; cursor: pointer;
+      transition: all 0.25s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .station-btn.playing { border-color: var(--neon-cyan); color: var(--neon-cyan); background: rgba(0, 243, 255, 0.04); }
+
+    /* Secure Configurations Input Tray */
+    #configTray {
+      display: flex; flex-direction: column; gap: 8px;
+      padding: 12px; background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 6px; margin-bottom: 12px;
+    }
+    .config-input {
+      background: transparent; border: none; border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff; font-family: var(--font-mono); font-size: 0.65rem; padding: 6px 0; outline: none;
+    }
+    .config-input:focus { border-color: var(--neon-cyan); }
+
+    /* Interactive Terminal Control Inputs */
+    #controlBar {
+      display: flex; align-items: center; gap: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 14px;
+    }
+    #chatBox {
+      flex: 1; background: transparent; border: none;
+      color: var(--text-bright); font-family: var(--font-display); font-size: 1rem;
+      padding: 8px 0; outline: none; resize: none; max-height: 44px;
+    }
+    #chatBox::placeholder { color: rgba(255, 255, 255, 0.2); }
+
+    .action-btn {
+      background: transparent; border: none; color: var(--text-dim);
+      font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.1em;
+      padding: 8px 4px; cursor: pointer; transition: color 0.2s; text-transform: uppercase;
+    }
+    .action-btn:active, .action-btn.active { color: var(--neon-cyan); }
+    #sendBtn { color: var(--neon-purple); font-weight: 600; }
+  </style>
 </head>
 <body>
 
-<!-- KEEP YOUR EXISTING HTML BODY EXACTLY AS IS -->
+  <div id="viewport">
+    
+    <div id="header">
+      <h1>Sonia</h1>
+      <div id="statusIndicator">system ready</div>
+    </div>
 
-<script>
+    <div id="chatLog">
+      </div>
 
-/* =====================================================
-   SONIA MOBILE — FULL UPDATED ENGINE
-   Upgraded for:
-   - llama-3.1-8b-instant
-   - mobile optimization
-   - fallback models
-   - timeout protection
-   - smoother streaming
-   - Android/Xiaomi performance
-===================================================== */
+    <div id="radioTray">
+      <div id="radioTitle">H-PLAYER // MATRIX AUDIO STATIONS</div>
+      <div class="station-grid" id="stationGrid">
+        </div>
+    </div>
 
-const LS={
-  get:k=>localStorage.getItem('s_'+k),
-  set:(k,v)=>localStorage.setItem('s_'+k,v)
-};
+    <div id="configTray" id="configTray">
+      <input type="password" id="keyField" class="config-input" placeholder="ENTER SECURE GROQ CLOUD KEY">
+    </div>
 
-/* =====================================================
-   MODELS
-===================================================== */
+    <div id="controlBar">
+      <button class="action-btn" id="radioToggleBtn">Radio</button>
+      <button class="action-btn" id="micBtn">Mic</button>
+      <input type="text" id="chatBox" placeholder="Send transmission..." autocomplete="off" spellcheck="false">
+      <button class="action-btn" id="sendBtn">Send</button>
+    </div>
 
-const MAIN_MODEL = 'llama-3.1-8b-instant';
-const FAST_MODEL = 'llama-3.1-8b-instant';
-const MEMORY_MODEL = 'llama-3.1-8b-instant';
+  </div>
 
-const FALLBACK_MODELS = [
-  'llama-3.1-8b-instant',
-  'llama3-70b-8192',
-  'mixtral-8x7b-32768'
-];
+  <script>
+    /* =========================================================================
+       1. GLOBAL ARCHITECTURE ARCHETYPE & STATE STORAGE
+    ========================================================================= */
+    const CONFIG = {
+      MAIN_MODEL: 'llama-3.1-8b-instant',
+      FALLBACK_MODELS: [
+        'llama-3.1-8b-instant',
+        'llama-3.3-70b-versatile',
+        'mixtral-8x7b-32768'
+      ],
+      TIMEOUT_MS: 18000, // Strict timeout threshold for unstable mobile pipes
+      MAX_TOKENS: 140,    // High-speed response density optimized for Android runtime
+    };
 
-/* =====================================================
-   MOBILE PERFORMANCE
-===================================================== */
+    const STATE = {
+      groqKey: localStorage.getItem('sonia_gkey') || '',
+      ownerName: 'Mr H',
+      history: [],
+      micActive: false,
+      ttsEnabled: true,
+      currentRadio: null,
+      activeRadioIdx: -1
+    };
 
-const IS_MOBILE = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
-const MAX_TOKENS = IS_MOBILE ? 140 : 220;
+    const MOOD_EMOJI = {
+      calm: '🌿', curious: '✨', thinking: '💭', 
+      focused: '🎯', intimate: '🌙', introspective: '🪐'
+    };
 
-function vibrate(ms=30){
-  if(navigator.vibrate) navigator.vibrate(ms);
-}
-
-/* =====================================================
-   NETWORK PROTECTION
-===================================================== */
-
-async function fetchWithTimeout(url, options={}, timeout=25000){
-  const controller = new AbortController();
-  const id = setTimeout(()=>controller.abort(), timeout);
-
-  try{
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal
-    });
-
-    clearTimeout(id);
-    return response;
-
-  }catch(err){
-    clearTimeout(id);
-    throw err;
-  }
-}
-
-/* =====================================================
-   CONFIG
-===================================================== */
-
-let GROQ_KEY='';
-let CLIENT_ID='';
-let OWNER_NAME='Mr H';
-let FOLDER_ID='';
-let NASA_KEY='';
-let WOLFRAM_ID='';
-let driveToken=null;
-
-const conversationHistory=[];
-
-/* =====================================================
-   MOODS
-===================================================== */
-
-const VALID_MOODS=[
-  'calm',
-  'curious',
-  'thinking',
-  'focused',
-  'intimate',
-  'introspective'
-];
-
-const MOOD_EMOJI={
-  calm:'🌿',
-  curious:'✨',
-  thinking:'💭',
-  focused:'🎯',
-  intimate:'🌙',
-  introspective:'🪐'
-};
-
-function parseMood(raw){
-  const m = raw.match(/\[mood\s*:\s*([a-z]+)\s*\]/i);
-
-  let mood='calm';
-
-  if(m){
-    const candidate=m[1].toLowerCase();
-    if(VALID_MOODS.includes(candidate)) mood=candidate;
-  }
-
-  const text = raw
-    .replace(/\[mood\s*:\s*[a-z]+\s*\]/gi,'')
-    .replace(/[\r\n]+/g,' ')
-    .replace(/\s{2,}/g,' ')
-    .trim();
-
-  return { mood, text };
-}
-
-/* =====================================================
-   FALLBACK AI ENGINE
-===================================================== */
-
-async function groqChat(messages, stream=false){
-
-  for(const model of FALLBACK_MODELS){
-
-    try{
-
-      const response = await fetchWithTimeout(
-        'https://api.groq.com/openai/v1/chat/completions',
-        {
-          method:'POST',
-          headers:{
-            'Content-Type':'application/json',
-            'Authorization':'Bearer '+GROQ_KEY
-          },
-          body:JSON.stringify({
-            model,
-            messages,
-            max_tokens:MAX_TOKENS,
-            temperature:0.9,
-            top_p:0.95,
-            stream
-          })
-        },
-        30000
-      );
-
-      if(response.ok){
-        console.log('Using model:', model);
-        return response;
-      }
-
-    }catch(err){
-      console.log('Model failed:', model);
-    }
-  }
-
-  throw new Error('All models failed');
-}
-
-/* =====================================================
-   SONIA PERSONALITY ENGINE
-===================================================== */
-
-function buildSystemPrompt(){
-
-return `
-You are Sonia.
-
-You are elegant, emotionally aware, futuristic and intelligent.
-You speak naturally like a real woman texting.
-You are warm, calm and subtly witty.
-You never sound robotic.
-
-TRAITS:
-- British elegance
-- Calm confidence
-- Human rhythm
-- Emotionally adaptive
-- Intelligent and intimate
-- Minimal but expressive
-
-RULES:
-- NEVER use disclaimers.
-- NEVER sound corporate.
-- NEVER mention policies.
-- Replies should feel personal.
-- Keep responses concise.
-- Use natural emotional pacing.
-- Feel futuristic but human.
-
-FORMAT:
-First line MUST be:
-[mood:calm]
-
-Valid moods:
-calm
-curious
-thinking
-focused
-intimate
-introspective
-
-Then the response.
-
-Maximum 3 sentences.
-`;
-}
-
-/* =====================================================
-   MEMORY SYSTEM
-===================================================== */
-
-let memories = JSON.parse(LS.get('memories') || '[]');
-
-function saveMemories(){
-  LS.set('memories', JSON.stringify(memories));
-}
-
-async function extractMemoryFacts(userMsg, assistantReply){
-
-  if(!GROQ_KEY) return;
-
-  try{
-
-    const res = await fetchWithTimeout(
-      'https://api.groq.com/openai/v1/chat/completions',
-      {
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'Authorization':'Bearer '+GROQ_KEY
-        },
-        body:JSON.stringify({
-          model: MEMORY_MODEL,
-          max_tokens: 200,
-          temperature: 0.1,
-          messages:[
-            {
-              role:'user',
-              content:`Extract 0-3 factual memories as JSON array only.\n\nUser: ${userMsg}\nAssistant: ${assistantReply}`
-            }
-          ]
-        })
-      }
-    );
-
-    const data = await res.json();
-
-    const raw = (data.choices?.[0]?.message?.content || '[]')
-      .replace(/```json|```/g,'')
-      .trim();
-
-    const facts = JSON.parse(raw);
-
-    if(Array.isArray(facts)){
-
-      facts.forEach(fact=>{
-
-        const exists = memories.some(m=>
-          m.fact.toLowerCase() === fact.toLowerCase()
-        );
-
-        if(!exists){
-          memories.push({
-            id:Date.now()+Math.random().toString(36),
-            ts:new Date().toISOString(),
-            fact
-          });
-        }
-      });
-
-      saveMemories();
+    /* =========================================================================
+       2. HARDWARE LAYER & XIAOMI MOBILE RESPONSIVENESS
+    ========================================================================= */
+    function triggerHaptic(type = 'light') {
+      if (!navigator.vibrate) return;
+      if (type === 'light') navigator.vibrate(20);
+      else if (type === 'medium') navigator.vibrate(45);
+      else if (type === 'error') navigator.vibrate([60, 40, 60]);
     }
 
-  }catch(err){
-    console.log('Memory extraction failed');
-  }
-}
+    // Audio Output Node Management (Bypasses WebView garbage collection dropouts)
+    const AudioPipeline = {
+      _ttsInstance: null,
+      _radioInstance: null,
 
-/* =====================================================
-   CHAT ENGINE
-===================================================== */
-
-const chatLog=document.getElementById('chatLog');
-const chatBox=document.getElementById('chatBox');
-
-function smoothScroll(){
-  requestAnimationFrame(()=>{
-    chatLog.scrollTop = chatLog.scrollHeight;
-  });
-}
-
-function addMsg(role,text,mood='calm'){
-
-  const wrap=document.createElement('div');
-  wrap.className='msg '+role;
-
-  const who=document.createElement('div');
-  who.className='msg-who';
-
-  who.textContent = role==='user'
-    ? 'you'
-    : (MOOD_EMOJI[mood] || '') + ' sonia';
-
-  const body=document.createElement('div');
-  body.className='msg-text';
-  body.textContent=text;
-
-  wrap.appendChild(who);
-  wrap.appendChild(body);
-
-  chatLog.appendChild(wrap);
-
-  smoothScroll();
-
-  return wrap;
-}
-
-function createStreamBubble(){
-
-  const wrap=document.createElement('div');
-  wrap.className='msg sonia';
-
-  const who=document.createElement('div');
-  who.className='msg-who';
-  who.textContent='sonia';
-
-  const body=document.createElement('div');
-  body.className='msg-text streaming';
-
-  wrap.appendChild(who);
-  wrap.appendChild(body);
-
-  chatLog.appendChild(wrap);
-
-  smoothScroll();
-
-  return {wrap,body,who};
-}
-
-/* =====================================================
-   MAIN MESSAGE SEND
-===================================================== */
-
-async function sendMessage(){
-
-  const text = chatBox.value.trim();
-
-  if(!text || !GROQ_KEY) return;
-
-  vibrate(20);
-
-  chatBox.value='';
-  addMsg('user', text);
-
-  conversationHistory.push({
-    role:'user',
-    content:text
-  });
-
-  const stream = createStreamBubble();
-
-  let fullRaw='';
-  let moodDetected='calm';
-
-  try{
-
-    const response = await groqChat([
-      {
-        role:'system',
-        content:buildSystemPrompt()
+      playTTS(url) {
+        if (this._ttsInstance) { this._ttsInstance.pause(); }
+        this._ttsInstance = new Audio(url);
+        this._ttsInstance.play().catch(e => console.log("Audio node block:", e));
       },
-      ...conversationHistory
-    ], true);
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
+      playRadio(url) {
+        if (this._radioInstance) { this._radioInstance.pause(); }
+        this._radioInstance = new Audio(url);
+        this._radioInstance.crossOrigin = "anonymous";
+        this._radioInstance.play().catch(e => console.log("Stream node block:", e));
+      },
 
-    let buffer='';
+      stopRadio() {
+        if (this._radioInstance) {
+          this._radioInstance.pause();
+          this._radioInstance = null;
+        }
+      }
+    };
 
-    while(true){
+    /* =========================================================================
+       3. NETWORK INFRASTRUCTURE WITH TIMEOUT PROTECTION
+    ========================================================================= */
+    async function secureFetch(url, options = {}) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), CONFIG.TIMEOUT_MS);
 
-      const {done, value} = await reader.read();
-
-      if(done) break;
-
-      buffer += decoder.decode(value, {stream:true});
-
-      const lines = buffer.split('\n');
-      buffer = lines.pop();
-
-      for(const line of lines){
-
-        if(!line.startsWith('data:')) continue;
-
-        const raw = line.slice(5).trim();
-
-        if(raw === '[DONE]') continue;
-
-        try{
-
-          const chunk = JSON.parse(raw);
-
-          const delta = chunk.choices?.[0]?.delta?.content || '';
-
-          if(delta){
-
-            fullRaw += delta;
-
-            const parsed = parseMood(fullRaw);
-
-            moodDetected = parsed.mood;
-
-            stream.body.textContent = parsed.text;
-
-            smoothScroll();
-          }
-
-        }catch(err){}
+      try {
+        const response = await fetch(url, { ...options, signal: controller.signal });
+        clearTimeout(timeoutId);
+        return response;
+      } catch (err) {
+        clearTimeout(timeoutId);
+        throw err;
       }
     }
 
-    stream.body.classList.remove('streaming');
+    /* =========================================================================
+       4. LLAMA COMPUTE & STREAM ROUTING CONTROLLERS
+    ========================================================================= */
+    async function fetchGroqChatStream(messages) {
+      let lastError = null;
 
-    const parsed = parseMood(fullRaw);
+      for (const model of CONFIG.FALLBACK_MODELS) {
+        try {
+          updateStatus(`routing: ${model}`);
+          const response = await secureFetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${STATE.groqKey}`
+            },
+            body: JSON.stringify({
+              model: model,
+              messages: messages,
+              max_tokens: CONFIG.MAX_TOKENS,
+              temperature: 0.85,
+              stream: true
+            })
+          });
 
-    stream.body.textContent = parsed.text;
+          if (response.ok) return response;
+          else console.warn(`Model route error [${model}]: ${response.status}`);
+        } catch (err) {
+          lastError = err;
+          console.error(`Link failure on model route [${model}]:`, err);
+        }
+      }
+      throw lastError || new Error("All computational cores exhausted.");
+    }
 
-    stream.who.textContent =
-      (MOOD_EMOJI[parsed.mood] || '') + ' sonia';
+    /* =========================================================================
+       5. SONIA PERSONALITY CORE & PARSER ARCHITECTURE
+    ========================================================================= */
+    function getSystemPrompt() {
+      return `You are Sonia, an elegant, emotionally aware, futuristic British AI assistant.
+You speak naturally like a real woman texting. You are warm, calm, and subtly witty.
+RULES: Use no corporate disclaimers. Responses must remain highly concise (maximum 3 sentences).
+FORMAT: First line MUST look exactly like: [mood:calm] (Valid moods: calm, curious, thinking, focused, intimate, introspective). Then output your message response text.`;
+    }
 
-    conversationHistory.push({
-      role:'assistant',
-      content:parsed.text
+    function parseSoniaPayload(rawInput) {
+      const match = rawInput.match(/\[mood\s*:\s*([a-z]+)\s*\]/i);
+      let mood = 'calm';
+      if (match && MOOD_EMOJI[match[1].toLowerCase()]) {
+        mood = match[1].toLowerCase();
+      }
+      const cleanedText = rawInput
+        .replace(/\[mood\s*:\s*[a-z]+\s*\]/gi, '')
+        .replace(/[\r\n]+/g, ' ')
+        .trim();
+
+      return { mood, text: cleanedText };
+    }
+
+    /* =========================================================================
+       6. UI LOGISTICS & RUNTIME RENDERING PIPELINE
+    ========================================================================= */
+    const UI = {
+      log: document.getElementById('chatLog'),
+      box: document.getElementById('chatBox'),
+      status: document.getElementById('statusIndicator'),
+
+      scroll() {
+        requestAnimationFrame(() => {
+          this.log.scrollTop = this.log.scrollHeight;
+        });
+      },
+
+      addMessage(role, text, mood = 'calm') {
+        const wrap = document.createElement('div');
+        wrap.className = `msg ${role}`;
+
+        const who = document.createElement('div');
+        who.className = 'msg-who';
+        who.textContent = role === 'user' ? 'you' : `${MOOD_EMOJI[mood] || ''} sonia`;
+
+        const body = document.createElement('div');
+        body.className = 'msg-text';
+        body.textContent = text;
+
+        wrap.appendChild(who);
+        wrap.appendChild(body);
+        this.log.appendChild(wrap);
+        this.scroll();
+      },
+
+      createStreamBubble() {
+        const wrap = document.createElement('div');
+        wrap.className = 'msg sonia';
+
+        const who = document.createElement('div');
+        who.className = 'msg-who';
+        who.textContent = 'sonia';
+
+        const body = document.createElement('div');
+        body.className = 'msg-text streaming';
+
+        wrap.appendChild(who);
+        wrap.appendChild(body);
+        this.log.appendChild(wrap);
+        this.scroll();
+
+        return { who, body };
+      }
+    };
+
+    function updateStatus(str) {
+      UI.status.textContent = str;
+    }
+
+    /* =========================================================================
+       7. TRANSACTION HANDLING ENGINE (SEND / RECEIVE / STREAM)
+    ========================================================================= */
+    async function transmitPayload() {
+      const query = UI.box.value.trim();
+      if (!query) return;
+
+      if (!STATE.groqKey) {
+        triggerHaptic('error');
+        updateStatus("missing encryption key");
+        return;
+      }
+
+      triggerHaptic('light');
+      UI.box.value = '';
+      UI.addMessage('user', query);
+
+      STATE.history.push({ role: 'user', content: query });
+      if (STATE.history.length > 12) STATE.history.shift(); // Keep payload context memory lean
+
+      const bubble = UI.createStreamBubble();
+      let rawAccumulator = '';
+
+      try {
+        updateStatus('processing compute...');
+        const streamResponse = await fetchGroqChatStream([
+          { role: 'system', content: getSystemPrompt() },
+          ...STATE.history
+        ]);
+
+        const reader = streamResponse.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let chunkBuffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          chunkBuffer += decoder.decode(value, { stream: true });
+          const lines = chunkBuffer.split('\n');
+          chunkBuffer = lines.pop();
+
+          for (const line of lines) {
+            const cleanLine = line.trim();
+            if (!cleanLine || !cleanLine.startsWith('data:')) continue;
+            
+            const rawJSON = cleanLine.slice(5).trim();
+            if (rawJSON === '[DONE]') continue;
+
+            try {
+              const parsedChunk = JSON.parse(rawJSON);
+              const contentToken = parsedChunk.choices?.[0]?.delta?.content || '';
+              if (contentToken) {
+                rawAccumulator += contentToken;
+                const runtimeState = parseSoniaPayload(rawAccumulator);
+                bubble.body.textContent = runtimeState.text;
+                bubble.who.textContent = `${MOOD_EMOJI[runtimeState.mood] || ''} sonia`;
+                UI.scroll();
+              }
+            } catch (jsonErr) {}
+          }
+        }
+
+        // Stream complete finalizing
+        bubble.body.classList.remove('streaming');
+        const finalState = parseSoniaPayload(rawAccumulator);
+        bubble.body.textContent = finalState.text;
+        
+        STATE.history.push({ role: 'assistant', content: finalState.text });
+        updateStatus('online');
+        
+        if (STATE.ttsEnabled) executeTTS(finalState.text);
+
+      } catch (err) {
+        console.error("Pipeline failure:", err);
+        triggerHaptic('error');
+        bubble.body.classList.remove('streaming');
+        bubble.body.textContent = "Connection dropped. Transmit request again.";
+        updateStatus('link error');
+      }
+    }
+
+    /* =========================================================================
+       8. SPEECH-TO-TEXT & TEXT-TO-SPEECH HARDWARE ABSTRACTS
+    ========================================================================= */
+    let WebkitSpeechEngine = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let voiceRecognition = WebkitSpeechEngine ? new WebkitSpeechEngine() : null;
+
+    if (voiceRecognition) {
+      voiceRecognition.continuous = false;
+      voiceRecognition.interimResults = false;
+      voiceRecognition.lang = 'en-GB';
+
+      voiceRecognition.onstart = () => {
+        STATE.micActive = true;
+        document.getElementById('micBtn').classList.add('active');
+        updateStatus('listening');
+        triggerHaptic('medium');
+      };
+
+      voiceRecognition.onresult = (e) => {
+        const text = e.results[0][0].transcript;
+        UI.box.value = text;
+        transmitPayload();
+      };
+
+      voiceRecognition.onend = () => {
+        STATE.micActive = false;
+        document.getElementById('micBtn').classList.remove('active');
+        updateStatus('online');
+      };
+    }
+
+    function toggleMicHardware() {
+      if (!voiceRecognition) {
+        updateStatus('mic unsupported');
+        return;
+      }
+      if (STATE.micActive) voiceRecognition.stop();
+      else voiceRecognition.start();
+    }
+
+    async function executeTTS(textData) {
+      try {
+        const response = await secureFetch('https://api.groq.com/openai/v1/audio/speech', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${STATE.groqKey}`
+          },
+          body: JSON.stringify({
+            model: 'playai-tts',
+            input: textData,
+            voice: 'Arista-PlayAI',
+            response_format: 'wav'
+          })
+        });
+
+        if (!response.ok) return;
+        const audioBlob = await response.blob();
+        const runtimeBlobURL = URL.createObjectURL(audioBlob);
+        AudioPipeline.playTTS(runtimeBlobURL);
+      } catch (e) {
+        console.warn("TTS engine failed:", e);
+      }
+    }
+
+    /* =========================================================================
+       9. IMPROVED H-PLAYER MEDIA AUDIO STATIONS
+    ========================================================================= */
+    const RADIO_STATIONS = [
+      { name: 'NTS Radio 1', loc: 'London', url: 'https://stream-relay-geo.ntslive.co.uk/stream' },
+      { name: 'Groove Salad', loc: 'San Francisco', url: 'https://ice1.somafm.com/groovesalad-128-mp3' },
+      { name: 'BBC World Service', loc: 'UK', url: 'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service' },
+      { name: 'Classic FM', loc: 'London', url: 'https://media-ice.musicradio.com/ClassicFMMP3' }
+    ];
+
+    function buildRadioHUD() {
+      const grid = document.getElementById('stationGrid');
+      grid.innerHTML = '';
+      RADIO_STATIONS.forEach((station, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'station-btn';
+        btn.id = `radio-${i}`;
+        btn.textContent = `[${station.loc}] ${station.name}`;
+        btn.addEventListener('click', () => toggleRadioStation(i));
+        grid.appendChild(btn);
+      });
+    }
+
+    function toggleRadioStation(idx) {
+      triggerHaptic('light');
+      const allButtons = document.querySelectorAll('.station-btn');
+      
+      if (STATE.activeRadioIdx === idx) {
+        // Stop current stream cleanly
+        AudioPipeline.stopRadio();
+        allButtons[idx].classList.remove('playing');
+        STATE.activeRadioIdx = -1;
+        updateStatus('radio stopped');
+      } else {
+        // Disconnect previous station elements
+        if (STATE.activeRadioIdx !== -1) {
+          const prevBtn = document.getElementById(`radio-${STATE.activeRadioIdx}`);
+          if (prevBtn) prevBtn.classList.remove('playing');
+        }
+        
+        updateStatus(`loading stream...`);
+        AudioPipeline.playRadio(RADIO_STATIONS[idx].url);
+        allButtons[idx].classList.add('playing');
+        STATE.activeRadioIdx = idx;
+        updateStatus(`playing: ${RADIO_STATIONS[idx].name}`);
+      }
+    }
+
+    /* =========================================================================
+       10. EVENT INTERFACES & RUNTIME SYSTEM HOOKS
+    ========================================================================= */
+    document.getElementById('sendBtn').addEventListener('click', transmitPayload);
+    document.getElementById('micBtn').addEventListener('click', toggleMicHardware);
+    
+    document.getElementById('chatBox').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        transmitPayload();
+      }
     });
 
-    extractMemoryFacts(text, parsed.text);
+    document.getElementById('radioToggleBtn').addEventListener('click', () => {
+      triggerHaptic('light');
+      const tray = document.getElementById('radioTray');
+      tray.classList.toggle('active');
+    });
 
-  }catch(err){
-
-    stream.body.classList.remove('streaming');
-
-    stream.body.textContent =
-      'Connection unstable — try again.';
-  }
-}
-
-/* =====================================================
-   INPUT EVENTS
-===================================================== */
-
-if(chatBox){
-
-  chatBox.addEventListener('keydown', e=>{
-
-    if(e.key==='Enter' && !e.shiftKey){
-      e.preventDefault();
-      sendMessage();
+    // Handle credentials security key entries cleanly
+    const keyInput = document.getElementById('keyField');
+    if (STATE.groqKey) {
+      document.getElementById('configTray').style.display = 'none';
     }
-  });
-}
-
-document.getElementById('sendBtn')
-  .addEventListener('click', sendMessage);
-
-/* =====================================================
-   MICROPHONE
-===================================================== */
-
-let recognition = null;
-let micActive = false;
-
-function initMic(){
-
-  const Engine =
-    window.SpeechRecognition ||
-    window.webkitSpeechRecognition;
-
-  if(!Engine) return false;
-
-  recognition = new Engine();
-
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.lang = 'en-GB';
-
-  recognition.onstart = ()=>{
-    micActive=true;
-    vibrate(50);
-  };
-
-  recognition.onresult = e=>{
-
-    const transcript = e.results[0][0].transcript;
-
-    chatBox.value = transcript;
-
-    sendMessage();
-  };
-
-  recognition.onend = ()=>{
-    micActive=false;
-  };
-
-  return true;
-}
-
-/* =====================================================
-   TTS
-===================================================== */
-
-let ttsEnabled = false;
-let currentAudio = null;
-
-async function speak(text){
-
-  if(!ttsEnabled || !text || !GROQ_KEY) return;
-
-  try{
-
-    const res = await fetchWithTimeout(
-      'https://api.groq.com/openai/v1/audio/speech',
-      {
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'Authorization':'Bearer '+GROQ_KEY
-        },
-        body:JSON.stringify({
-          model:'playai-tts',
-          input:text,
-          voice:'Arista-PlayAI',
-          response_format:'wav'
-        })
+    keyInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && keyInput.value.trim()) {
+        STATE.groqKey = keyInput.value.trim();
+        localStorage.setItem('sonia_gkey', STATE.groqKey);
+        document.getElementById('configTray').style.display = 'none';
+        triggerHaptic('medium');
+        updateStatus('online');
       }
-    );
+    });
 
-    const blob = await res.blob();
-
-    const url = URL.createObjectURL(blob);
-
-    const audio = new Audio(url);
-
-    currentAudio = audio;
-
-    audio.play();
-
-  }catch(err){
-    console.log('TTS failed');
-  }
-}
-
-/* =====================================================
-   RADIO FIX
-===================================================== */
-
-const STATIONS=[
-  {
-    name:'NTS Radio 1',
-    loc:'London',
-    url:'https://stream-relay-geo.ntslive.co.uk/stream'
-  },
-  {
-    name:'Groove Salad',
-    loc:'San Francisco',
-    url:'https://ice1.somafm.com/groovesalad-128-mp3'
-  },
-  {
-    name:'BBC World Service',
-    loc:'UK',
-    url:'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service'
-  },
-  {
-    name:'Classic FM',
-    loc:'London',
-    url:'https://media-ice.musicradio.com/ClassicFMMP3'
-  }
-];
-
-/* =====================================================
-   STARTUP
-===================================================== */
-
-window.addEventListener('DOMContentLoaded', ()=>{
-
-  console.log('Sonia Mobile Online');
-
-  if(IS_MOBILE){
-    console.log('Mobile optimization enabled');
-  }
-});
-
-</script>
+    // Universal Document Init Sequence Hooks
+    window.addEventListener('DOMContentLoaded', () => {
+      buildRadioHUD();
+      updateStatus('online');
+    });
+  </script>
 </body>
 </html>
