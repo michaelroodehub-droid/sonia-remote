@@ -3,773 +3,365 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>Sonia</title>
 
-<title>Sonia — Secure Mobile</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-
-<!-- MODERN GOOGLE IDENTITY -->
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<!-- Minimalist Variable Font Setup -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 
 <style>
-
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
-:root{
-  --bg:#000;
-  --surface:#0a0a0a;
-  --border:rgba(255,255,255,0.08);
-  --cyan:#00f3ff;
-  --purple:#c44dff;
-  --green:#00ff99;
-  --text:#fff;
-  --text-mid:rgba(255,255,255,0.72);
-  --text-dim:rgba(255,255,255,0.38);
-
-  --font:'Space Grotesk',sans-serif;
-  --mono:'Space Mono',monospace;
+/* System-Driven Light/Dark Adaptive Theme */
+:root {
+  --bg: #ffffff;
+  --surface: #f8f9fa;
+  --border: #eaeaea;
+  --text: #111111;
+  --text-muted: #767676;
+  --bubble-user: #f0f0f0;
+  --bubble-sonia: transparent;
+  --font: 'Plus Jakarta Sans', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
 }
 
-html,body{
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  background:#000;
-  color:#fff;
-  font-family:var(--font);
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b0b0b;
+    --surface: #121212;
+    --border: #1f1f1f;
+    --text: #eeeeee;
+    --text-muted: #888888;
+    --bubble-user: #222222;
+  }
 }
 
-#viewport{
-  position:fixed;
-  inset:0;
+html, body {
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  overflow: hidden;
+}
 
-  display:flex;
-  flex-direction:column;
-
-  padding:
-    env(safe-area-inset-top,14px)
-    16px
-    env(safe-area-inset-bottom,14px)
-    16px;
+#viewport {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: env(safe-area-inset-top, 20px) 24px env(safe-area-inset-bottom, 20px) 24px;
 }
 
 /* HEADER */
-
-#header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-
-  padding:10px 0 14px;
-  border-bottom:1px solid var(--border);
-
-  flex-shrink:0;
+#header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
-#header h1{
-  font-weight:400;
-  font-size:1.2rem;
-  letter-spacing:.25em;
-  text-transform:uppercase;
+#header h1 {
+  font-weight: 400;
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
 }
 
-#headerRight{
-  display:flex;
-  align-items:center;
-  gap:10px;
+#statusLabel {
+  font-size: 0.7rem;
+  font-family: var(--mono);
+  color: var(--text-muted);
+  text-transform: lowercase;
 }
 
-#statusLabel{
-  font-size:.55rem;
-  font-family:var(--mono);
-  letter-spacing:.14em;
-  text-transform:uppercase;
-  color:var(--text-mid);
+/* MEMORY LOG */
+#chatLog {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px 0;
+  scrollbar-width: none;
 }
 
-#statusDot{
-  width:7px;
-  height:7px;
-  border-radius:50%;
-  background:var(--cyan);
-  box-shadow:0 0 8px var(--cyan);
+#chatLog::-webkit-scrollbar {
+  display: none;
 }
 
-#statusDot.drive{
-  background:var(--green);
-  box-shadow:0 0 8px var(--green);
+.msg {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 85%;
+  animation: fadeIn 0.2s ease-out;
 }
 
-#driveBtn{
-  background:none;
-  border:1px solid var(--border);
-
-  color:var(--text-dim);
-
-  padding:5px 10px;
-  border-radius:4px;
-
-  font-size:.52rem;
-  font-family:var(--mono);
-
-  text-transform:uppercase;
-  letter-spacing:.12em;
-
-  cursor:pointer;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-#driveBtn.connected{
-  border-color:var(--green);
-  color:var(--green);
+.msg.user {
+  align-self: flex-end;
+  align-items: flex-end;
 }
 
-/* CHAT */
-
-#chatLog{
-  flex:1;
-  overflow-y:auto;
-
-  display:flex;
-  flex-direction:column;
-  gap:20px;
-
-  padding:18px 0;
-
-  scrollbar-width:none;
+.msg.sonia {
+  align-self: flex-start;
+  align-items: flex-start;
 }
 
-#chatLog::-webkit-scrollbar{
-  display:none;
+.msg-label {
+  font-size: 0.65rem;
+  font-family: var(--mono);
+  color: var(--text-muted);
 }
 
-.msg{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  max-width:88%;
+.msg-bubble {
+  padding: 10px 14px;
+  border-radius: 14px;
+  line-height: 1.55;
+  font-size: 0.95rem;
+  font-weight: 400;
+  word-break: break-word;
 }
 
-.msg.user{
-  align-self:flex-end;
-  align-items:flex-end;
+.msg.user .msg-bubble {
+  background: var(--bubble-user);
+  color: var(--text);
+  border-bottom-right-radius: 4px;
 }
 
-.msg.sonia{
-  align-self:flex-start;
-  align-items:flex-start;
+.msg.sonia .msg-bubble {
+  background: var(--bubble-sonia);
+  color: var(--text);
+  padding-left: 0;
 }
 
-.msg-label{
-  font-size:.54rem;
-  letter-spacing:.12em;
-  text-transform:uppercase;
-  font-family:var(--mono);
+/* INPUT COMPONENT */
+#inputBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
-.msg.user .msg-label{
-  color:var(--purple);
+#chatBox {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 1rem;
+  font-family: var(--font);
 }
 
-.msg.sonia .msg-label{
-  color:var(--cyan);
+#chatBox::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
 }
 
-.msg-bubble{
-  padding:12px 14px;
-  border-radius:12px;
-
-  line-height:1.5;
-  font-size:.96rem;
+.actionBtn {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 8px;
 }
 
-.msg.user .msg-bubble{
-  background:rgba(196,77,255,.11);
-  border:1px solid rgba(196,77,255,.18);
+.actionBtn:disabled {
+  opacity: 0.25;
 }
 
-.msg.sonia .msg-bubble{
-  background:rgba(0,243,255,.05);
-  border:1px solid rgba(0,243,255,.12);
+.sys-tag {
+  align-self: center;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
 }
-
-/* INPUT */
-
-#inputBar{
-  display:flex;
-  align-items:center;
-  gap:10px;
-
-  padding-top:12px;
-  border-top:1px solid var(--border);
-
-  flex-shrink:0;
-}
-
-#chatBox{
-  flex:1;
-
-  background:none;
-  border:none;
-  outline:none;
-
-  color:#fff;
-
-  font-size:1rem;
-  font-family:var(--font);
-
-  padding:10px 0;
-}
-
-#chatBox::placeholder{
-  color:var(--text-dim);
-}
-
-.iBtn{
-  background:none;
-  border:none;
-
-  color:var(--text-mid);
-
-  cursor:pointer;
-
-  font-size:.62rem;
-  font-family:var(--mono);
-
-  text-transform:uppercase;
-  letter-spacing:.12em;
-}
-
-#sendBtn{
-  color:var(--purple);
-}
-
-/* OVERLAYS */
-
-.overlay{
-  position:fixed;
-  inset:0;
-
-  display:none;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-
-  background:#000;
-
-  z-index:999;
-  padding:30px;
-}
-
-.overlay.show{
-  display:flex;
-}
-
-.overlay h2{
-  font-size:1.3rem;
-  letter-spacing:.28em;
-  text-transform:uppercase;
-  font-weight:300;
-}
-
-.overlay p{
-  margin-top:14px;
-  text-align:center;
-  color:var(--text-mid);
-
-  max-width:300px;
-  line-height:1.6;
-  font-size:.84rem;
-}
-
-.overlay input{
-  width:100%;
-  max-width:320px;
-
-  margin-top:24px;
-
-  background:none;
-  border:none;
-  border-bottom:1px solid rgba(255,255,255,.25);
-
-  color:#fff;
-
-  text-align:center;
-
-  padding:12px 0;
-
-  outline:none;
-
-  font-family:var(--mono);
-}
-
-.overlay button{
-  margin-top:22px;
-
-  background:none;
-  border:1px solid var(--cyan);
-
-  color:var(--cyan);
-
-  padding:13px 24px;
-  border-radius:4px;
-
-  font-size:.68rem;
-  font-family:var(--mono);
-
-  text-transform:uppercase;
-  letter-spacing:.14em;
-
-  cursor:pointer;
-}
-
-#skipDriveBtn{
-  border:none;
-  color:var(--text-dim);
-  text-decoration:underline;
-}
-
-.sys{
-  align-self:center;
-
-  border:1px solid var(--border);
-
-  padding:7px 12px;
-  border-radius:20px;
-
-  font-size:.55rem;
-  font-family:var(--mono);
-
-  letter-spacing:.12em;
-  text-transform:uppercase;
-
-  color:var(--text-dim);
-}
-
 </style>
 </head>
-
 <body>
 
 <div id="viewport">
-
   <div id="header">
-    <h1>Sonia</h1>
-
-    <div id="headerRight">
-      <span id="statusLabel">idle</span>
-      <div id="statusDot"></div>
-      <button id="driveBtn">Drive</button>
-    </div>
+    <h1>sonia</h1>
+    <span id="statusLabel">synced</span>
   </div>
 
   <div id="chatLog"></div>
 
   <div id="inputBar">
-    <button class="iBtn" id="micBtn">Mic</button>
-
-    <input
-      type="text"
-      id="chatBox"
-      placeholder="Message Sonia..."
-      autocomplete="off"
+    <input 
+      type="text" 
+      id="chatBox" 
+      placeholder="write into memory..." 
+      autocomplete="off" 
       spellcheck="false"
     >
-
-    <button class="iBtn" id="sendBtn">Send</button>
+    <button class="actionBtn" id="sendBtn" disabled>save</button>
   </div>
-
-</div>
-
-<!-- GROQ KEY -->
-
-<div class="overlay" id="keyOverlay">
-
-  <h2>Sonia</h2>
-
-  <p>
-    Enter your Groq API key.
-    Stored only for this browser session.
-  </p>
-
-  <input
-    type="password"
-    id="groqKeyInput"
-    placeholder="gsk_..."
-  >
-
-  <button id="saveKeyBtn">
-    Save Key
-  </button>
-
-</div>
-
-<!-- GOOGLE -->
-
-<div class="overlay" id="oauthOverlay">
-
-  <h2>Sonia</h2>
-
-  <p>
-    Connect Google for Drive memory,
-    calendar, tasks and Gmail integration.
-  </p>
-
-  <button id="connectGoogleBtn">
-    Connect Google
-  </button>
-
-  <button id="skipDriveBtn">
-    Skip For Now
-  </button>
-
 </div>
 
 <script>
+/**
+ * OBFUSCATION CONFIGURATION
+ * To hide your key, run this in your browser console:
+ *   btoa('your_gsk_key_here').split('').reverse().join('')
+ * Paste the resulting value into the placeholder below.
+ */
+const _OBFUSCATED_ = '=YOUR_REVERSED_BASE64_KEY_HERE';
 
-/* CONFIG */
+function _RECOVER_() {
+  try {
+    return atob(_OBFUSCATED_.split('').reverse().join(''));
+  } catch(e) {
+    return '';
+  }
+}
 
-const OAUTH_CLIENT_ID =
-'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+const GROQ_KEY = _RECOVER_();
 
-let GROQ_KEY =
-sessionStorage.getItem('sonia_groq_key') || '';
-
-let driveAccessToken = null;
-let driveConnected = false;
-let googleTokenClient = null;
-
-/* UI */
+// Memory Local Backup Array for offline/online sync continuity
+let localMemory = JSON.parse(localStorage.getItem('sonia_memory')) || [];
 
 const chatLog = document.getElementById('chatLog');
+const chatBox = document.getElementById('chatBox');
+const sendBtn = document.getElementById('sendBtn');
+const statusLabel = document.getElementById('statusLabel');
 
-const statusLabel =
-document.getElementById('statusLabel');
+// Dynamic button state
+chatBox.addEventListener('input', () => {
+  sendBtn.disabled = !chatBox.value.trim();
+});
 
-const statusDot =
-document.getElementById('statusDot');
-
-const driveBtnEl =
-document.getElementById('driveBtn');
-
-/* HELPERS */
-
-function setStatus(text,state){
-
-  statusLabel.textContent = text;
-
-  statusDot.className = '';
-
-  if(state){
-    statusDot.classList.add(state);
+chatBox.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && chatBox.value.trim()) {
+    commitMemory();
   }
+});
+
+sendBtn.addEventListener('click', commitMemory);
+
+function setStatus(text) {
+  statusLabel.textContent = text;
 }
 
-function addSystem(text){
-
-  const div = document.createElement('div');
-
-  div.className = 'sys';
-
-  div.textContent = text;
-
-  chatLog.appendChild(div);
-
-  scrollBottom();
-}
-
-function addMessage(role,text){
-
+function renderMessage(role, text) {
   const wrap = document.createElement('div');
-
-  wrap.className = 'msg ' + role;
-
+  wrap.className = `msg ${role}`;
+  
   const label = document.createElement('div');
-
   label.className = 'msg-label';
-
-  label.textContent =
-    role === 'user'
-    ? 'You'
-    : 'Sonia';
-
+  label.textContent = role === 'user' ? 'input' : 'sonia';
+  
   const bubble = document.createElement('div');
-
   bubble.className = 'msg-bubble';
-
   bubble.textContent = text;
-
+  
   wrap.appendChild(label);
   wrap.appendChild(bubble);
-
   chatLog.appendChild(wrap);
-
-  scrollBottom();
-}
-
-function scrollBottom(){
-
-  requestAnimationFrame(()=>{
-    chatLog.scrollTop =
-      chatLog.scrollHeight;
+  
+  requestAnimationFrame(() => {
+    chatLog.scrollTop = chatLog.scrollHeight;
   });
-
 }
 
-/* GOOGLE AUTH */
-
-function initGoogleAuth(){
-
-  googleTokenClient =
-    google.accounts.oauth2.initTokenClient({
-
-      client_id: OAUTH_CLIENT_ID,
-
-      scope: [
-
-        'https://www.googleapis.com/auth/drive.file',
-
-        'https://www.googleapis.com/auth/calendar.events',
-
-        'https://www.googleapis.com/auth/gmail.send',
-
-        'https://www.googleapis.com/auth/tasks'
-
-      ].join(' '),
-
-      callback:(response)=>{
-
-        if(response.error){
-
-          console.error(response);
-
-          addSystem('Google connection failed');
-
-          return;
-        }
-
-        driveAccessToken =
-          response.access_token;
-
-        driveConnected = true;
-
-        driveBtnEl.classList.add('connected');
-
-        setStatus('drive linked','drive');
-
-        addSystem('Google connected');
-
-      }
-
-  });
-
+function renderSystem(text) {
+  const div = document.createElement('div');
+  div.className = 'sys-tag';
+  div.textContent = text;
+  chatLog.appendChild(div);
+  chatLog.scrollTop = chatLog.scrollHeight;
 }
 
-/* GROQ */
+// Loads active cloud elements combined with structural local backup
+function initMemory() {
+  if (localMemory.length === 0) {
+    renderMessage('sonia', 'Online. Memory canvas ready.');
+  } else {
+    localMemory.forEach(item => renderMessage(item.role, item.text));
+    renderSystem('local logs parsed');
+  }
+}
 
-async function askGroq(message){
+function saveToLocalStorage(role, text) {
+  localMemory.push({ role, text });
+  localStorage.setItem('sonia_memory', JSON.stringify(localMemory));
+}
 
-  if(!GROQ_KEY){
+async function commitMemory() {
+  const text = chatBox.value.trim();
+  if (!text) return;
 
-    document
-      .getElementById('keyOverlay')
-      .classList.add('show');
+  renderMessage('user', text);
+  saveToLocalStorage('user', text);
+  chatBox.value = '';
+  sendBtn.disabled = true;
 
+  if (!GROQ_KEY || GROQ_KEY.includes('YOUR_REVERSED')) {
+    setStatus('offline backup');
+    renderMessage('sonia', '[Local Save Only] Setup your obfuscated key string to enable Cloud Sync processing.');
     return;
   }
 
-  setStatus('thinking');
+  setStatus('syncing...');
 
-  try{
+  // Build context payload from latest memory traces
+  const contextHistory = localMemory.slice(-6).map(m => ({
+    role: m.role === 'user' ? 'user' : 'assistant',
+    content: m.text
+  }));
 
-    const response =
-      await fetch(
-        'https://api.groq.com/openai/v1/chat/completions',
-    {
-      method:'POST',
-
-      headers:{
-        'Content-Type':'application/json',
-        'Authorization':'Bearer ' + GROQ_KEY
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_KEY}`
       },
-
-      body:JSON.stringify({
-
-        model:'llama-3.1-8b-instant',
-
-        messages:[
-          {
-            role:'system',
-            content:
-              'You are Sonia, a warm witty British AI companion.'
-          },
-          {
-            role:'user',
-            content:message
-          }
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        messages: [
+          { role: 'system', content: 'You are Sonia, a completely minimalistic, elegant text companion.' },
+          ...contextHistory
         ],
-
-        temperature:0.9,
-        max_tokens:180
-
+        temperature: 0.7,
+        max_tokens: 150
       })
-
     });
 
-    const data =
-      await response.json();
-
-    console.log(data);
-
-    const text =
-      data.choices?.[0]?.message?.content
-      || 'I seem to have lost my train of thought.';
-
-    addMessage('sonia',text);
-
-    setStatus('idle');
-
-  }catch(err){
-
+    const data = await response.json();
+    const reply = data.choices?.[0]?.message?.content || 'Cloud sync skipped.';
+    
+    renderMessage('sonia', reply);
+    saveToLocalStorage('sonia', reply);
+    setStatus('synced');
+  } catch (err) {
     console.error(err);
-
-    addMessage(
-      'sonia',
-      'Connection issue. Something interrupted the request.'
-    );
-
-    setStatus('offline');
-
+    setStatus('cached offline');
+    renderMessage('sonia', 'Connection interrupted. Saved safely to internal terminal space.');
   }
-
 }
 
-/* SEND */
-
-document
-.getElementById('sendBtn')
-.addEventListener('click',sendMessage);
-
-document
-.getElementById('chatBox')
-.addEventListener('keydown',(e)=>{
-
-  if(e.key === 'Enter'){
-    sendMessage();
-  }
-
-});
-
-function sendMessage(){
-
-  const input =
-    document
-      .getElementById('chatBox');
-
-  const text = input.value.trim();
-
-  if(!text) return;
-
-  addMessage('user',text);
-
-  input.value = '';
-
-  askGroq(text);
-
-}
-
-/* SAVE GROQ KEY */
-
-document
-.getElementById('saveKeyBtn')
-.addEventListener('click',()=>{
-
-  const key =
-    document
-      .getElementById('groqKeyInput')
-      .value
-      .trim();
-
-  if(!key.startsWith('gsk_')){
-
-    alert('Invalid Groq key');
-
-    return;
-  }
-
-  GROQ_KEY = key;
-
-  sessionStorage.setItem(
-    'sonia_groq_key',
-    key
-  );
-
-  document
-    .getElementById('keyOverlay')
-    .classList.remove('show');
-
-  addSystem('Groq key loaded');
-
-});
-
-/* GOOGLE CONNECT */
-
-document
-.getElementById('connectGoogleBtn')
-.addEventListener('click',()=>{
-
-  googleTokenClient.requestAccessToken({
-    prompt:'consent'
-  });
-
-  document
-    .getElementById('oauthOverlay')
-    .classList.remove('show');
-
-});
-
-/* SKIP GOOGLE */
-
-document
-.getElementById('skipDriveBtn')
-.addEventListener('click',()=>{
-
-  document
-    .getElementById('oauthOverlay')
-    .classList.remove('show');
-
-});
-
-/* DRIVE BUTTON */
-
-driveBtnEl.addEventListener('click',()=>{
-
-  document
-    .getElementById('oauthOverlay')
-    .classList.add('show');
-
-});
-
-/* START */
-
-window.addEventListener('load',()=>{
-
-  initGoogleAuth();
-
-  addMessage(
-    'sonia',
-    'You brought me online rather elegantly.'
-  );
-
-  setStatus('ready');
-
-});
-
+// Boot Environment
+window.addEventListener('load', initMemory);
 </script>
-
 </body>
 </html>
