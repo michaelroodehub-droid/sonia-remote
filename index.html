@@ -265,45 +265,85 @@ const MOOD_EMOJI={calm:'🌿',curious:'✨',thinking:'💭',focused:'🎯',intim
 const MOOD_MAP={amused:'curious',happy:'intimate',tired:'calm',warm:'intimate',sharp:'focused',reflective:'introspective',excited:'curious',serious:'focused',playful:'curious',pensive:'introspective',analytical:'focused'};
 
 /* ══════════════════════════════════════
-   1. TTS — Web Speech API
+   1. TTS — Groq PlayAI (natural voice)
+   Endpoint: /openai/v1/audio/speech
+   Model: playai-tts  Voice: Arista-PlayAI
 ══════════════════════════════════════ */
 let ttsEnabled = false;
-let ttsVoice = null;
-let currentUtterance = null;
-
-function loadVoices(){
-  const voices = speechSynthesis.getVoices();
-  // Prefer en-GB voices for British accent
-  ttsVoice = voices.find(v=>v.lang==='en-GB'&&v.name.toLowerCase().includes('female'))
-    || voices.find(v=>v.lang==='en-GB')
-    || voices.find(v=>v.lang.startsWith('en'))
-    || voices[0]
-    || null;
-}
-speechSynthesis.addEventListener('voiceschanged', loadVoices);
-loadVoices();
+let currentAudio = null;   // HTMLAudioElement currently playing
 
 const ttsBtn = document.getElementById('ttsBtn');
-ttsBtn.addEventListener('click',()=>{
+ttsBtn.addEventListener('click', ()=>{
   ttsEnabled = !ttsEnabled;
-  if(!ttsEnabled && currentUtterance){ speechSynthesis.cancel(); currentUtterance=null; }
+  if(!ttsEnabled && currentAudio){ currentAudio.pause(); currentAudio=null; ttsBtn.classList.remove('speaking-pulse'); }
   ttsBtn.textContent = ttsEnabled ? '🔊' : '🔇';
   ttsBtn.classList.toggle('active', ttsEnabled);
 });
 
-function speak(text){
-  if(!ttsEnabled || !text) return;
-  speechSynthesis.cancel();
-  const utt = new SpeechSynthesisUtterance(text);
-  if(ttsVoice) utt.voice = ttsVoice;
-  utt.rate = 0.95;
-  utt.pitch = 1.05;
-  utt.volume = 1;
-  currentUtterance = utt;
-  utt.onstart = ()=>{ ttsBtn.classList.add('speaking-pulse'); setPresence('speaking'); };
-  utt.onend = ()=>{ ttsBtn.classList.remove('speaking-pulse'); currentUtterance=null; setPresence('online'); };
-  utt.onerror = ()=>{ ttsBtn.classList.remove('speaking-pulse'); currentUtterance=null; };
-  speechSynthesis.speak(utt);
+async function speak(text){
+  if(!ttsEnabled || !text || !GROQ_KEY) return;
+  // Stop any previous audio
+  if(currentAudio){ currentAudio.pause(); currentAudio=null; }
+
+  try{
+    ttsBtn.classList.add('speaking-pulse');
+    setPresence('speaking');
+
+    const res = await fetch('https://api.groq.com/openai/v1/audio/speech',{
+      method: 'POST',
+      headers:{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + GROQ_KEY
+      },
+      body: JSON.stringify({
+        model: 'playai-tts',
+        input: text,
+        voice: 'Arista-PlayAI',   // natural female en voice
+        response_format: 'wav'
+      })
+    });
+
+    if(!res.ok){
+      // Graceful fallback: try Orpheus
+      const res2 = await fetch('https://api.groq.com/openai/v1/audio/speech',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
+        body:JSON.stringify({model:'canopylabs/orpheus-v1-english',input:text,voice:'tara',response_format:'wav'})
+      });
+      if(!res2.ok){ ttsBtn.classList.remove('speaking-pulse'); setPresence('online'); return; }
+      await playAudioBlob(await res2.blob());
+      return;
+    }
+
+    await playAudioBlob(await res.blob());
+
+  } catch(e){
+    ttsBtn.classList.remove('speaking-pulse');
+    setPresence('online');
+  }
+}
+
+function playAudioBlob(blob){
+  return new Promise(resolve=>{
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    currentAudio = audio;
+    audio.onended = ()=>{
+      URL.revokeObjectURL(url);
+      currentAudio = null;
+      ttsBtn.classList.remove('speaking-pulse');
+      setPresence('online');
+      resolve();
+    };
+    audio.onerror = ()=>{
+      URL.revokeObjectURL(url);
+      currentAudio = null;
+      ttsBtn.classList.remove('speaking-pulse');
+      setPresence('online');
+      resolve();
+    };
+    audio.play().catch(()=>{ resolve(); });
+  });
 }
 
 /* ══════════════════════════════════════
