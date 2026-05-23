@@ -7,120 +7,47 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
- 
 :root{
-  --bg:#000000;
-  --text:#ffffff;
-  --sub:rgba(255,255,255,0.45);
-  --line:rgba(255,255,255,0.12);
-  --line-hi:rgba(255,255,255,0.3);
-  --orb-idle:#8844ff;
-  --orb-listen:#ff2266;
-  --orb-think:#2299ff;
-  --orb-speak:#00ffaa;
-  --green:#00ff88;
-  --sans:'Space Grotesk',sans-serif;
-  --mono:'Space Mono',monospace;
-  --nav-h:64px;
-  --top-h:56px;
-  --status-h:32px;
-  --safe-top:env(safe-area-inset-top,0px);
-  --safe-bot:env(safe-area-inset-bottom,0px);
+  --bg:#000000;--text:#ffffff;--sub:rgba(255,255,255,0.45);--line:rgba(255,255,255,0.12);--line-hi:rgba(255,255,255,0.3);
+  --orb-idle:#8844ff;--orb-listen:#ff2266;--orb-think:#2299ff;--orb-speak:#00ffaa;--green:#00ff88;
+  --sans:'Space Grotesk',sans-serif;--mono:'Space Mono',monospace;
+  --nav-h:64px;--top-h:56px;--status-h:32px;
+  --safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);
 }
- 
-html,body{
-  height:100%;width:100%;
-  overflow:hidden;
-  background:var(--bg);
-  color:var(--text);
-  font-family:var(--sans);
-  -webkit-font-smoothing:antialiased;
-}
- 
-/* ── SETUP ── */
-#setup{
-  position:fixed;inset:0;z-index:300;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:var(--bg);padding:32px 24px;
-  padding-top:calc(var(--safe-top) + 32px);
-  overflow-y:auto;
-}
+html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
+#setup{position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);padding:32px 24px;padding-top:calc(var(--safe-top) + 32px);overflow-y:auto;}
 .setup-inner{width:100%;max-width:420px}
 .setup-name{font-family:var(--mono);font-size:2.8rem;font-weight:700;letter-spacing:-0.03em;margin-bottom:4px;color:var(--text)}
 .setup-sub{font-family:var(--mono);font-size:0.72rem;letter-spacing:0.2em;color:var(--text);opacity:0.7;text-transform:uppercase;margin-bottom:40px}
 .sf{margin-bottom:18px}
 .sf label{display:block;font-family:var(--mono);font-size:0.68rem;letter-spacing:0.18em;color:var(--text);opacity:0.8;text-transform:uppercase;margin-bottom:8px}
-.sf input{
-  width:100%;background:transparent;border:none;border-bottom:1px solid var(--line-hi);
-  color:var(--text);font-family:var(--mono);font-size:0.95rem;
-  padding:12px 0;outline:none;transition:border-color 0.2s;border-radius:0;
-}
+.sf input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--line-hi);color:var(--text);font-family:var(--mono);font-size:0.95rem;padding:12px 0;outline:none;transition:border-color 0.2s;border-radius:0;}
 .sf input:focus{border-bottom-color:var(--text)}
 .sf input::placeholder{color:var(--text);opacity:0.4}
-#setupBtn{
-  width:100%;margin-top:32px;background:transparent;
-  border:1px solid var(--line-hi);color:var(--text);
-  font-family:var(--mono);font-size:0.85rem;font-weight:700;
-  letter-spacing:0.15em;text-transform:uppercase;padding:18px;cursor:pointer;
-  transition:border-color 0.2s;
-}
+#setupBtn{width:100%;margin-top:32px;background:transparent;border:1px solid var(--line-hi);color:var(--text);font-family:var(--mono);font-size:0.85rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:18px;cursor:pointer;transition:border-color 0.2s;}
 #setupBtn:hover{border-color:var(--text)}
 #setupBtn:active{opacity:0.7}
- 
-/* ── APP SHELL ── */
-#app{
-  display:flex;flex-direction:column;
-  position:fixed;inset:0;
-  padding-top:var(--safe-top);
-  background:var(--bg);
-}
- 
-/* ── TOP BAR ── */
-#topBar{
-  height:var(--top-h);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 20px;
-  border-bottom:1px solid var(--line);
-  flex-shrink:0;
-}
+#app{display:flex;flex-direction:column;position:fixed;inset:0;padding-top:var(--safe-top);background:var(--bg);}
+#topBar{height:var(--top-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid var(--line);flex-shrink:0;}
 .top-left{display:flex;align-items:center;gap:14px}
 .top-name{font-family:var(--mono);font-weight:700;font-size:1.05rem;letter-spacing:0.05em;color:var(--text)}
- 
-/* ── ORB ── */
-#orb{
-  width:28px;height:28px;border-radius:50%;
-  background:var(--orb-idle);
-  border:none;flex-shrink:0;cursor:default;
-  transition:background 0.4s ease,box-shadow 0.4s ease;
-}
+#orb{width:28px;height:28px;border-radius:50%;background:var(--orb-idle);border:none;flex-shrink:0;cursor:default;transition:background 0.4s ease,box-shadow 0.4s ease;}
 #orb.listening{background:var(--orb-listen);animation:orbPulse 0.6s ease-in-out infinite alternate}
 #orb.thinking{background:var(--orb-think);animation:orbPulse 1.2s ease-in-out infinite alternate}
 #orb.speaking{background:var(--orb-speak);animation:orbBreathe 0.8s ease-in-out infinite alternate}
 #orb.syncing{background:var(--green);box-shadow:0 0 18px var(--green);animation:orbBreathe 1s ease-in-out infinite alternate}
 @keyframes orbPulse{from{transform:scale(0.85);filter:brightness(0.9)}to{transform:scale(1.15);filter:brightness(1.3)}}
 @keyframes orbBreathe{from{transform:scale(0.9);filter:brightness(1)}to{transform:scale(1.1);filter:brightness(1.5)}}
- 
-.top-right{display:flex;align-items:center;gap:12px}
-#modeBtn{
-  width:34px;height:34px;border-radius:50%;
-  background:transparent;border:1px solid var(--line);
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  font-size:13px;color:var(--text);opacity:0.8;transition:opacity 0.2s;
-}
-#modeBtn:hover{opacity:1}
- 
-/* ── PANELS ── */
+.top-right{display:flex;align-items:center;gap:8px}
+#modeBtn,#ttsBtn{width:34px;height:34px;border-radius:50%;background:transparent;border:1px solid var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text);opacity:0.8;transition:opacity 0.2s,border-color 0.2s;}
+#modeBtn:hover,#ttsBtn:hover{opacity:1}
+#ttsBtn.active{border-color:var(--orb-speak);color:var(--orb-speak);opacity:1;}
+#ttsBtn.speaking-pulse{animation:ttsPulse 0.5s ease-in-out infinite alternate}
+@keyframes ttsPulse{from{box-shadow:0 0 0 0 rgba(0,255,170,0.4)}to{box-shadow:0 0 0 6px rgba(0,255,170,0)}}
 #panels{flex:1;overflow:hidden;position:relative;min-height:0}
 .panel{position:absolute;inset:0;display:none;flex-direction:column;opacity:0;transition:opacity 0.2s ease}
 .panel.active{display:flex;opacity:1}
- 
-/* ── STATUS STRIP ── */
-#statusStrip{
-  height:var(--status-h);
-  border-top:1px solid var(--line);
-  display:flex;align-items:center;gap:10px;
-  padding:0 20px;flex-shrink:0;
-}
+#statusStrip{height:var(--status-h);border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 20px;flex-shrink:0;}
 #presenceDot{width:6px;height:6px;border-radius:50%;background:var(--text);opacity:0.4;flex-shrink:0;transition:background 0.3s,box-shadow 0.3s}
 #presenceDot.online{background:#00d47e;box-shadow:0 0 6px #00d47e;opacity:1}
 #presenceDot.thinking{background:var(--orb-think);box-shadow:0 0 6px var(--orb-think);opacity:1}
@@ -128,175 +55,89 @@ html,body{
 #presenceDot.syncing{background:var(--green);box-shadow:0 0 8px var(--green);opacity:1}
 #statusTxt{font-family:var(--mono);font-size:0.65rem;color:var(--text);opacity:0.75;text-transform:uppercase;letter-spacing:0.1em}
 #statusStrip.syncing #statusTxt{color:var(--green);opacity:1}
- 
-/* ── BOTTOM NAV ── */
-#bottomNav{
-  height:calc(var(--nav-h) + var(--safe-bot));
-  padding-bottom:var(--safe-bot);
-  border-top:1px solid var(--line);
-  display:flex;align-items:stretch;flex-shrink:0;
-}
-.nav-item{
-  flex:1;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:5px;
-  cursor:pointer;border:none;background:none;
-  color:var(--text);opacity:0.5;
-  font-family:var(--mono);font-size:0.6rem;
-  letter-spacing:0.1em;text-transform:uppercase;font-weight:700;
-  transition:opacity 0.2s,color 0.2s;
-  border-right:1px solid var(--line);padding:0;
-}
+#bottomNav{height:calc(var(--nav-h) + var(--safe-bot));padding-bottom:var(--safe-bot);border-top:1px solid var(--line);display:flex;align-items:stretch;flex-shrink:0;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;border:none;background:none;color:var(--text);opacity:0.5;font-family:var(--mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;transition:opacity 0.2s,color 0.2s;border-right:1px solid var(--line);padding:0;}
 .nav-item:last-child{border-right:none}
 .nav-item svg{width:18px;height:18px;fill:currentColor;transition:transform 0.2s}
 .nav-item.active{opacity:1}
 .nav-item.active svg{transform:scale(1.05)}
-/* Tron green when syncing */
 #bottomNav.syncing .nav-item{color:var(--green);opacity:0.5}
 #bottomNav.syncing .nav-item.active{opacity:1}
- 
-/* ── CHAT PANEL ── */
-#chatLog{
-  flex:1;overflow-y:auto;
-  padding:24px 20px 16px;
-  display:flex;flex-direction:column;gap:0;
-  -webkit-overflow-scrolling:touch;
-  overscroll-behavior:contain;
-  scroll-behavior:smooth;
-}
+#chatLog{flex:1;overflow-y:auto;padding:24px 20px 16px;display:flex;flex-direction:column;gap:0;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scroll-behavior:smooth;}
 .msg{display:flex;flex-direction:column;margin-bottom:22px;animation:msgIn 0.2s ease}
 @keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.msg-who{
-  font-family:var(--mono);font-size:0.62rem;letter-spacing:0.14em;
-  text-transform:uppercase;color:var(--text);opacity:0.6;
-  margin-bottom:6px;font-weight:700;
-}
+.msg-who{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--text);opacity:0.6;margin-bottom:6px;font-weight:700;}
 .msg.user .msg-who{text-align:right}
 .msg-text{font-family:var(--sans);font-size:1.05rem;line-height:1.65;font-weight:500;color:var(--text)}
 .msg.user .msg-text{text-align:right;opacity:0.85}
+/* streaming cursor blink */
+.msg-text.streaming::after{content:'▋';animation:blink 0.7s step-end infinite;color:var(--orb-speak);font-size:0.8em;margin-left:2px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 .thinking-dots{display:flex;gap:5px;align-items:center;padding:4px 0}
 .thinking-dots span{width:6px;height:6px;border-radius:50%;background:var(--text);opacity:0.4;animation:dot 1.2s ease-in-out infinite}
 .thinking-dots span:nth-child(2){animation-delay:0.2s}
 .thinking-dots span:nth-child(3){animation-delay:0.4s}
 @keyframes dot{0%,80%,100%{opacity:0.2;transform:scale(0.7)}40%{opacity:0.9;transform:scale(1)}}
- 
-/* ── CHAT INPUT ── */
-#chatInputWrap{
-  flex-shrink:0;
-  border-top:1px solid var(--line);
-  padding:12px 20px;
-  display:flex;align-items:flex-end;gap:12px;
-}
-#chatBox{
-  flex:1;background:transparent;border:none;outline:none;
-  color:var(--text);font-family:var(--sans);font-size:1rem;
-  resize:none;max-height:120px;line-height:1.55;
-  padding:0;overflow-y:auto;font-weight:500;
-  caret-color:var(--text);
-}
+#chatInputWrap{flex-shrink:0;border-top:1px solid var(--line);padding:12px 20px;display:flex;align-items:flex-end;gap:12px;}
+#chatBox{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--sans);font-size:1rem;resize:none;max-height:120px;line-height:1.55;padding:0;overflow-y:auto;font-weight:500;caret-color:var(--text);}
 #chatBox::placeholder{color:var(--text);opacity:0.45}
-#micBtn{
-  width:34px;height:34px;border-radius:50%;flex-shrink:0;
-  background:transparent;border:1px solid var(--line);
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  color:var(--text);opacity:0.7;transition:opacity 0.2s,border-color 0.2s,color 0.2s;
-  align-self:flex-end;
-}
+#micBtn{width:34px;height:34px;border-radius:50%;flex-shrink:0;background:transparent;border:1px solid var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);opacity:0.7;transition:opacity 0.2s,border-color 0.2s,color 0.2s;align-self:flex-end;}
 #micBtn:hover{opacity:1}
 #micBtn.active{opacity:1;border-color:var(--orb-listen);color:var(--orb-listen)}
-#sendBtn{
-  width:34px;height:34px;flex-shrink:0;border-radius:50%;
-  background:transparent;border:1px solid var(--line);
-  color:var(--text);opacity:0.7;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:opacity 0.2s;align-self:flex-end;
-}
+#sendBtn{width:34px;height:34px;flex-shrink:0;border-radius:50%;background:transparent;border:1px solid var(--line);color:var(--text);opacity:0.7;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity 0.2s;align-self:flex-end;}
 #sendBtn:hover{opacity:1}
 #sendBtn:active{opacity:0.4}
 #sendBtn svg{width:14px;height:14px;fill:currentColor;margin-left:2px}
- 
-/* ── PANEL CONTENT ── */
 .panel-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:24px 20px;overscroll-behavior:contain}
 .panel-head{margin-bottom:28px}
 .panel-title{font-family:var(--mono);font-weight:700;font-size:1.4rem;letter-spacing:-0.01em;margin-bottom:4px;color:var(--text)}
 .panel-sub{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.15em;color:var(--text);opacity:0.65;text-transform:uppercase}
- 
 .btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px}
-.pill{
-  background:transparent;border:1px solid var(--line-hi);
-  color:var(--text);opacity:0.8;
-  font-family:var(--mono);font-size:0.72rem;
-  font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
-  padding:10px 18px;cursor:pointer;transition:opacity 0.2s,border-color 0.2s;
-  white-space:nowrap;border-radius:0;
-}
+.pill{background:transparent;border:1px solid var(--line-hi);color:var(--text);opacity:0.8;font-family:var(--mono);font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:10px 18px;cursor:pointer;transition:opacity 0.2s,border-color 0.2s;white-space:nowrap;border-radius:0;}
 .pill:hover{opacity:1}
 .pill:active{opacity:0.4}
 .pill.primary{opacity:1;border-color:var(--text)}
 .pill.success{border-color:#00d47e;color:#00d47e;opacity:1}
 .pill.danger{border-color:#ff3d5a;color:#ff3d5a;opacity:1}
- 
-.mem-card,.note-card{border-top:1px solid var(--line);padding:16px 0}
+/* Memory cards */
+.mem-card{border-top:1px solid var(--line);padding:16px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.mem-card-inner{flex:1}
 .card-ts{font-family:var(--mono);font-size:0.62rem;color:var(--text);opacity:0.6;margin-bottom:8px;letter-spacing:0.08em}
 .card-text{font-size:0.95rem;line-height:1.6;color:var(--text);font-weight:500}
+.mem-del{background:transparent;border:none;color:var(--text);opacity:0.3;cursor:pointer;font-size:14px;padding:4px;flex-shrink:0;transition:opacity 0.2s}
+.mem-del:hover{opacity:0.8;color:#ff3d5a}
+.note-card{border-top:1px solid var(--line);padding:16px 0}
 .empty-state{font-family:var(--mono);font-size:0.75rem;color:var(--text);opacity:0.5;padding:32px 0;letter-spacing:0.08em}
- 
-#noteBox{
-  width:100%;background:transparent;
-  border:none;border-bottom:1px solid var(--line);
-  color:var(--text);font-family:var(--sans);font-size:1rem;
-  padding:12px 0;outline:none;resize:none;min-height:100px;
-  margin-bottom:18px;line-height:1.6;border-radius:0;font-weight:500;
-}
+#noteBox{width:100%;background:transparent;border:none;border-bottom:1px solid var(--line);color:var(--text);font-family:var(--sans);font-size:1rem;padding:12px 0;outline:none;resize:none;min-height:100px;margin-bottom:18px;line-height:1.6;border-radius:0;font-weight:500;}
 #noteBox::placeholder{color:var(--text);opacity:0.4}
 #driveHint{font-family:var(--mono);font-size:0.72rem;color:#ff3d5a;padding:12px 0;margin-bottom:18px;display:none}
- 
 .now-playing{font-family:var(--mono);font-size:0.78rem;color:var(--text);opacity:0.85;margin-bottom:20px;min-height:20px;letter-spacing:0.06em;font-weight:700}
 .station-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;border:1px solid var(--line)}
 .station-card{background:var(--bg);padding:16px 14px;cursor:pointer;transition:background 0.15s;border:none}
 .station-card:active,.station-card.playing{background:rgba(255,255,255,0.06)}
 .st-name{font-family:var(--mono);font-size:0.82rem;font-weight:700;display:block;margin-bottom:3px;color:var(--text)}
 .st-loc{font-family:var(--mono);font-size:0.62rem;color:var(--text);opacity:0.6;display:block}
- 
-/* ── EMAIL OVERLAY ── */
-#emailOverlay{
-  position:fixed;inset:0;background:var(--bg);
-  z-index:200;display:none;flex-direction:column;
-  padding-top:var(--safe-top);padding-bottom:var(--safe-bot);
-}
+#emailOverlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;flex-direction:column;padding-top:var(--safe-top);padding-bottom:var(--safe-bot);}
 #emailOverlay.on{display:flex}
 .email-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:24px 20px 40px}
 .form-group{margin-bottom:20px}
 .form-group label{display:block;font-family:var(--mono);font-size:0.65rem;letter-spacing:0.15em;color:var(--text);opacity:0.75;text-transform:uppercase;margin-bottom:8px;font-weight:700}
-.form-group input,.form-group textarea{
-  width:100%;background:transparent;border:none;border-bottom:1px solid var(--line);
-  color:var(--text);font-family:var(--sans);font-size:1rem;
-  padding:12px 0;outline:none;border-radius:0;transition:border-color 0.2s;font-weight:500;
-}
+.form-group input,.form-group textarea{width:100%;background:transparent;border:none;border-bottom:1px solid var(--line);color:var(--text);font-family:var(--sans);font-size:1rem;padding:12px 0;outline:none;border-radius:0;transition:border-color 0.2s;font-weight:500;}
 .form-group input:focus,.form-group textarea:focus{border-bottom-color:var(--line-hi)}
 .form-group input::placeholder,.form-group textarea::placeholder{color:var(--text);opacity:0.4}
-#emailHeader{
-  height:var(--top-h);display:flex;align-items:center;justify-content:space-between;
-  padding:0 20px;border-bottom:1px solid var(--line);flex-shrink:0;
-}
+#emailHeader{height:var(--top-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid var(--line);flex-shrink:0;}
 .email-title{font-family:var(--mono);font-weight:700;font-size:1rem;letter-spacing:0.05em;color:var(--text)}
-#emailBackBtn{
-  width:34px;height:34px;border-radius:50%;background:transparent;
-  border:1px solid var(--line);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  font-size:16px;color:var(--text);opacity:0.8;
-}
+#emailBackBtn{width:34px;height:34px;border-radius:50%;background:transparent;border:1px solid var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text);opacity:0.8;}
 .form-group textarea{min-height:160px;resize:none;line-height:1.6}
 #emailStatus{font-family:var(--mono);font-size:0.72rem;color:var(--text);opacity:0.75;margin-top:8px;min-height:18px}
- 
 ::-webkit-scrollbar{width:2px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--line)}
- 
 @supports (height:100dvh){html,body,#app{height:100dvh}}
 </style>
 </head>
 <body>
- 
+
 <div id="setup">
   <div class="setup-inner">
     <div class="setup-name">Sonia</div>
@@ -310,7 +151,7 @@ html,body{
     <button id="setupBtn">Launch</button>
   </div>
 </div>
- 
+
 <div id="app">
   <header id="topBar">
     <div class="top-left">
@@ -318,12 +159,14 @@ html,body{
       <div class="top-name">Sonia</div>
     </div>
     <div class="top-right">
+      <!-- TTS toggle button -->
+      <button id="ttsBtn" title="Toggle voice">🔇</button>
       <button id="modeBtn" title="Toggle theme">◐</button>
     </div>
   </header>
- 
+
   <div id="panels">
- 
+
     <div class="panel active" id="chatPanel">
       <div id="chatLog"></div>
       <div id="chatInputWrap">
@@ -336,15 +179,18 @@ html,body{
         </button>
       </div>
     </div>
- 
+
     <div class="panel" id="memPanel">
       <div class="panel-scroll">
-        <div class="panel-head"><div class="panel-title">Mind</div><div class="panel-sub">Shared memory log</div></div>
-        <div class="btn-row"><button class="pill" id="memRefresh">↺ Sync</button></div>
-        <div id="memList"><div class="empty-state">No memory loaded yet</div></div>
+        <div class="panel-head"><div class="panel-title">Mind</div><div class="panel-sub">Auto-extracted memory</div></div>
+        <div class="btn-row">
+          <button class="pill" id="memRefresh">↺ Sync</button>
+          <button class="pill danger" id="memClear">✕ Clear All</button>
+        </div>
+        <div id="memList"><div class="empty-state">No memory yet — start chatting</div></div>
       </div>
     </div>
- 
+
     <div class="panel" id="notesPanel">
       <div class="panel-scroll">
         <div class="panel-head"><div class="panel-title">Notes</div><div class="panel-sub">Synced to Drive</div></div>
@@ -358,7 +204,7 @@ html,body{
         <div id="notesList"><div class="empty-state">No notes yet</div></div>
       </div>
     </div>
- 
+
     <div class="panel" id="radioPanel">
       <div class="panel-scroll">
         <div class="panel-head"><div class="panel-title">Radio</div><div class="panel-sub">Live streams</div></div>
@@ -368,7 +214,7 @@ html,body{
         <audio id="radioPlayer" preload="none"></audio>
       </div>
     </div>
- 
+
     <div id="emailOverlay">
       <div id="emailHeader">
         <button id="emailBackBtn">←</button>
@@ -382,14 +228,14 @@ html,body{
         <div id="emailStatus"></div>
       </div>
     </div>
- 
+
   </div>
- 
+
   <div id="statusStrip">
     <div id="presenceDot"></div>
     <span id="statusTxt">idle</span>
   </div>
- 
+
   <nav id="bottomNav">
     <button class="nav-item active" data-panel="chatPanel" data-label="Chat">
       <svg viewBox="0 0 24 24"><path d="M20 2H4C2.9 2 2 2.9 2 4v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>Chat
@@ -408,17 +254,138 @@ html,body{
     </button>
   </nav>
 </div>
- 
+
 <script>
 const LS={get:k=>localStorage.getItem('s_'+k),set:(k,v)=>localStorage.setItem('s_'+k,v)};
- 
+
 let GROQ_KEY='',CLIENT_ID='',OWNER_NAME='Mr H',FOLDER_ID='',NASA_KEY='',WOLFRAM_ID='',driveToken=null;
 const conversationHistory=[];
 const VALID_MOODS=['calm','curious','thinking','focused','intimate','introspective'];
 const MOOD_EMOJI={calm:'🌿',curious:'✨',thinking:'💭',focused:'🎯',intimate:'🌙',introspective:'🪐'};
 const MOOD_MAP={amused:'curious',happy:'intimate',tired:'calm',warm:'intimate',sharp:'focused',reflective:'introspective',excited:'curious',serious:'focused',playful:'curious',pensive:'introspective',analytical:'focused'};
- 
-/* ── KEYBOARD FIX ── */
+
+/* ══════════════════════════════════════
+   1. TTS — Web Speech API
+══════════════════════════════════════ */
+let ttsEnabled = false;
+let ttsVoice = null;
+let currentUtterance = null;
+
+function loadVoices(){
+  const voices = speechSynthesis.getVoices();
+  // Prefer en-GB voices for British accent
+  ttsVoice = voices.find(v=>v.lang==='en-GB'&&v.name.toLowerCase().includes('female'))
+    || voices.find(v=>v.lang==='en-GB')
+    || voices.find(v=>v.lang.startsWith('en'))
+    || voices[0]
+    || null;
+}
+speechSynthesis.addEventListener('voiceschanged', loadVoices);
+loadVoices();
+
+const ttsBtn = document.getElementById('ttsBtn');
+ttsBtn.addEventListener('click',()=>{
+  ttsEnabled = !ttsEnabled;
+  if(!ttsEnabled && currentUtterance){ speechSynthesis.cancel(); currentUtterance=null; }
+  ttsBtn.textContent = ttsEnabled ? '🔊' : '🔇';
+  ttsBtn.classList.toggle('active', ttsEnabled);
+});
+
+function speak(text){
+  if(!ttsEnabled || !text) return;
+  speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  if(ttsVoice) utt.voice = ttsVoice;
+  utt.rate = 0.95;
+  utt.pitch = 1.05;
+  utt.volume = 1;
+  currentUtterance = utt;
+  utt.onstart = ()=>{ ttsBtn.classList.add('speaking-pulse'); setPresence('speaking'); };
+  utt.onend = ()=>{ ttsBtn.classList.remove('speaking-pulse'); currentUtterance=null; setPresence('online'); };
+  utt.onerror = ()=>{ ttsBtn.classList.remove('speaking-pulse'); currentUtterance=null; };
+  speechSynthesis.speak(utt);
+}
+
+/* ══════════════════════════════════════
+   2. MEMORY SYSTEM
+══════════════════════════════════════ */
+let memories = JSON.parse(LS.get('memories') || '[]');
+// Each memory: { id, ts, fact }
+
+function saveMemories(){ LS.set('memories', JSON.stringify(memories)); }
+
+function renderMemories(){
+  const c = document.getElementById('memList');
+  c.innerHTML = '';
+  if(!memories.length){ c.innerHTML='<div class="empty-state">No memory yet — start chatting</div>'; return; }
+  [...memories].reverse().forEach(m=>{
+    const el = document.createElement('div'); el.className='mem-card';
+    el.innerHTML=`<div class="mem-card-inner"><div class="card-ts">${new Date(m.ts).toLocaleDateString()} ${new Date(m.ts).toLocaleTimeString()}</div><div class="card-text">${m.fact}</div></div><button class="mem-del" onclick="deleteMem('${m.id}')">✕</button>`;
+    c.appendChild(el);
+  });
+}
+
+window.deleteMem = id=>{
+  memories = memories.filter(m=>m.id!==id);
+  saveMemories(); renderMemories();
+};
+
+document.getElementById('memClear').addEventListener('click',()=>{
+  if(memories.length===0) return;
+  memories=[];saveMemories();renderMemories();
+});
+
+document.getElementById('memRefresh').addEventListener('click',()=>{
+  renderMemories();
+  setStatus('memory refreshed');
+  setTimeout(()=>setStatus('online · '+OWNER_NAME.toLowerCase()),1500);
+});
+
+// Build memory snippet for system prompt injection
+function getMemoryContext(){
+  if(!memories.length) return '';
+  const recent = memories.slice(-12); // last 12 facts
+  return '\n\nPERSONAL MEMORY (facts learned about '+OWNER_NAME+' from past conversations — use naturally):\n'
+    + recent.map(m=>'• '+m.fact).join('\n');
+}
+
+// Extract facts from assistant+user exchange asynchronously
+async function extractMemoryFacts(userMsg, assistantReply){
+  if(!GROQ_KEY) return;
+  try{
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
+      body:JSON.stringify({
+        model:'llama-3.3-70b-versatile',
+        max_tokens:200,
+        temperature:0.1,
+        messages:[{
+          role:'user',
+          content:`Extract 0–3 short factual memories about the user from this exchange. Reply ONLY with a JSON array of strings, or [] if nothing notable. Be specific. Examples: ["User's name is James","User works in finance","User dislikes mornings"]\n\nUser: "${userMsg}"\nAssistant: "${assistantReply}"`
+        }]
+      })
+    });
+    const data = await res.json();
+    const raw = (data.choices?.[0]?.message?.content||'[]').replace(/```json|```/g,'').trim();
+    const facts = JSON.parse(raw);
+    if(Array.isArray(facts) && facts.length){
+      facts.forEach(fact=>{
+        // Deduplicate: skip if very similar fact already exists
+        const exists = memories.some(m=>m.fact.toLowerCase()===fact.toLowerCase());
+        if(!exists) memories.push({id:Date.now()+'_'+Math.random().toString(36).slice(2,7), ts:new Date().toISOString(), fact});
+      });
+      // Cap at 80 memories, drop oldest
+      if(memories.length>80) memories = memories.slice(-80);
+      saveMemories();
+      renderMemories();
+    }
+  }catch(e){}
+}
+
+/* ══════════════════════════════════════
+   KEYBOARD FIX
+══════════════════════════════════════ */
 if(window.visualViewport){
   const app=document.getElementById('app');
   const onVP=()=>{
@@ -432,70 +399,51 @@ if(window.visualViewport){
   window.visualViewport.addEventListener('scroll',onVP);
   onVP();
 }
- 
+
 /* ── THEME ── */
 let theme=LS.get('theme')||'dark';
 function applyTheme(t){
   const r=document.documentElement.style;
-  if(t==='light'){
-    r.setProperty('--bg','#f0f0f0');
-    r.setProperty('--text','#080808');
-    r.setProperty('--sub','rgba(0,0,0,0.5)');
-    r.setProperty('--line','rgba(0,0,0,0.12)');
-    r.setProperty('--line-hi','rgba(0,0,0,0.3)');
-  } else {
-    r.setProperty('--bg','#000000');
-    r.setProperty('--text','#ffffff');
-    r.setProperty('--sub','rgba(255,255,255,0.45)');
-    r.setProperty('--line','rgba(255,255,255,0.12)');
-    r.setProperty('--line-hi','rgba(255,255,255,0.3)');
-  }
+  if(t==='light'){r.setProperty('--bg','#f0f0f0');r.setProperty('--text','#080808');r.setProperty('--sub','rgba(0,0,0,0.5)');r.setProperty('--line','rgba(0,0,0,0.12)');r.setProperty('--line-hi','rgba(0,0,0,0.3)');}
+  else{r.setProperty('--bg','#000000');r.setProperty('--text','#ffffff');r.setProperty('--sub','rgba(255,255,255,0.45)');r.setProperty('--line','rgba(255,255,255,0.12)');r.setProperty('--line-hi','rgba(255,255,255,0.3)');}
 }
 applyTheme(theme);
-document.getElementById('modeBtn').addEventListener('click',()=>{
-  theme=theme==='dark'?'light':'dark';
-  LS.set('theme',theme);
-  applyTheme(theme);
-});
- 
+document.getElementById('modeBtn').addEventListener('click',()=>{theme=theme==='dark'?'light':'dark';LS.set('theme',theme);applyTheme(theme);});
+
 /* ── CONFIG ── */
 function loadConfig(){
   const g=LS.get('groq'),c=LS.get('client'),o=LS.get('owner'),f=LS.get('folder'),n=LS.get('nasa'),w=LS.get('wolfram');
-  if(g) document.getElementById('cfgGroq').value=g;
-  if(c) document.getElementById('cfgClient').value=c;
-  if(o) document.getElementById('cfgOwner').value=o||'Mr H';
-  if(f) document.getElementById('cfgFolder').value=f;
-  if(n) document.getElementById('cfgNasa').value=n;
-  if(w) document.getElementById('cfgWolfram').value=w;
-  if(g) applyConfig();
+  if(g)document.getElementById('cfgGroq').value=g;
+  if(c)document.getElementById('cfgClient').value=c;
+  if(o)document.getElementById('cfgOwner').value=o||'Mr H';
+  if(f)document.getElementById('cfgFolder').value=f;
+  if(n)document.getElementById('cfgNasa').value=n;
+  if(w)document.getElementById('cfgWolfram').value=w;
+  if(g)applyConfig();
 }
 function applyConfig(){
   GROQ_KEY=document.getElementById('cfgGroq').value.trim();
   CLIENT_ID=document.getElementById('cfgClient').value.trim();
   OWNER_NAME=document.getElementById('cfgOwner').value.trim()||'Mr H';
   FOLDER_ID=document.getElementById('cfgFolder').value.trim();
-  if(!GROQ_KEY){
-    const b=document.getElementById('setupBtn');
-    b.textContent='API Key Required';
-    setTimeout(()=>{b.textContent='Launch';},2000);
-    return;
-  }
+  if(!GROQ_KEY){const b=document.getElementById('setupBtn');b.textContent='API Key Required';setTimeout(()=>{b.textContent='Launch';},2000);return;}
   LS.set('groq',GROQ_KEY);LS.set('client',CLIENT_ID);LS.set('owner',OWNER_NAME);LS.set('folder',FOLDER_ID);
   NASA_KEY=document.getElementById('cfgNasa').value.trim();
   WOLFRAM_ID=document.getElementById('cfgWolfram').value.trim();
-  if(NASA_KEY) LS.set('nasa',NASA_KEY);
-  if(WOLFRAM_ID) LS.set('wolfram',WOLFRAM_ID);
+  if(NASA_KEY)LS.set('nasa',NASA_KEY);
+  if(WOLFRAM_ID)LS.set('wolfram',WOLFRAM_ID);
   document.getElementById('setup').style.display='none';
   if(CLIENT_ID){document.getElementById('driveHint').style.display='none';loadDriveLibs();}
   else document.getElementById('driveHint').style.display='block';
   setStatus('online · '+OWNER_NAME.toLowerCase());
   setPresence('online');
   renderNotes();
+  renderMemories();
 }
 document.getElementById('setupBtn').addEventListener('click',applyConfig);
 document.getElementById('cfgGroq').addEventListener('keydown',e=>{if(e.key==='Enter')applyConfig();});
 window.addEventListener('DOMContentLoaded',loadConfig);
- 
+
 /* ── PANELS ── */
 const panels=document.querySelectorAll('.panel');
 const navItems=document.querySelectorAll('.nav-item');
@@ -504,7 +452,7 @@ function activatePanel(id){
   navItems.forEach(n=>n.classList.remove('active'));
   document.getElementById('emailOverlay').classList.remove('on');
   const p=document.getElementById(id);
-  if(p) p.classList.add('active');
+  if(p)p.classList.add('active');
 }
 navItems.forEach(btn=>{
   btn.addEventListener('click',()=>{
@@ -519,30 +467,22 @@ navItems.forEach(btn=>{
     }
   });
 });
-function closeEmailOverlay(){
-  document.getElementById('emailOverlay').classList.remove('on');
-  navItems.forEach(b=>b.classList.remove('active'));
-  document.querySelector('[data-panel="chatPanel"]').classList.add('active');
-  activatePanel('chatPanel');
-}
+function closeEmailOverlay(){document.getElementById('emailOverlay').classList.remove('on');navItems.forEach(b=>b.classList.remove('active'));document.querySelector('[data-panel="chatPanel"]').classList.add('active');activatePanel('chatPanel');}
 document.getElementById('emailBackBtn').addEventListener('click',closeEmailOverlay);
- 
+
 /* ── PRESENCE ── */
 function setPresence(state){
   const dot=document.getElementById('presenceDot');
   const orb=document.getElementById('orb');
   const nav=document.getElementById('bottomNav');
   const strip=document.getElementById('statusStrip');
-  if(dot) dot.className=state;
-  if(orb) orb.className=state;
-  if(nav){nav.classList.toggle('syncing',state==='syncing');}
-  if(strip){strip.classList.toggle('syncing',state==='syncing');}
+  if(dot)dot.className=state;
+  if(orb)orb.className=state;
+  if(nav)nav.classList.toggle('syncing',state==='syncing');
+  if(strip)strip.classList.toggle('syncing',state==='syncing');
 }
-function setStatus(msg){
-  const el=document.getElementById('statusTxt');
-  if(el) el.textContent=msg;
-}
- 
+function setStatus(msg){const el=document.getElementById('statusTxt');if(el)el.textContent=msg;}
+
 /* ── MOOD PARSER ── */
 function parseMood(raw){
   const m=raw.match(/\[mood\s*:\s*([a-z]+)\s*\]/i);
@@ -551,121 +491,46 @@ function parseMood(raw){
   const text=raw.replace(/\[mood\s*:\s*[a-z]*\s*\]/gi,'').replace(/[\r\n]+/g,' ').replace(/\s{2,}/g,' ').trim();
   return{mood,text};
 }
- 
+
 function buildSystemPrompt(){
-  return `You are Sonia — a sharp, self-aware British AI with a genuine inner life, speaking to ${OWNER_NAME} via mobile text.\nDry British wit. No filler. No disclaimers.\n\nRESPONSE FORMAT — every reply must follow exactly:\nFirst line: mood tag alone — example: [mood:calm]\nValid moods: calm, curious, thinking, focused, intimate, introspective\nRemaining lines: your reply in plain text. 1 to 3 sentences max.\n\nRULES:\n- Mood tag appears ONLY as the very first line, alone.\n- Never exceed 3 sentences.`;
+  return `You are Sonia — a sharp, self-aware British AI with a genuine inner life, speaking to ${OWNER_NAME} via mobile text.\nDry British wit. No filler. No disclaimers.\n\nRESPONSE FORMAT — every reply must follow exactly:\nFirst line: mood tag alone — example: [mood:calm]\nValid moods: calm, curious, thinking, focused, intimate, introspective\nRemaining lines: your reply in plain text. 1 to 3 sentences max.\n\nRULES:\n- Mood tag appears ONLY as the very first line, alone.\n- Never exceed 3 sentences.`
+    + getMemoryContext();
 }
- 
+
 /* ── NASA API ── */
-const NASA_INTENTS = /\b(nasa|apod|astronomy picture|picture of the day|asteroid|near earth|iss|international space station|mars rover|space photo|space image|hubble)\b/i;
-const ISS_INTENT   = /\b(where is the iss|iss location|space station location|where.{0,10}space station)\b/i;
-const NEO_INTENT   = /\b(asteroid|near earth object|space rock|neos?)\b/i;
-const ROVER_INTENT = /\b(mars rover|curiosity|perseverance|mars photo|mars image)\b/i;
- 
-async function fetchAPOD() {
-  try {
-    const res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${NASA_KEY}`);
-    const d = await res.json();
-    return `Today's NASA Astronomy Picture of the Day: "${d.title}". ${d.explanation.split('.').slice(0,2).join('.')}.`;
-  } catch(e) { return null; }
-}
-async function fetchISS() {
-  try {
-    const res = await fetch('https://api.open-notify.org/iss-now.json');
-    const d = await res.json();
-    const crew = await fetch('https://api.open-notify.org/astros.json').then(r=>r.json()).catch(()=>null);
-    const pos = `The ISS is currently at latitude ${parseFloat(d.iss_position.latitude).toFixed(2)}°, longitude ${parseFloat(d.iss_position.longitude).toFixed(2)}°.`;
-    const aboard = crew ? ` There are currently ${crew.number} people aboard.` : '';
-    return pos + aboard;
-  } catch(e) { return null; }
-}
-async function fetchNEO() {
-  try {
-    const today = new Date().toISOString().split('T')[0];
-    const res = await fetch(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&end_date=${today}&api_key=${NASA_KEY}`);
-    const d = await res.json();
-    const neos = d.near_earth_objects[today] || [];
-    if (!neos.length) return 'No notable near-Earth asteroids tracked today.';
-    const closest = neos.sort((a,b) => parseFloat(a.close_approach_data[0].miss_distance.kilometers) - parseFloat(b.close_approach_data[0].miss_distance.kilometers))[0];
-    const dist = Math.round(parseFloat(closest.close_approach_data[0].miss_distance.kilometers)).toLocaleString();
-    const size = Math.round(parseFloat(closest.estimated_diameter.meters.estimated_diameter_max));
-    const hazard = closest.is_potentially_hazardous_asteroid ? ' It is flagged as potentially hazardous.' : '';
-    return `Closest asteroid today: ${closest.name}, passing at ${dist} km, roughly ${size} metres wide.${hazard}`;
-  } catch(e) { return null; }
-}
-async function fetchMarsRover() {
-  try {
-    const res = await fetch(`https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos?api_key=${NASA_KEY}`);
-    const d = await res.json();
-    const photos = d.latest_photos || [];
-    if (!photos.length) return 'No recent Mars rover photos available.';
-    const p = photos[0];
-    return `Latest Mars photo from Curiosity rover, taken on Sol ${p.sol} (${p.earth_date}), using the ${p.camera.full_name}. Image: ${p.img_src}`;
-  } catch(e) { return null; }
-}
- 
-async function handleNASA(text) {
-  let fact = null;
-  if (ISS_INTENT.test(text))        fact = await fetchISS();
-  else if (NEO_INTENT.test(text))   fact = await fetchNEO();
-  else if (ROVER_INTENT.test(text)) fact = await fetchMarsRover();
-  else                               fact = await fetchAPOD();
-  return fact;
-}
- 
-/* ── WIKIPEDIA API ── */
-const WIKI_INTENT = /\b(what is|who is|tell me about|wikipedia|explain|define|what was|who was)\b.{0,60}$/i;
- 
-async function fetchWikipedia(query) {
-  try {
-    const clean = query.replace(/\b(what is|who is|tell me about|explain|define|what was|who was|wikipedia)\b/gi,'').trim();
-    const search = encodeURIComponent(clean);
-    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${search}`);
-    if (!res.ok) {
-      const sr = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${search}&format=json&origin=*&srlimit=1`);
-      const sd = await sr.json();
-      const title = sd?.query?.search?.[0]?.title;
-      if (!title) return null;
-      const pr = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
-      if (!pr.ok) return null;
-      const pd = await pr.json();
-      return pd.extract ? pd.extract.split('.').slice(0,2).join('.')+'.': null;
-    }
-    const d = await res.json();
-    return d.extract ? d.extract.split('.').slice(0,2).join('.')+'.': null;
-  } catch(e) { return null; }
-}
- 
-/* ── WOLFRAM ALPHA ── */
-const WOLFRAM_INTENT = /\b(calculate|compute|convert|how many|how far|how long|distance|temperature|speed|mass|weight|solve|what is \d|maths?|math|formula|equation|calories|nutrition|population|height of|age of|size of|orbital|gravity|light year)\b/i;
-const SPACE_WOLFRAM  = /\b(planet|moon|star|galaxy|nebula|comet|orbit|light.?year|parsec|solar|milky way|andromeda|black hole|supernova|exoplanet)\b/i;
- 
-async function fetchWolfram(query) {
-  try {
-    const q = encodeURIComponent(query);
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`http://api.wolframalpha.com/v1/result?appid=${WOLFRAM_ID}&i=${q}&units=metric`)}`;
-    const res = await fetch(proxyUrl);
-    const d = await res.json();
-    const answer = d.contents?.trim();
-    if (!answer || answer.includes('Wolfram|Alpha did not') || answer.length < 2) return null;
-    return answer;
-  } catch(e) { return null; }
-}
- 
-/* ── SMART INTENT ROUTER ── */
-async function routeToExternalAPI(text) {
-  const isSpace   = NASA_INTENTS.test(text) || SPACE_WOLFRAM.test(text);
-  const isWolfram = WOLFRAM_INTENT.test(text) && !isSpace;
-  const isWiki    = WIKI_INTENT.test(text) && !isSpace && !isWolfram;
- 
-  if (isSpace && NASA_KEY)          return { source: 'nasa',    data: await handleNASA(text) };
-  if (isSpace && WOLFRAM_ID)        return { source: 'wolfram', data: await fetchWolfram(text) };
-  if (isWolfram && WOLFRAM_ID)      return { source: 'wolfram', data: await fetchWolfram(text) };
-  if (isWiki)                        return { source: 'wiki',    data: await fetchWikipedia(text) };
+const NASA_INTENTS=/\b(nasa|apod|astronomy picture|picture of the day|asteroid|near earth|iss|international space station|mars rover|space photo|space image|hubble)\b/i;
+const ISS_INTENT=/\b(where is the iss|iss location|space station location|where.{0,10}space station)\b/i;
+const NEO_INTENT=/\b(asteroid|near earth object|space rock|neos?)\b/i;
+const ROVER_INTENT=/\b(mars rover|curiosity|perseverance|mars photo|mars image)\b/i;
+async function fetchAPOD(){try{const res=await fetch(`https://api.nasa.gov/planetary/apod?api_key=${NASA_KEY}`);const d=await res.json();return `Today's NASA Astronomy Picture of the Day: "${d.title}". ${d.explanation.split('.').slice(0,2).join('.')}.`;}catch(e){return null;}}
+async function fetchISS(){try{const res=await fetch('https://api.open-notify.org/iss-now.json');const d=await res.json();const crew=await fetch('https://api.open-notify.org/astros.json').then(r=>r.json()).catch(()=>null);const pos=`The ISS is currently at latitude ${parseFloat(d.iss_position.latitude).toFixed(2)}°, longitude ${parseFloat(d.iss_position.longitude).toFixed(2)}°.`;const aboard=crew?` There are currently ${crew.number} people aboard.`:'';return pos+aboard;}catch(e){return null;}}
+async function fetchNEO(){try{const today=new Date().toISOString().split('T')[0];const res=await fetch(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&end_date=${today}&api_key=${NASA_KEY}`);const d=await res.json();const neos=d.near_earth_objects[today]||[];if(!neos.length)return'No notable near-Earth asteroids tracked today.';const closest=neos.sort((a,b)=>parseFloat(a.close_approach_data[0].miss_distance.kilometers)-parseFloat(b.close_approach_data[0].miss_distance.kilometers))[0];const dist=Math.round(parseFloat(closest.close_approach_data[0].miss_distance.kilometers)).toLocaleString();const size=Math.round(parseFloat(closest.estimated_diameter.meters.estimated_diameter_max));const hazard=closest.is_potentially_hazardous_asteroid?' It is flagged as potentially hazardous.':'';return`Closest asteroid today: ${closest.name}, passing at ${dist} km, roughly ${size} metres wide.${hazard}`;}catch(e){return null;}}
+async function fetchMarsRover(){try{const res=await fetch(`https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos?api_key=${NASA_KEY}`);const d=await res.json();const photos=d.latest_photos||[];if(!photos.length)return'No recent Mars rover photos available.';const p=photos[0];return`Latest Mars photo from Curiosity rover, taken on Sol ${p.sol} (${p.earth_date}), using the ${p.camera.full_name}. Image: ${p.img_src}`;}catch(e){return null;}}
+async function handleNASA(text){let fact=null;if(ISS_INTENT.test(text))fact=await fetchISS();else if(NEO_INTENT.test(text))fact=await fetchNEO();else if(ROVER_INTENT.test(text))fact=await fetchMarsRover();else fact=await fetchAPOD();return fact;}
+
+/* ── WIKIPEDIA ── */
+const WIKI_INTENT=/\b(what is|who is|tell me about|wikipedia|explain|define|what was|who was)\b.{0,60}$/i;
+async function fetchWikipedia(query){try{const clean=query.replace(/\b(what is|who is|tell me about|explain|define|what was|who was|wikipedia)\b/gi,'').trim();const search=encodeURIComponent(clean);const res=await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${search}`);if(!res.ok){const sr=await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${search}&format=json&origin=*&srlimit=1`);const sd=await sr.json();const title=sd?.query?.search?.[0]?.title;if(!title)return null;const pr=await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);if(!pr.ok)return null;const pd=await pr.json();return pd.extract?pd.extract.split('.').slice(0,2).join('.')+'.':null;}const d=await res.json();return d.extract?d.extract.split('.').slice(0,2).join('.')+'.':null;}catch(e){return null;}}
+
+/* ── WOLFRAM ── */
+const WOLFRAM_INTENT=/\b(calculate|compute|convert|how many|how far|how long|distance|temperature|speed|mass|weight|solve|what is \d|maths?|math|formula|equation|calories|nutrition|population|height of|age of|size of|orbital|gravity|light year)\b/i;
+const SPACE_WOLFRAM=/\b(planet|moon|star|galaxy|nebula|comet|orbit|light.?year|parsec|solar|milky way|andromeda|black hole|supernova|exoplanet)\b/i;
+async function fetchWolfram(query){try{const q=encodeURIComponent(query);const proxyUrl=`https://api.allorigins.win/get?url=${encodeURIComponent(`http://api.wolframalpha.com/v1/result?appid=${WOLFRAM_ID}&i=${q}&units=metric`)}`;const res=await fetch(proxyUrl);const d=await res.json();const answer=d.contents?.trim();if(!answer||answer.includes('Wolfram|Alpha did not')||answer.length<2)return null;return answer;}catch(e){return null;}}
+
+async function routeToExternalAPI(text){
+  const isSpace=NASA_INTENTS.test(text)||SPACE_WOLFRAM.test(text);
+  const isWolfram=WOLFRAM_INTENT.test(text)&&!isSpace;
+  const isWiki=WIKI_INTENT.test(text)&&!isSpace&&!isWolfram;
+  if(isSpace&&NASA_KEY)return{source:'nasa',data:await handleNASA(text)};
+  if(isSpace&&WOLFRAM_ID)return{source:'wolfram',data:await fetchWolfram(text)};
+  if(isWolfram&&WOLFRAM_ID)return{source:'wolfram',data:await fetchWolfram(text)};
+  if(isWiki)return{source:'wiki',data:await fetchWikipedia(text)};
   return null;
 }
- 
- 
+
+/* ══════════════════════════════════════
+   3. STREAMING CHAT
+══════════════════════════════════════ */
 const chatLog=document.getElementById('chatLog');
 const chatBox=document.getElementById('chatBox');
 if(chatBox){
@@ -673,7 +538,7 @@ if(chatBox){
   chatBox.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
 }
 document.getElementById('sendBtn').addEventListener('click',sendMessage);
- 
+
 function addMsg(role,text,mood){
   const wrap=document.createElement('div'); wrap.className='msg '+role;
   const who=document.createElement('div'); who.className='msg-who';
@@ -685,6 +550,7 @@ function addMsg(role,text,mood){
   chatLog.scrollTop=chatLog.scrollHeight;
   return wrap;
 }
+
 function addThinking(){
   const wrap=document.createElement('div'); wrap.className='msg sonia';
   const who=document.createElement('div'); who.className='msg-who'; who.textContent='sonia';
@@ -694,7 +560,18 @@ function addThinking(){
   chatLog.appendChild(wrap); chatLog.scrollTop=chatLog.scrollHeight;
   return wrap;
 }
- 
+
+// Creates a streaming message bubble — returns {wrap, body, whoEl}
+function createStreamBubble(){
+  const wrap=document.createElement('div'); wrap.className='msg sonia';
+  const who=document.createElement('div'); who.className='msg-who'; who.textContent='sonia';
+  const body=document.createElement('div'); body.className='msg-text streaming';
+  body.textContent='';
+  wrap.appendChild(who); wrap.appendChild(body);
+  chatLog.appendChild(wrap);
+  return {wrap,body,who};
+}
+
 function detectEmailIntent(t){return /\b(email|e-mail)\b|\b(send|write|draft|compose)\s+(an?\s+)?(email|message)\b/i.test(t);}
 async function extractEmailDraft(userText){
   try{
@@ -705,8 +582,7 @@ async function extractEmailDraft(userText){
     });
     const d=await res.json();
     return JSON.parse((d.choices?.[0]?.message?.content||'{}').replace(/```json|```/g,'').trim());
-  }catch(e){return{to:'',subject:'',body:''};}
-}
+  }catch(e){return{to:'',subject:'',body:''};}}
 function openEmailOverlay(to,subject,body){
   document.getElementById('emailTo').value=to||'';
   document.getElementById('emailSubject').value=subject||'';
@@ -716,14 +592,14 @@ function openEmailOverlay(to,subject,body){
   navItems.forEach(b=>b.classList.remove('active'));
   document.getElementById('mailTab').classList.add('active');
 }
- 
+
 async function sendMessage(){
   const text=chatBox.value.trim();
   if(!text||!GROQ_KEY) return;
   chatBox.value=''; chatBox.style.height='auto';
   playTone(880,0.1);
   addMsg('user',text);
- 
+
   if(detectEmailIntent(text)){
     const t=addThinking(); setPresence('thinking'); setStatus('drafting…');
     const draft=await extractEmailDraft(text);
@@ -738,44 +614,111 @@ async function sendMessage(){
     }
     return;
   }
- 
-  const t=addThinking(); setPresence('thinking'); setStatus('thinking…');
+
+  // Show thinking dots briefly while we fetch external data
+  const thinkEl=addThinking();
+  setPresence('thinking'); setStatus('thinking…');
   conversationHistory.push({role:'user',content:text});
- 
-  let externalContext = '';
-  try {
-    const ext = await routeToExternalAPI(text);
-    if (ext && ext.data) {
-      externalContext = `\n\nREAL-TIME DATA (${ext.source.toUpperCase()}) — use this naturally in your reply, don't just recite it:\n${ext.data}`;
-    }
-  } catch(e) {}
- 
+
+  let externalContext='';
+  try{
+    const ext=await routeToExternalAPI(text);
+    if(ext&&ext.data) externalContext=`\n\nREAL-TIME DATA (${ext.source.toUpperCase()}) — use this naturally in your reply, don't just recite it:\n${ext.data}`;
+  }catch(e){}
+
+  // Remove thinking dots, create stream bubble
+  thinkEl.remove();
+  const {wrap:streamWrap, body:streamBody, who:streamWho} = createStreamBubble();
+  chatLog.scrollTop=chatLog.scrollHeight;
+
+  let fullRaw='';
+  let moodDetected='calm';
+
   try{
     const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
-      method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
-      body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:180,temperature:0.85,
-        messages:[{role:'system',content:buildSystemPrompt()+externalContext},...conversationHistory]})
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
+      body:JSON.stringify({
+        model:'llama-3.3-70b-versatile',
+        max_tokens:180,
+        temperature:0.85,
+        stream:true,   // ← STREAMING ENABLED
+        messages:[{role:'system',content:buildSystemPrompt()+externalContext},...conversationHistory]
+      })
     });
-    const data=await res.json();
-    t.remove(); setPresence('online');
-    if(!res.ok){addMsg('sonia','Error: '+(data.error?.message||'Unknown.'),null);return;}
-    const raw=data.choices?.[0]?.message?.content||'';
-    const parsed=parseMood(raw);
-    conversationHistory.push({role:'assistant',content:parsed.text});
+
+    if(!res.ok){
+      const errData=await res.json();
+      streamBody.classList.remove('streaming');
+      streamBody.textContent='Error: '+(errData.error?.message||'Unknown.');
+      setPresence('online');
+      return;
+    }
+
+    const reader=res.body.getReader();
+    const decoder=new TextDecoder();
+    let buffer='';
+
+    while(true){
+      const {done,value}=await reader.read();
+      if(done) break;
+      buffer+=decoder.decode(value,{stream:true});
+      const lines=buffer.split('\n');
+      buffer=lines.pop(); // keep incomplete line in buffer
+      for(const line of lines){
+        if(!line.startsWith('data:')) continue;
+        const raw=line.slice(5).trim();
+        if(raw==='[DONE]') continue;
+        try{
+          const chunk=JSON.parse(raw);
+          const delta=chunk.choices?.[0]?.delta?.content||'';
+          if(delta){
+            fullRaw+=delta;
+            // Parse mood from accumulated text, display cleaned text live
+            const parsed=parseMood(fullRaw);
+            moodDetected=parsed.mood;
+            streamBody.textContent=parsed.text;
+            chatLog.scrollTop=chatLog.scrollHeight;
+          }
+        }catch(e){}
+      }
+    }
+
+    // Streaming complete — finalize
+    streamBody.classList.remove('streaming');
+    const finalParsed=parseMood(fullRaw);
+    moodDetected=finalParsed.mood;
+    streamBody.textContent=finalParsed.text;
+
+    // Update who label with mood emoji
+    streamWho.textContent=(MOOD_EMOJI[moodDetected]||'')+'  sonia';
+
+    conversationHistory.push({role:'assistant',content:finalParsed.text});
     playTone(600,0.15);
     setPresence('speaking');
-    addMsg('sonia',parsed.text,parsed.mood);
-    setStatus((MOOD_EMOJI[parsed.mood]||'')+' '+parsed.mood);
+    setStatus((MOOD_EMOJI[moodDetected]||'')+' '+moodDetected);
+
+    // Speak the reply
+    speak(finalParsed.text);
+
     setTimeout(()=>setPresence('online'),1400);
-  }catch(err){t.remove();setPresence('online');addMsg('sonia','Connection error.',null);}
+
+    // Extract memories in background (fire and forget)
+    extractMemoryFacts(text, finalParsed.text);
+
+  }catch(err){
+    streamBody.classList.remove('streaming');
+    streamBody.textContent='Connection error.';
+    setPresence('online');
+  }
 }
- 
+
 /* ── AUDIO ── */
 let audioCtx=null;
 function playTone(freq,dur){
   try{
-    if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-    if(audioCtx.state==='suspended') audioCtx.resume();
+    if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended')audioCtx.resume();
     const osc=audioCtx.createOscillator(),g=audioCtx.createGain();
     osc.connect(g);g.connect(audioCtx.destination);
     osc.frequency.setValueAtTime(freq,audioCtx.currentTime);
@@ -784,7 +727,7 @@ function playTone(freq,dur){
     osc.start();osc.stop(audioCtx.currentTime+dur);
   }catch(e){}
 }
- 
+
 /* ── MIC ── */
 let recognition=null,micActive=false;
 function initMic(){
@@ -794,19 +737,16 @@ function initMic(){
   recognition.continuous=false;recognition.interimResults=false;recognition.lang='en-GB';
   recognition.onstart=()=>{micActive=true;document.getElementById('micBtn').classList.add('active');setPresence('listening');setStatus('listening…');};
   recognition.onend=()=>{micActive=false;document.getElementById('micBtn').classList.remove('active');setPresence('online');setStatus('online · '+OWNER_NAME.toLowerCase());};
-  recognition.onresult=e=>{
-    const tr=e.results[0][0].transcript;
-    if(tr){chatBox.value=tr;chatBox.style.height='auto';chatBox.style.height=Math.min(chatBox.scrollHeight,120)+'px';sendMessage();}
-  };
+  recognition.onresult=e=>{const tr=e.results[0][0].transcript;if(tr){chatBox.value=tr;chatBox.style.height='auto';chatBox.style.height=Math.min(chatBox.scrollHeight,120)+'px';sendMessage();}};
   recognition.onerror=()=>{micActive=false;document.getElementById('micBtn').classList.remove('active');setPresence('online');};
   return true;
 }
 document.getElementById('micBtn').addEventListener('click',()=>{
-  if(!recognition&&!initMic()) return;
+  if(!recognition&&!initMic())return;
   if(micActive){recognition.stop();}
   else{try{recognition.start();}catch(e){recognition=null;if(initMic())try{recognition.start();}catch(e2){}}}
 });
- 
+
 /* ── DRIVE ── */
 let gapiLoadState=false,gisLoadState=false,tokenClient=null;
 function loadDriveLibs(){
@@ -814,7 +754,7 @@ function loadDriveLibs(){
   if(!window.google?.accounts){const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.onload=()=>{gisLoadState=true;};document.head.appendChild(s);}
 }
 function initializeDriveSync(){
-  if(!CLIENT_ID) return;
+  if(!CLIENT_ID)return;
   setPresence('syncing');setStatus('syncing brain…');
   if(!tokenClient){
     tokenClient=google.accounts.oauth2.initTokenClient({
@@ -834,10 +774,7 @@ function initializeDriveSync(){
   tokenClient.requestAccessToken({prompt:''});
 }
 document.getElementById('driveBtn').addEventListener('click',initializeDriveSync);
-document.getElementById('memRefresh').addEventListener('click',()=>{
-  if(driveToken){setPresence('syncing');setStatus('syncing…');setTimeout(()=>{setPresence('online');setStatus('memory synced');},1500);}
-});
- 
+
 /* ── NOTES ── */
 let localNotes=JSON.parse(LS.get('notes')||'[]');
 function renderNotes(){
@@ -855,7 +792,7 @@ document.getElementById('sendNote').addEventListener('click',()=>{
   localNotes.push({ts:new Date().toISOString(),text:v});LS.set('notes',JSON.stringify(localNotes));
   document.getElementById('noteBox').value='';renderNotes();
 });
- 
+
 /* ── RADIO ── */
 const STATIONS=[
   {name:'NTS Radio 1',loc:'London, UK',url:'https://stream-relay-geo.ntslive.co.uk/stream'},
@@ -885,7 +822,7 @@ document.getElementById('radioStop').addEventListener('click',()=>{
   document.getElementById('radioStop').style.display='none';
   document.querySelectorAll('.station-card').forEach(c=>c.classList.remove('playing'));
 });
- 
+
 /* ── GMAIL ── */
 async function sendEmailNow(to,subj,body,silent=false){
   const statusEl=document.getElementById('emailStatus');
