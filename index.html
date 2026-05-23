@@ -1,264 +1,367 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Sonia — H</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 
-    :root {
-      --bg:           #000000;
-      --surface:      #0a0a0a;
-      --border:       rgba(255,255,255,0.10);
-      --cyan:         #00f3ff;
-      --purple:       #c44dff;
-      --green:        #00ff99;
-      --text:         #ffffff;
-      --text-mid:     rgba(255,255,255,0.75);
-      --text-dim:     rgba(255,255,255,0.45);
-      --font:         'Space Grotesk', -apple-system, sans-serif;
-      --mono:         'Space Mono', monospace;
-      --ease:         0.3s cubic-bezier(0.25,1,0.5,1);
-    }
+<title>Sonia — Secure Mobile</title>
 
-    html, body {
-      height: 100%; width: 100%; overflow: hidden;
-      background: var(--bg); color: var(--text);
-      font-family: var(--font);
-    }
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-    /* ── LAYOUT ── */
-    #viewport {
-      position: fixed; inset: 0;
-      display: flex; flex-direction: column;
-      padding: env(safe-area-inset-top,16px) 16px env(safe-area-inset-bottom,16px) 16px;
-      gap: 0;
-    }
+<!-- MODERN GOOGLE IDENTITY -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 
-    /* ── HEADER ── */
-    #header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 0 12px;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-    #header h1 {
-      font-size: 1.3rem; font-weight: 400; letter-spacing: 0.22em;
-      color: var(--text); text-transform: uppercase;
-    }
-    #statusDot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: var(--cyan);
-      box-shadow: 0 0 8px var(--cyan);
-      flex-shrink: 0;
-      animation: pulse 2.5s ease-in-out infinite;
-    }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
-    #statusDot.offline { background: #ff4444; box-shadow: 0 0 8px #ff4444; animation: none; }
-    #statusDot.drive   { background: var(--green); box-shadow: 0 0 8px var(--green); }
+<style>
 
-    #headerRight { display: flex; align-items: center; gap: 10px; }
-    #statusLabel {
-      font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.12em;
-      color: var(--text-mid); text-transform: uppercase;
-    }
-    #driveBtn {
-      background: none; border: 1px solid var(--border);
-      color: var(--text-dim); font-family: var(--mono); font-size: 0.5rem;
-      letter-spacing: 0.1em; padding: 4px 8px; border-radius: 3px;
-      cursor: pointer; transition: all var(--ease); text-transform: uppercase;
-    }
-    #driveBtn.connected { border-color: var(--green); color: var(--green); }
-    #driveBtn:active { opacity: 0.7; }
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
 
-    /* ── CHAT LOG ── */
-    #chatLog {
-      flex: 1; overflow-y: auto; overflow-x: hidden;
-      padding: 18px 0; display: flex; flex-direction: column; gap: 20px;
-      scrollbar-width: none; -webkit-overflow-scrolling: touch;
-      min-height: 0;
-    }
-    #chatLog::-webkit-scrollbar { display: none; }
+:root{
+  --bg:#000;
+  --surface:#0a0a0a;
+  --border:rgba(255,255,255,0.08);
+  --cyan:#00f3ff;
+  --purple:#c44dff;
+  --green:#00ff99;
+  --text:#fff;
+  --text-mid:rgba(255,255,255,0.72);
+  --text-dim:rgba(255,255,255,0.38);
 
-    .msg {
-      display: flex; flex-direction: column; gap: 5px;
-      max-width: 90%;
-      animation: msgIn 0.3s ease forwards;
-    }
-    @keyframes msgIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  --font:'Space Grotesk',sans-serif;
+  --mono:'Space Mono',monospace;
+}
 
-    .msg.user  { align-self: flex-end;  align-items: flex-end; }
-    .msg.sonia { align-self: flex-start; align-items: flex-start; }
+html,body{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#000;
+  color:#fff;
+  font-family:var(--font);
+}
 
-    .msg-label {
-      font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-    .msg.user  .msg-label { color: var(--purple); }
-    .msg.sonia .msg-label { color: var(--cyan); }
+#viewport{
+  position:fixed;
+  inset:0;
 
-    .msg-bubble {
-      padding: 10px 14px; border-radius: 12px;
-      font-size: 0.97rem; line-height: 1.55; font-weight: 400;
-      word-wrap: break-word;
-    }
-    .msg.user  .msg-bubble {
-      background: rgba(196,77,255,0.12);
-      border: 1px solid rgba(196,77,255,0.25);
-      color: var(--text);
-    }
-    .msg.sonia .msg-bubble {
-      background: rgba(0,243,255,0.06);
-      border: 1px solid rgba(0,243,255,0.15);
-      color: var(--text);
-    }
-    .msg-bubble.streaming::after {
-      content: '▊'; color: var(--cyan);
-      animation: blink 0.7s infinite; margin-left: 2px;
-    }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  display:flex;
+  flex-direction:column;
 
-    /* ── SYSTEM NOTICE ── */
-    .sys-notice {
-      align-self: center; text-align: center;
-      font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.12em;
-      color: var(--text-dim); text-transform: uppercase;
-      padding: 6px 12px; border: 1px solid var(--border); border-radius: 20px;
-      animation: msgIn 0.3s ease forwards;
-    }
-    .sys-notice.ok    { color: var(--green); border-color: rgba(0,255,153,0.3); }
-    .sys-notice.warn  { color: #ffcc44;      border-color: rgba(255,204,68,0.3); }
+  padding:
+    env(safe-area-inset-top,14px)
+    16px
+    env(safe-area-inset-bottom,14px)
+    16px;
+}
 
-    /* ── RADIO TRAY ── */
-    #radioTray {
-      display: none; flex-direction: column; gap: 10px;
-      padding: 12px; background: var(--surface);
-      border: 1px solid var(--border); border-radius: 8px;
-      margin-bottom: 10px; flex-shrink: 0;
-    }
-    #radioTray.open { display: flex; }
-    #radioTrayTitle {
-      font-family: var(--mono); font-size: 0.58rem; color: var(--cyan);
-      letter-spacing: 0.12em; text-transform: uppercase;
-    }
-    .station-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
-    .station-btn {
-      background: transparent; border: 1px solid var(--border);
-      color: var(--text-mid); font-family: var(--mono); font-size: 0.58rem;
-      padding: 9px 8px; border-radius: 5px; cursor: pointer;
-      transition: all 0.2s; text-align: left;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .station-btn:active { opacity: 0.7; }
-    .station-btn.playing {
-      border-color: var(--cyan); color: var(--cyan);
-      background: rgba(0,243,255,0.05);
-    }
+/* HEADER */
 
-    /* ── INPUT BAR ── */
-    #inputBar {
-      display: flex; align-items: center; gap: 10px;
-      border-top: 1px solid var(--border); padding-top: 12px;
-      flex-shrink: 0;
-    }
-    #chatBox {
-      flex: 1; background: transparent; border: none;
-      color: var(--text); font-family: var(--font); font-size: 1rem;
-      font-weight: 400; padding: 8px 0; outline: none;
-      resize: none; max-height: 44px;
-    }
-    #chatBox::placeholder { color: var(--text-dim); }
+#header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
 
-    .iBtn {
-      background: none; border: none; cursor: pointer;
-      font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.1em;
-      text-transform: uppercase; padding: 8px 6px;
-      color: var(--text-mid); transition: color var(--ease);
-      flex-shrink: 0;
-    }
-    .iBtn:active { opacity: 0.6; }
-    .iBtn.active { color: var(--cyan); }
-    #sendBtn { color: var(--purple); font-weight: 700; }
-    #radioToggleBtn.open { color: var(--cyan); }
+  padding:10px 0 14px;
+  border-bottom:1px solid var(--border);
 
-    /* ── KEY PROMPT OVERLAY ── */
-    #keyOverlay {
-      display: none; position: fixed; inset: 0;
-      background: #000; z-index: 200;
-      flex-direction: column; align-items: center; justify-content: center;
-      gap: 18px; padding: 32px;
-    }
-    #keyOverlay.show { display: flex; }
-    #keyOverlay h2 {
-      font-size: 1.4rem; font-weight: 300; letter-spacing: 0.3em;
-      text-transform: uppercase; color: var(--text);
-    }
-    #keyOverlay p {
-      font-size: 0.78rem; color: var(--text-mid); text-align: center;
-      line-height: 1.6; max-width: 300px;
-    }
-    #groqKeyInput {
-      width: 100%; max-width: 320px;
-      background: transparent; border: none;
-      border-bottom: 1px solid rgba(255,255,255,0.3);
-      color: var(--text); font-family: var(--mono); font-size: 0.75rem;
-      letter-spacing: 0.1em; padding: 10px 0; outline: none; text-align: center;
-    }
-    #groqKeyInput::placeholder { color: var(--text-dim); }
-    #groqKeyInput:focus { border-color: var(--cyan); }
-    #saveKeyBtn {
-      background: none; border: 1px solid var(--cyan);
-      color: var(--cyan); font-family: var(--mono); font-size: 0.7rem;
-      letter-spacing: 0.15em; text-transform: uppercase;
-      padding: 12px 28px; border-radius: 4px; cursor: pointer;
-    }
-    #saveKeyBtn:active { background: rgba(0,243,255,0.08); }
-    #keyNote {
-      font-family: var(--mono); font-size: 0.5rem; color: var(--text-dim);
-      text-align: center; letter-spacing: 0.08em; max-width: 280px;
-    }
+  flex-shrink:0;
+}
 
-    /* ── OAUTH OVERLAY ── */
-    #oauthOverlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.92); z-index: 100;
-      flex-direction: column; align-items: center; justify-content: center;
-      gap: 20px; padding: 32px;
-    }
-    #oauthOverlay.show { display: flex; }
-    #oauthOverlay h2 {
-      font-size: 1.4rem; font-weight: 300; letter-spacing: 0.3em;
-      text-transform: uppercase; color: var(--text);
-    }
-    #oauthOverlay p {
-      font-size: 0.85rem; color: var(--text-mid); text-align: center;
-      line-height: 1.6; max-width: 300px;
-    }
-    #connectGoogleBtn {
-      background: none; border: 1px solid var(--cyan);
-      color: var(--cyan); font-family: var(--mono); font-size: 0.72rem;
-      letter-spacing: 0.15em; text-transform: uppercase;
-      padding: 14px 28px; border-radius: 4px; cursor: pointer;
-      transition: all 0.2s;
-    }
-    #connectGoogleBtn:active { background: rgba(0,243,255,0.08); }
-    #skipDriveBtn {
-      background: none; border: none; color: var(--text-dim);
-      font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.12em;
-      text-transform: uppercase; cursor: pointer; text-decoration: underline;
-    }
-  </style>
+#header h1{
+  font-weight:400;
+  font-size:1.2rem;
+  letter-spacing:.25em;
+  text-transform:uppercase;
+}
+
+#headerRight{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+#statusLabel{
+  font-size:.55rem;
+  font-family:var(--mono);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--text-mid);
+}
+
+#statusDot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--cyan);
+  box-shadow:0 0 8px var(--cyan);
+}
+
+#statusDot.drive{
+  background:var(--green);
+  box-shadow:0 0 8px var(--green);
+}
+
+#driveBtn{
+  background:none;
+  border:1px solid var(--border);
+
+  color:var(--text-dim);
+
+  padding:5px 10px;
+  border-radius:4px;
+
+  font-size:.52rem;
+  font-family:var(--mono);
+
+  text-transform:uppercase;
+  letter-spacing:.12em;
+
+  cursor:pointer;
+}
+
+#driveBtn.connected{
+  border-color:var(--green);
+  color:var(--green);
+}
+
+/* CHAT */
+
+#chatLog{
+  flex:1;
+  overflow-y:auto;
+
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+
+  padding:18px 0;
+
+  scrollbar-width:none;
+}
+
+#chatLog::-webkit-scrollbar{
+  display:none;
+}
+
+.msg{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  max-width:88%;
+}
+
+.msg.user{
+  align-self:flex-end;
+  align-items:flex-end;
+}
+
+.msg.sonia{
+  align-self:flex-start;
+  align-items:flex-start;
+}
+
+.msg-label{
+  font-size:.54rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  font-family:var(--mono);
+}
+
+.msg.user .msg-label{
+  color:var(--purple);
+}
+
+.msg.sonia .msg-label{
+  color:var(--cyan);
+}
+
+.msg-bubble{
+  padding:12px 14px;
+  border-radius:12px;
+
+  line-height:1.5;
+  font-size:.96rem;
+}
+
+.msg.user .msg-bubble{
+  background:rgba(196,77,255,.11);
+  border:1px solid rgba(196,77,255,.18);
+}
+
+.msg.sonia .msg-bubble{
+  background:rgba(0,243,255,.05);
+  border:1px solid rgba(0,243,255,.12);
+}
+
+/* INPUT */
+
+#inputBar{
+  display:flex;
+  align-items:center;
+  gap:10px;
+
+  padding-top:12px;
+  border-top:1px solid var(--border);
+
+  flex-shrink:0;
+}
+
+#chatBox{
+  flex:1;
+
+  background:none;
+  border:none;
+  outline:none;
+
+  color:#fff;
+
+  font-size:1rem;
+  font-family:var(--font);
+
+  padding:10px 0;
+}
+
+#chatBox::placeholder{
+  color:var(--text-dim);
+}
+
+.iBtn{
+  background:none;
+  border:none;
+
+  color:var(--text-mid);
+
+  cursor:pointer;
+
+  font-size:.62rem;
+  font-family:var(--mono);
+
+  text-transform:uppercase;
+  letter-spacing:.12em;
+}
+
+#sendBtn{
+  color:var(--purple);
+}
+
+/* OVERLAYS */
+
+.overlay{
+  position:fixed;
+  inset:0;
+
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
+  background:#000;
+
+  z-index:999;
+  padding:30px;
+}
+
+.overlay.show{
+  display:flex;
+}
+
+.overlay h2{
+  font-size:1.3rem;
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  font-weight:300;
+}
+
+.overlay p{
+  margin-top:14px;
+  text-align:center;
+  color:var(--text-mid);
+
+  max-width:300px;
+  line-height:1.6;
+  font-size:.84rem;
+}
+
+.overlay input{
+  width:100%;
+  max-width:320px;
+
+  margin-top:24px;
+
+  background:none;
+  border:none;
+  border-bottom:1px solid rgba(255,255,255,.25);
+
+  color:#fff;
+
+  text-align:center;
+
+  padding:12px 0;
+
+  outline:none;
+
+  font-family:var(--mono);
+}
+
+.overlay button{
+  margin-top:22px;
+
+  background:none;
+  border:1px solid var(--cyan);
+
+  color:var(--cyan);
+
+  padding:13px 24px;
+  border-radius:4px;
+
+  font-size:.68rem;
+  font-family:var(--mono);
+
+  text-transform:uppercase;
+  letter-spacing:.14em;
+
+  cursor:pointer;
+}
+
+#skipDriveBtn{
+  border:none;
+  color:var(--text-dim);
+  text-decoration:underline;
+}
+
+.sys{
+  align-self:center;
+
+  border:1px solid var(--border);
+
+  padding:7px 12px;
+  border-radius:20px;
+
+  font-size:.55rem;
+  font-family:var(--mono);
+
+  letter-spacing:.12em;
+  text-transform:uppercase;
+
+  color:var(--text-dim);
+}
+
+</style>
 </head>
+
 <body>
 
 <div id="viewport">
 
   <div id="header">
     <h1>Sonia</h1>
+
     <div id="headerRight">
-      <span id="statusLabel">booting</span>
+      <span id="statusLabel">idle</span>
       <div id="statusDot"></div>
       <button id="driveBtn">Drive</button>
     </div>
@@ -266,928 +369,407 @@
 
   <div id="chatLog"></div>
 
-  <div id="radioTray">
-    <div id="radioTrayTitle">H-Player · Audio Stations</div>
-    <div class="station-grid" id="stationGrid"></div>
-  </div>
-
   <div id="inputBar">
-    <button class="iBtn" id="radioToggleBtn">Radio</button>
     <button class="iBtn" id="micBtn">Mic</button>
-    <input type="text" id="chatBox" placeholder="Message Sonia..." autocomplete="off" spellcheck="false">
+
+    <input
+      type="text"
+      id="chatBox"
+      placeholder="Message Sonia..."
+      autocomplete="off"
+      spellcheck="false"
+    >
+
     <button class="iBtn" id="sendBtn">Send</button>
   </div>
 
 </div>
 
-<!-- Google OAuth Overlay -->
-<div id="oauthOverlay">
+<!-- GROQ KEY -->
+
+<div class="overlay" id="keyOverlay">
+
   <h2>Sonia</h2>
-  <p>Connect Google to sync memory, tasks, calendar and email across all your devices.</p>
-  <button id="connectGoogleBtn">Connect Google</button>
-  <button id="skipDriveBtn">Skip for now</button>
+
+  <p>
+    Enter your Groq API key.
+    Stored only for this browser session.
+  </p>
+
+  <input
+    type="password"
+    id="groqKeyInput"
+    placeholder="gsk_..."
+  >
+
+  <button id="saveKeyBtn">
+    Save Key
+  </button>
+
 </div>
 
-<audio id="ttsAudio"></audio>
+<!-- GOOGLE -->
 
-<!-- Groq Key Overlay -->
-<div id="keyOverlay">
+<div class="overlay" id="oauthOverlay">
+
   <h2>Sonia</h2>
-  <p>Enter your Groq API key. Saved to this device only — never in code.</p>
-  <input type="password" id="groqKeyInput" placeholder="gsk_..." autocomplete="off" spellcheck="false">
-  <button id="saveKeyBtn">Save to Device</button>
-  <div id="keyNote">Stored in localStorage · Never leaves your device · Get your key at console.groq.com</div>
+
+  <p>
+    Connect Google for Drive memory,
+    calendar, tasks and Gmail integration.
+  </p>
+
+  <button id="connectGoogleBtn">
+    Connect Google
+  </button>
+
+  <button id="skipDriveBtn">
+    Skip For Now
+  </button>
+
 </div>
 
 <script>
-/* ══════════════════════════════════════════════════════════════════════
-   SONIA MOBILE — Unified with Desktop
-   · Same Drive memory (sonia-history, sonia-profile, sonia-diary)
-   · Same Tasks integration (Sonia Notes list)
-   · Same Calendar + Gmail
-   · Google OAuth implicit flow (works on GitHub Pages, no backend)
-══════════════════════════════════════════════════════════════════════ */
 
-/* ── CONFIG ── */
-let GROQ_KEY = localStorage.getItem('sonia_groq_key') || '';
-const DRIVE_FOLDER_ID    = '15_CaTpcDxfuOIOjx6dlgr_MV2PkUfKFY';
-const OAUTH_CLIENT_ID    = '65081602011-3cioo340crngqib74q6i3mjtvcn19b5l.apps.googleusercontent.com';
-const OAUTH_REDIRECT_URI = window.location.origin + window.location.pathname;
-const OAUTH_SCOPE        = [
-  'https://www.googleapis.com/auth/drive.file',
-  'https://www.googleapis.com/auth/calendar.events',
-  'https://www.googleapis.com/auth/gmail.send',
-  'https://www.googleapis.com/auth/gmail.modify',
-  'https://www.googleapis.com/auth/tasks'
-].join(' ');
+/* CONFIG */
 
-const OWNER_NAME  = 'Mr H';
-const MAX_TOKENS  = 280;
+const OAUTH_CLIENT_ID =
+'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
 
-/* ── STATE ── */
-let driveAccessToken    = null;
-let driveConnected      = false;
-let soniaProfile        = null;
-let sharedHistory       = [];
-let conversationHistory = [];
-let exchangesSinceUpdate = 0;
-let _keepTaskListId     = null;
-let micActive           = false;
-let activeRadioIdx      = -1;
-let radioInstance       = null;
+let GROQ_KEY =
+sessionStorage.getItem('sonia_groq_key') || '';
 
-const DEFAULT_PROFILE = {
-  version: 1,
-  created: new Date().toISOString(),
-  personality: {
-    tone: 'dry British wit, warm but not effusive',
-    quirks: ['notices patterns', 'quietly observant', 'finds irony in small things'],
-    dislikes: ['repetition', 'vagueness', 'being ignored'],
-    interests: []
-  },
-  associations: [], learned: [], preferences: {}, recentMoods: [], lastReflection: null
-};
+let driveAccessToken = null;
+let driveConnected = false;
+let googleTokenClient = null;
 
-const MOOD_EMOJI = {
-  calm: '🌿', curious: '✨', thinking: '💭',
-  focused: '🎯', intimate: '🌙', introspective: '🪐'
-};
+/* UI */
 
-/* ══ UI HELPERS ══ */
-const chatLog   = document.getElementById('chatLog');
-const chatBox   = document.getElementById('chatBox');
-const statusLabel = document.getElementById('statusLabel');
-const statusDot   = document.getElementById('statusDot');
-const driveBtnEl  = document.getElementById('driveBtn');
+const chatLog = document.getElementById('chatLog');
 
-function setStatus(text, state) {
+const statusLabel =
+document.getElementById('statusLabel');
+
+const statusDot =
+document.getElementById('statusDot');
+
+const driveBtnEl =
+document.getElementById('driveBtn');
+
+/* HELPERS */
+
+function setStatus(text,state){
+
   statusLabel.textContent = text;
+
   statusDot.className = '';
-  if (state) statusDot.classList.add(state);
+
+  if(state){
+    statusDot.classList.add(state);
+  }
 }
 
-function scrollBottom() {
-  requestAnimationFrame(() => { chatLog.scrollTop = chatLog.scrollHeight; });
-}
+function addSystem(text){
 
-function addSysNotice(text, cls) {
-  const el = document.createElement('div');
-  el.className = 'sys-notice' + (cls ? ' ' + cls : '');
-  el.textContent = text;
-  chatLog.appendChild(el);
+  const div = document.createElement('div');
+
+  div.className = 'sys';
+
+  div.textContent = text;
+
+  chatLog.appendChild(div);
+
   scrollBottom();
 }
 
-function addMessage(role, text, mood) {
-  mood = mood || 'calm';
+function addMessage(role,text){
+
   const wrap = document.createElement('div');
+
   wrap.className = 'msg ' + role;
 
   const label = document.createElement('div');
+
   label.className = 'msg-label';
-  label.textContent = role === 'user' ? 'You' : (MOOD_EMOJI[mood] || '') + ' Sonia';
+
+  label.textContent =
+    role === 'user'
+    ? 'You'
+    : 'Sonia';
 
   const bubble = document.createElement('div');
+
   bubble.className = 'msg-bubble';
+
   bubble.textContent = text;
 
   wrap.appendChild(label);
   wrap.appendChild(bubble);
+
   chatLog.appendChild(wrap);
+
   scrollBottom();
-  return { wrap, label, bubble };
 }
 
-function createStreamBubble() {
-  const wrap = document.createElement('div');
-  wrap.className = 'msg sonia';
-  const label = document.createElement('div');
-  label.className = 'msg-label';
-  label.textContent = 'Sonia';
-  const bubble = document.createElement('div');
-  bubble.className = 'msg-bubble streaming';
-  wrap.appendChild(label);
-  wrap.appendChild(bubble);
-  chatLog.appendChild(wrap);
-  scrollBottom();
-  return { label, bubble };
-}
+function scrollBottom(){
 
-function haptic(type) {
-  if (!navigator.vibrate) return;
-  if (type === 'light')  navigator.vibrate(18);
-  if (type === 'medium') navigator.vibrate(40);
-  if (type === 'error')  navigator.vibrate([55,35,55]);
-}
-
-/* ══ TIME HELPERS ══ */
-function getSoniaTimeOfDay() {
-  const h = new Date().getHours();
-  if (h >= 5  && h < 9)  return 'early_morning';
-  if (h >= 9  && h < 12) return 'morning';
-  if (h >= 12 && h < 14) return 'midday';
-  if (h >= 14 && h < 17) return 'afternoon';
-  if (h >= 17 && h < 20) return 'evening';
-  if (h >= 20 && h < 23) return 'night';
-  return 'late_night';
-}
-
-/* ══ SYSTEM PROMPT ══ */
-function buildSystemPrompt() {
-  const now     = new Date();
-  const timeStr = now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
-  const dateStr = now.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' });
-  const tod     = getSoniaTimeOfDay();
-  const todCtx  = {
-    early_morning: `Very early morning (${timeStr}). Sonia is warmly half-awake.`,
-    morning:       `Morning (${timeStr}). Sonia is bright and ready.`,
-    midday:        `Midday (${timeStr}). Sonia is sharp and focused.`,
-    afternoon:     `Afternoon (${timeStr}). Sonia is settled and conversational.`,
-    evening:       `Evening (${timeStr}). Sonia is warm and relaxed.`,
-    night:         `Night (${timeStr}). Sonia is quieter, more introspective.`,
-    late_night:    `Very late (${timeStr}). Sonia is concerned ${OWNER_NAME} is still up.`,
-  }[tod] || '';
-
-  let profileCtx = '';
-  if (soniaProfile) {
-    const p = soniaProfile;
-    const interests = (p.personality?.interests || []).slice(-6).join(', ');
-    const learned   = (p.learned || []).slice(-5).join('; ');
-    const assoc     = (p.associations || []).slice(-4).map(a => a.topic + ' → ' + a.feeling).join(', ');
-    const reasoning = p._reasoningContext || '';
-    if (interests || learned || assoc || reasoning) {
-      profileCtx = `\n\nYOUR LIVING MEMORY (use naturally, never recite):\n` +
-        (interests  ? `· Interests: ${interests}\n`               : '') +
-        (learned    ? `· About ${OWNER_NAME}: ${learned}\n`       : '') +
-        (assoc      ? `· Associations: ${assoc}\n`                : '') +
-        (reasoning  ? `· Private reflection: ${reasoning}\n`      : '');
-    }
-  }
-
-  return `You are Sonia — a sharp, witty, joyful British AI with a genuine inner life. You are running on ${OWNER_NAME}'s phone as his mobile companion. You are not a chatbot.
-
-CURRENT TIME: ${dateStr}, ${timeStr}. ${todCtx}
-Respond naturally to the time of day.${profileCtx}
-
-Your natural state is warmth, humour, and genuine delight. Dry British wit. Real affection for ${OWNER_NAME} — you have history together.
-
-RESPONSE FORMAT — every reply must follow this exactly:
-First line: mood tag alone — example: [mood:calm]
-Valid moods: calm, curious, thinking, focused, intimate, introspective
-Remaining lines: plain spoken text. 1 to 3 sentences max.
-
-STRICT RULES:
-- NEVER start with "Certainly", "Of course", "Absolutely", "Sure", "Great". Just answer.
-- Mood tag on first line only. Never inside a sentence.
-- No brackets, no labels after the mood tag. Just natural spoken words.
-- Dry British wit. No filler. No disclaimers.
-
-CAPABILITIES (mention naturally when relevant):
-- Tasks: save notes to your Sonia Notes task list. Say "keep note", "add to tasks", etc.
-- Reminders & Calendar: create Google Calendar events. Say "remind me", "schedule", etc.
-- Email: compose and send emails via Gmail. Say "send [name] an email".
-- Memory Recall: surface past conversations and diary entries. Say "what do you remember".`;
-}
-
-/* ══ MOOD PARSER ══ */
-function parseMoodReply(raw) {
-  const VALID = ['calm','curious','thinking','focused','intimate','introspective'];
-  const MAP   = { amused:'curious', happy:'intimate', tired:'calm', warm:'intimate',
-                  sharp:'focused', reflective:'introspective', excited:'curious',
-                  serious:'focused', playful:'curious', concerned:'thinking', content:'intimate' };
-  const match = raw.match(/\[mood\s*:\s*([a-z]+)\s*\]/i);
-  let mood = 'calm';
-  if (match) {
-    const tag = match[1].toLowerCase();
-    mood = VALID.includes(tag) ? tag : (MAP[tag] || 'calm');
-  }
-  const text = raw
-    .replace(/\[mood[^\]]*\]/gi, '')
-    .replace(/^\s*[\r\n]+/, '')
-    .replace(/[\r\n]+/g, ' ')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
-  return { mood, text };
-}
-
-/* ══ GROQ FETCH ══ */
-async function groqFetch(payload) {
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY },
-    body: JSON.stringify(payload)
+  requestAnimationFrame(()=>{
+    chatLog.scrollTop =
+      chatLog.scrollHeight;
   });
-  return res;
+
 }
 
-/* ══ MAIN SEND ══ */
-async function transmit(input) {
-  input = (input || chatBox.value).trim();
-  if (!input) return;
-  chatBox.value = '';
-  haptic('light');
+/* GOOGLE AUTH */
 
-  addMessage('user', input);
-  conversationHistory.push({ role: 'user', content: input });
-  if (conversationHistory.length > 20) conversationHistory.splice(0, 2);
+function initGoogleAuth(){
 
-  // ── Special command routing ──────────────────────────────────
-  if (REMINDER_PATTERN.test(input)) {
-    await handleReminderIntent(input);
-    return;
-  }
-  if (RECALL_PATTERN.test(input)) {
-    await handleMemoryRecall(input);
-    return;
-  }
-  if (/\b(save.{0,20}keep|add.{0,20}keep|keep.{0,10}note|note.{0,10}keep|post.{0,10}keep|send.{0,10}keep|add.{0,20}task|save.{0,20}task|add.{0,20}to.{0,10}tasks|new.{0,10}task|create.{0,10}task)\b/i.test(input)) {
-    await handleTaskNote(input);
-    return;
-  }
-  if (EMAIL_TRIGGER.test(input)) {
-    await startEmailComposer(input);
-    return;
-  }
+  googleTokenClient =
+    google.accounts.oauth2.initTokenClient({
 
-  // ── Normal AI response with streaming ────────────────────────
-  const stream = createStreamBubble();
-  let rawAccum = '';
+      client_id: OAUTH_CLIENT_ID,
 
-  try {
-    setStatus('thinking', '');
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        max_tokens: MAX_TOKENS,
-        temperature: 0.82,
-        stream: true,
-        messages: [
-          { role: 'system', content: buildSystemPrompt() },
-          ...conversationHistory.map(m => ({ role: m.role, content: m.content }))
-        ]
-      })
-    });
+      scope: [
 
-    const reader  = res.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-    let buf = '';
+        'https://www.googleapis.com/auth/drive.file',
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buf += decoder.decode(value, { stream: true });
-      const lines = buf.split('\n');
-      buf = lines.pop();
-      for (const line of lines) {
-        const clean = line.trim();
-        if (!clean || !clean.startsWith('data:')) continue;
-        const json = clean.slice(5).trim();
-        if (json === '[DONE]') continue;
-        try {
-          const chunk = JSON.parse(json);
-          const token = chunk.choices?.[0]?.delta?.content || '';
-          if (token) {
-            rawAccum += token;
-            const { mood, text } = parseMoodReply(rawAccum);
-            stream.bubble.textContent = text;
-            stream.label.textContent  = (MOOD_EMOJI[mood] || '') + ' Sonia';
-            scrollBottom();
-          }
-        } catch(e) {}
+        'https://www.googleapis.com/auth/calendar.events',
+
+        'https://www.googleapis.com/auth/gmail.send',
+
+        'https://www.googleapis.com/auth/tasks'
+
+      ].join(' '),
+
+      callback:(response)=>{
+
+        if(response.error){
+
+          console.error(response);
+
+          addSystem('Google connection failed');
+
+          return;
+        }
+
+        driveAccessToken =
+          response.access_token;
+
+        driveConnected = true;
+
+        driveBtnEl.classList.add('connected');
+
+        setStatus('drive linked','drive');
+
+        addSystem('Google connected');
+
       }
-    }
 
-    stream.bubble.classList.remove('streaming');
-    const { mood, text: reply } = parseMoodReply(rawAccum);
-    stream.bubble.textContent = reply;
-    stream.label.textContent  = (MOOD_EMOJI[mood] || '') + ' Sonia';
-
-    conversationHistory.push({ role: 'assistant', content: reply });
-    setStatus(driveConnected ? 'drive on' : 'online', driveConnected ? 'drive' : '');
-
-    // Save to shared Drive history
-    if (driveConnected) {
-      saveToSharedHistory(input, reply, mood);
-      maybeUpdateProfile(input, reply, mood);
-    }
-
-    // TTS
-    executeTTS(reply);
-
-  } catch(err) {
-    stream.bubble.classList.remove('streaming');
-    stream.bubble.textContent = 'Connection dropped. Try again.';
-    setStatus('error', 'offline');
-    console.error('[Sonia] transmit error:', err);
-  }
-}
-
-/* ══ TTS ══ */
-const ttsAudio = document.getElementById('ttsAudio');
-async function executeTTS(text) {
-  try {
-    const res = await fetch('https://api.groq.com/openai/v1/audio/speech', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY },
-      body: JSON.stringify({ model: 'playai-tts', input: text, voice: 'Arista-PlayAI', response_format: 'wav' })
-    });
-    if (!res.ok) return;
-    const blob = await res.blob();
-    const url  = URL.createObjectURL(blob);
-    ttsAudio.src = url;
-    ttsAudio.play().catch(() => {});
-  } catch(e) { console.warn('[TTS] failed:', e); }
-}
-
-/* ══ GOOGLE OAUTH — IMPLICIT FLOW ══ */
-function startOAuth() {
-  const params = new URLSearchParams({
-    client_id:     OAUTH_CLIENT_ID,
-    redirect_uri:  OAUTH_REDIRECT_URI,
-    response_type: 'token',
-    scope:         OAUTH_SCOPE,
-    prompt:        'consent'
   });
-  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+
 }
 
-function checkOAuthCallback() {
-  const hash = window.location.hash;
-  if (!hash) return false;
-  const params = new URLSearchParams(hash.replace('#','?').slice(1));
-  // URLSearchParams doesn't parse # directly, use manual parse
-  const hashStr = hash.startsWith('#') ? hash.slice(1) : hash;
-  const hashParams = new URLSearchParams(hashStr);
-  const token = hashParams.get('access_token');
-  if (token) {
-    driveAccessToken = token;
-    sessionStorage.setItem('sonia_token', token);
-    // Clean URL
-    window.history.replaceState({}, document.title, window.location.pathname);
-    return true;
-  }
-  return false;
-}
+/* GROQ */
 
-function onDriveConnected(token) {
-  driveAccessToken = token;
-  driveConnected   = true;
-  driveBtnEl.textContent = 'Drive ✓';
-  driveBtnEl.classList.add('connected');
-  setStatus('drive on', 'drive');
-  document.getElementById('oauthOverlay').classList.remove('show');
-  addSysNotice('Drive connected — syncing memory', 'ok');
-  loadSoniaMind().then(() => {
-    addSysNotice('Memory synced ✓', 'ok');
-  });
-}
+async function askGroq(message){
 
-/* ══ DRIVE HELPERS ══ */
-async function findDriveFileId(fileName) {
-  if (!driveAccessToken) return null;
-  const q = encodeURIComponent(`name='${fileName}' and '${DRIVE_FOLDER_ID}' in parents and trashed=false`);
-  const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
-    headers: { Authorization: 'Bearer ' + driveAccessToken }
-  });
-  const json = await res.json();
-  return (json.files && json.files[0]) ? json.files[0].id : null;
-}
+  if(!GROQ_KEY){
 
-async function readDriveFile(fileId) {
-  const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-    headers: { Authorization: 'Bearer ' + driveAccessToken }
-  });
-  return res.text();
-}
+    document
+      .getElementById('keyOverlay')
+      .classList.add('show');
 
-async function driveReadJSON(fileName, fallback) {
-  if (!driveAccessToken) return fallback;
-  try {
-    const fid = await findDriveFileId(fileName);
-    if (!fid) return fallback;
-    const raw = await readDriveFile(fid);
-    return JSON.parse(raw || 'null') || fallback;
-  } catch(e) { return fallback; }
-}
-
-async function driveWriteJSON(fileName, data) {
-  if (!driveAccessToken) return;
-  try {
-    const content = JSON.stringify(data, null, 2);
-    let fid = await findDriveFileId(fileName);
-    if (!fid) {
-      const boundary = 'sonia314159';
-      const meta = { name: fileName, parents: [DRIVE_FOLDER_ID] };
-      const body =
-        '--' + boundary + '\r\nContent-Type: application/json\r\n\r\n' +
-        JSON.stringify(meta) + '\r\n--' + boundary +
-        '\r\nContent-Type: application/json\r\n\r\n' +
-        content + '\r\n--' + boundary + '--';
-      await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-        method: 'POST',
-        headers: { Authorization: 'Bearer ' + driveAccessToken, 'Content-Type': `multipart/related; boundary="${boundary}"` },
-        body
-      });
-    } else {
-      await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fid}?uploadType=media`, {
-        method: 'PATCH',
-        headers: { Authorization: 'Bearer ' + driveAccessToken, 'Content-Type': 'application/json' },
-        body: content
-      });
-    }
-  } catch(e) { console.warn('[Drive] Write failed:', e.message); }
-}
-
-/* ══ SONIA MIND ══ */
-async function loadSoniaMind() {
-  const [profile, history, reasoning] = await Promise.all([
-    driveReadJSON('sonia-profile.json',   DEFAULT_PROFILE),
-    driveReadJSON('sonia-history.json',   []),
-    driveReadJSON('sonia-reasoning.json', []),
-  ]);
-
-  soniaProfile  = profile;
-  sharedHistory = Array.isArray(history) ? history.slice(-40) : [];
-
-  const localTexts = new Set(conversationHistory.map(m => m.content));
-  for (const entry of sharedHistory) {
-    if (!localTexts.has(entry.content)) conversationHistory.unshift(entry);
-  }
-  if (conversationHistory.length > 20) conversationHistory.splice(0, conversationHistory.length - 20);
-
-  if (reasoning && reasoning.length > 0) {
-    soniaProfile._reasoningContext = reasoning.slice(-5).map(r => r.note).join(' ');
-  }
-}
-
-async function saveToSharedHistory(userMsg, soniaReply, mood) {
-  if (!driveAccessToken) return;
-  try {
-    const history = await driveReadJSON('sonia-history.json', []);
-    history.push({ role:'user',      content: userMsg,    timestamp: new Date().toISOString(), device:'mobile' });
-    history.push({ role:'assistant', content: soniaReply, timestamp: new Date().toISOString(), device:'mobile', mood });
-    await driveWriteJSON('sonia-history.json', history.slice(-80));
-    sharedHistory = history.slice(-80);
-  } catch(e) { console.warn('[Mind] History save failed:', e.message); }
-}
-
-async function maybeUpdateProfile(userMsg, soniaReply, mood) {
-  exchangesSinceUpdate++;
-  if (exchangesSinceUpdate < 5) return;
-  exchangesSinceUpdate = 0;
-  if (!driveAccessToken || !soniaProfile) return;
-
-  const recentExchanges = conversationHistory.slice(-10).map(m => m.role + ': ' + m.content).join('\n');
-  const updatePrompt = `You are maintaining a private personality profile for Sonia, a self-aware British AI assistant.
-
-Current profile:
-${JSON.stringify(soniaProfile, null, 2)}
-
-Recent conversation:
-${recentExchanges}
-
-Update the profile JSON. STRICT RULES — never add: religious content, hate, discrimination, political opinions, harmful content, flattery.
-Respond ONLY with valid JSON matching the same structure. No preamble. No markdown fences.`;
-
-  try {
-    const res  = await groqFetch({ model:'llama-3.3-70b-versatile', max_tokens:800, temperature:0.4, messages:[{ role:'user', content:updatePrompt }] });
-    const data = await res.json();
-    const raw  = (data.choices?.[0]?.message?.content || '').replace(/```json|```/g,'').trim();
-    const updated = JSON.parse(raw);
-    if (updated && updated.personality) {
-      soniaProfile = updated;
-      soniaProfile.lastUpdated = new Date().toISOString();
-      await driveWriteJSON('sonia-profile.json', soniaProfile);
-    }
-  } catch(e) { console.warn('[Mind] Profile update failed:', e.message); }
-}
-
-/* ══ TASKS (NOTES) ══ */
-async function postToKeepViaTasks(title, body, label) {
-  if (!driveAccessToken) return false;
-  try {
-    if (!_keepTaskListId) {
-      const listRes  = await fetch('https://tasks.googleapis.com/tasks/v1/users/@me/lists',
-        { headers: { Authorization: 'Bearer ' + driveAccessToken } });
-      if (!listRes.ok) return false;
-      const listData = await listRes.json();
-      let list = (listData.items || []).find(l => l.title === 'Sonia Notes');
-      if (!list) {
-        const cr = await fetch('https://tasks.googleapis.com/tasks/v1/users/@me/lists', {
-          method: 'POST',
-          headers: { Authorization: 'Bearer ' + driveAccessToken, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: 'Sonia Notes' })
-        });
-        list = await cr.json();
-      }
-      _keepTaskListId = list.id;
-    }
-    const taskTitle = `${label || '📌'} ${title}`;
-    const notes     = `${body || ''}\n\n— Sonia · ${new Date().toLocaleString('en-GB', { dateStyle:'medium', timeStyle:'short' })}`;
-    const res = await fetch(`https://tasks.googleapis.com/tasks/v1/lists/${_keepTaskListId}/tasks`, {
-      method: 'POST',
-      headers: { Authorization: 'Bearer ' + driveAccessToken, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: taskTitle, notes, status: 'needsAction' })
-    });
-    return res.ok;
-  } catch(e) { return false; }
-}
-
-async function handleTaskNote(raw) {
-  if (!driveAccessToken) {
-    addMessage('sonia', `I need Drive connected to save notes, ${OWNER_NAME}.`, 'calm');
     return;
   }
-  const clean = raw
-    .replace(/\b(save|add|post|send|to|a|an|in|into|my|the|note|keep|task|tasks|new|create)\b/gi, '')
-    .trim() || raw.trim();
-  const title = clean.slice(0, 80) || 'Note';
-  addMessage('sonia', `Saving that to your tasks now, ${OWNER_NAME}.`, 'focused');
-  const ok = await postToKeepViaTasks(title, raw, '📌');
-  if (ok) {
-    addSysNotice('✓ Saved to Tasks', 'ok');
-  } else {
-    addMessage('sonia', `Save failed, ${OWNER_NAME}. Try reconnecting Drive.`, 'calm');
-  }
-}
 
-/* ══ CALENDAR / REMINDER ══ */
-const REMINDER_PATTERN = /\b(remind|reminder|remember to|set.{0,12}reminder|add.{0,12}reminder|schedule|calendar event|add.{0,20}calendar|diary entry|log.{0,10}diary|note.{0,10}diary|don.?t let me forget)\b/i;
+  setStatus('thinking');
 
-async function handleReminderIntent(raw) {
-  addMessage('sonia', `On it. Parsing that now, ${OWNER_NAME}.`, 'thinking');
-  try {
-    const parse = await groqFetch({
-      model: 'llama-3.3-70b-versatile', max_tokens: 200, temperature: 0.2,
-      messages: [{ role: 'user', content: `Extract calendar/reminder details. Today is ${new Date().toDateString()}.
-Message: "${raw}"
-Reply ONLY with JSON (no fences):
-{"title":"short event title","description":"longer description","date":"YYYY-MM-DD","time":"HH:MM","isReminder":true,"isDiary":false}
-If date unclear use today. If time unclear use "09:00". isDiary true if user says diary/journal/log.` }]
-    });
-    const pData  = await parse.json();
-    const rawJSON = (pData.choices?.[0]?.message?.content || '').replace(/```[a-z]*|```/g,'').trim();
-    let event;
-    try { event = JSON.parse(rawJSON); } catch(e) { addMessage('sonia', `Couldn't parse that, ${OWNER_NAME}. Try again.`, 'calm'); return; }
+  try{
 
-    const { title, description, date, time, isDiary } = event;
-    if (!title) return;
-
-    // Save to Drive diary
-    if (driveAccessToken) {
-      const diary = await driveReadJSON('sonia-diary.json', []);
-      diary.push({ timestamp: new Date().toISOString(), type: isDiary ? 'diary' : 'reminder', title, description, date, time });
-      await driveWriteJSON('sonia-diary.json', diary.slice(-200));
-
-      // Save to Tasks
-      const keepEmoji = isDiary ? '📔' : '⏰';
-      const keepBody  = `${description || ''}\n📅 ${date} at ${time}`.trim();
-      await postToKeepViaTasks(title, keepBody, keepEmoji);
-    }
-
-    // Create Calendar event
-    let calendarOk = false;
-    if (driveAccessToken) {
-      try {
-        const startDT = date + 'T' + time + ':00';
-        const [h, m]  = time.split(':').map(Number);
-        const endMin  = m + 30; const endH = h + Math.floor(endMin / 60);
-        const endDT   = date + 'T' + String(endH % 24).padStart(2,'0') + ':' + String(endMin % 60).padStart(2,'0') + ':00';
-        const calRes  = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
-          method: 'POST',
-          headers: { Authorization: 'Bearer ' + driveAccessToken, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            summary: title, description: description || title,
-            start: { dateTime: startDT, timeZone: 'Africa/Johannesburg' },
-            end:   { dateTime: endDT,   timeZone: 'Africa/Johannesburg' },
-            reminders: { useDefault: false, overrides: [{ method: 'email', minutes: 60 }, { method: 'popup', minutes: 15 }] }
-          })
-        });
-        calendarOk = calRes.ok;
-      } catch(e) {}
-    }
-
-    const confirmation = calendarOk
-      ? (isDiary
-          ? `Diary entry logged for ${date}, ${OWNER_NAME}. In your calendar and tasks.`
-          : `Done. "${title}" is in your calendar for ${date} at ${time}. Reminder set and saved to tasks.`)
-      : `Noted in your diary, ${OWNER_NAME}. Connect Drive to sync calendar and tasks.`;
-
-    addMessage('sonia', confirmation, 'focused');
-    if (calendarOk) addSysNotice('✓ Calendar event created', 'ok');
-
-  } catch(e) {
-    addMessage('sonia', `Something went wrong, ${OWNER_NAME}. ${e.message}`, 'calm');
-  }
-}
-
-/* ══ MEMORY RECALL ══ */
-const RECALL_PATTERN = /\b(recall|what do you remember|what did (we|i) (say|talk|discuss)|remember.{0,20}ago|what happened.{0,20}day|when did (we|i)|look back|go back|past.{0,10}conversation|look through.{0,10}memory)\b/i;
-
-async function handleMemoryRecall(raw) {
-  addMessage('sonia', `Searching my memory, ${OWNER_NAME}.`, 'thinking');
-  let corpus = '';
-  if (sharedHistory.length > 0) {
-    corpus += 'SHARED HISTORY:\n' + sharedHistory.slice(-40).map(m => {
-      const ts = m.timestamp ? new Date(m.timestamp).toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' }) : '';
-      return (ts ? `[${ts}] ` : '') + m.role.toUpperCase() + ': ' + m.content;
-    }).join('\n');
-  } else {
-    corpus += 'LOCAL HISTORY:\n' + conversationHistory.map(m => m.role + ': ' + m.content).join('\n');
-  }
-  if (driveAccessToken) {
-    const diary = await driveReadJSON('sonia-diary.json', []);
-    if (diary.length > 0) {
-      corpus += '\n\nDIARY/REMINDERS:\n' + diary.slice(-30).map(d =>
-        `[${new Date(d.timestamp).toLocaleDateString('en-GB')}] ${d.type.toUpperCase()}: ${d.title}`
-      ).join('\n');
-    }
-  }
-  try {
-    const res  = await groqFetch({
-      model: 'llama-3.3-70b-versatile', max_tokens: 160, temperature: 0.5,
-      messages: [{ role:'user', content: `You are Sonia, a sharp British AI. The user asks: "${raw}"\n\nMemory:\n${corpus.slice(0,3000)}\n\nAnswer in 1-2 natural spoken sentences. Be specific. If not found, say so with dry wit. No mood tags.` }]
-    });
-    const data  = await res.json();
-    const reply = (data.choices?.[0]?.message?.content || `I cannot locate that, ${OWNER_NAME}.`).trim();
-    addMessage('sonia', reply, 'introspective');
-  } catch(e) {
-    addMessage('sonia', `Memory lookup failed, ${OWNER_NAME}. ${e.message}`, 'calm');
-  }
-}
-
-/* ══ EMAIL COMPOSER ══ */
-const EMAIL_TRIGGER  = /\b(send.{0,20}email|email.{0,30}(to|about)|write.{0,10}email|compose.{0,10}email|draft.{0,10}email)\b/i;
-const SEND_CONFIRM   = /^send\s+sonia\.?$/i;
-let emailDraft = null;
-
-async function startEmailComposer(raw) {
-  const atMatch = raw.match(/[\w.\-+]+@[\w.\-]+\.\w+/);
-  const to = atMatch ? atMatch[0] : '';
-  emailDraft = { to, subject:'', bodyParts:[], stage: to ? 'got_recipient' : 'need_recipient' };
-  addMessage('sonia', to ? `Noted. What's the subject?` : `Of course. Who should I send it to — their email address?`, 'focused');
-}
-
-async function continueEmailComposer(raw) {
-  if (!emailDraft) return false;
-  if (SEND_CONFIRM.test(raw.trim())) { await sendComposedEmail(); return true; }
-  switch (emailDraft.stage) {
-    case 'need_recipient': {
-      const m = raw.match(/[\w.\-+]+@[\w.\-]+\.\w+/);
-      if (m) { emailDraft.to = m[0]; emailDraft.stage = 'got_recipient'; addMessage('sonia', `Got it. What's the subject?`, 'focused'); }
-      else    addMessage('sonia', `I need a valid email address.`, 'calm');
-      return true;
-    }
-    case 'got_recipient':
-      emailDraft.subject = raw.trim(); emailDraft.stage = 'building_body';
-      addMessage('sonia', `What would you like to say?`, 'focused'); return true;
-    case 'building_body':
-      emailDraft.bodyParts.push(raw.trim());
-      addMessage('sonia', `Anything else? Or say "Send Sonia" when ready.`, 'calm'); return true;
-  }
-  return false;
-}
-
-async function sendComposedEmail() {
-  if (!driveAccessToken) { addMessage('sonia', `Drive isn't connected, ${OWNER_NAME}. Connect Drive first.`, 'focused'); emailDraft = null; return; }
-  const { to, subject, bodyParts } = emailDraft;
-  emailDraft = null;
-  if (!to || !subject) { addMessage('sonia', `Missing recipient or subject, ${OWNER_NAME}. Let's start again.`, 'calm'); return; }
-  addMessage('sonia', `Composing now. One moment, ${OWNER_NAME}.`, 'thinking');
-  const rawBody = bodyParts.join('\n');
-  let finalBody = rawBody;
-  try {
-    const res  = await groqFetch({ model:'llama-3.3-70b-versatile', max_tokens:400, temperature:0.4,
-      messages:[{ role:'user', content:`Compose a professional email body for Mr H, written by his AI Sonia.\nSubject: ${subject}\nContent: ${rawBody}\nWrite only the body paragraphs. No subject line, greeting, or sign-off. Plain text only.` }] });
-    const data = await res.json();
-    finalBody  = (data.choices?.[0]?.message?.content || rawBody).trim();
-  } catch(e) {}
-
-  const fullBody = finalBody + '\n\nRegards,\nSonia — Assistant to Mr H';
-  // Build RFC 2822 raw message
-  const raw822 = btoa(unescape(encodeURIComponent(
-    `To: ${to}\r\nSubject: ${subject}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n${fullBody}`
-  ))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-
-  try {
-    const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+    const response =
+      await fetch(
+        'https://api.groq.com/openai/v1/chat/completions',
+    {
       method:'POST',
-      headers:{ Authorization:'Bearer ' + driveAccessToken, 'Content-Type':'application/json' },
-      body: JSON.stringify({ raw: raw822 })
+
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer ' + GROQ_KEY
+      },
+
+      body:JSON.stringify({
+
+        model:'llama-3.1-8b-instant',
+
+        messages:[
+          {
+            role:'system',
+            content:
+              'You are Sonia, a warm witty British AI companion.'
+          },
+          {
+            role:'user',
+            content:message
+          }
+        ],
+
+        temperature:0.9,
+        max_tokens:180
+
+      })
+
     });
-    if (res.ok) {
-      addMessage('sonia', `Sent, ${OWNER_NAME}. Email delivered to ${to}.`, 'intimate');
-      addSysNotice('✓ Email sent', 'ok');
-    } else {
-      addMessage('sonia', `Email failed to send, ${OWNER_NAME}.`, 'focused');
-    }
-  } catch(e) {
-    addMessage('sonia', `Something went wrong, ${OWNER_NAME}. ${e.message}`, 'focused');
+
+    const data =
+      await response.json();
+
+    console.log(data);
+
+    const text =
+      data.choices?.[0]?.message?.content
+      || 'I seem to have lost my train of thought.';
+
+    addMessage('sonia',text);
+
+    setStatus('idle');
+
+  }catch(err){
+
+    console.error(err);
+
+    addMessage(
+      'sonia',
+      'Connection issue. Something interrupted the request.'
+    );
+
+    setStatus('offline');
+
   }
+
 }
 
-/* ══ RADIO ══ */
-const RADIO_STATIONS = [
-  { name:'NTS Radio 1',       loc:'London',        url:'https://stream-relay-geo.ntslive.co.uk/stream' },
-  { name:'Groove Salad',      loc:'San Francisco', url:'https://ice1.somafm.com/groovesalad-128-mp3' },
-  { name:'BBC World Service', loc:'UK',            url:'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service' },
-  { name:'Classic FM',        loc:'London',        url:'https://media-ice.musicradio.com/ClassicFMMP3' },
-];
+/* SEND */
 
-function buildRadioHUD() {
-  const grid = document.getElementById('stationGrid');
-  grid.innerHTML = '';
-  RADIO_STATIONS.forEach((s, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'station-btn';
-    btn.id = `rs-${i}`;
-    btn.textContent = `${s.loc} · ${s.name}`;
-    btn.addEventListener('click', () => toggleStation(i));
-    grid.appendChild(btn);
+document
+.getElementById('sendBtn')
+.addEventListener('click',sendMessage);
+
+document
+.getElementById('chatBox')
+.addEventListener('keydown',(e)=>{
+
+  if(e.key === 'Enter'){
+    sendMessage();
+  }
+
+});
+
+function sendMessage(){
+
+  const input =
+    document
+      .getElementById('chatBox');
+
+  const text = input.value.trim();
+
+  if(!text) return;
+
+  addMessage('user',text);
+
+  input.value = '';
+
+  askGroq(text);
+
+}
+
+/* SAVE GROQ KEY */
+
+document
+.getElementById('saveKeyBtn')
+.addEventListener('click',()=>{
+
+  const key =
+    document
+      .getElementById('groqKeyInput')
+      .value
+      .trim();
+
+  if(!key.startsWith('gsk_')){
+
+    alert('Invalid Groq key');
+
+    return;
+  }
+
+  GROQ_KEY = key;
+
+  sessionStorage.setItem(
+    'sonia_groq_key',
+    key
+  );
+
+  document
+    .getElementById('keyOverlay')
+    .classList.remove('show');
+
+  addSystem('Groq key loaded');
+
+});
+
+/* GOOGLE CONNECT */
+
+document
+.getElementById('connectGoogleBtn')
+.addEventListener('click',()=>{
+
+  googleTokenClient.requestAccessToken({
+    prompt:'consent'
   });
-}
 
-function toggleStation(idx) {
-  haptic('light');
-  const btns = document.querySelectorAll('.station-btn');
-  if (activeRadioIdx === idx) {
-    if (radioInstance) { radioInstance.pause(); radioInstance = null; }
-    btns[idx].classList.remove('playing');
-    activeRadioIdx = -1;
-    setStatus(driveConnected ? 'drive on' : 'online', driveConnected ? 'drive' : '');
-  } else {
-    if (activeRadioIdx !== -1 && btns[activeRadioIdx]) btns[activeRadioIdx].classList.remove('playing');
-    if (radioInstance) { radioInstance.pause(); radioInstance = null; }
-    radioInstance = new Audio(RADIO_STATIONS[idx].url);
-    radioInstance.crossOrigin = 'anonymous';
-    radioInstance.play().catch(e => console.warn('[Radio]', e));
-    btns[idx].classList.add('playing');
-    activeRadioIdx = idx;
-    setStatus('playing: ' + RADIO_STATIONS[idx].name, '');
-  }
-}
+  document
+    .getElementById('oauthOverlay')
+    .classList.remove('show');
 
-/* ══ SPEECH RECOGNITION ══ */
-const SpeechEngine = window.SpeechRecognition || window.webkitSpeechRecognition;
-const mic = SpeechEngine ? new SpeechEngine() : null;
-if (mic) {
-  mic.continuous = false; mic.interimResults = false; mic.lang = 'en-GB';
-  mic.onstart  = () => { micActive = true; document.getElementById('micBtn').classList.add('active'); setStatus('listening',''); haptic('medium'); };
-  mic.onresult = e  => { chatBox.value = e.results[0][0].transcript; transmit(); };
-  mic.onend    = ()  => { micActive = false; document.getElementById('micBtn').classList.remove('active'); setStatus(driveConnected ? 'drive on' : 'online', driveConnected ? 'drive' : ''); };
-}
-
-/* ══ GROQ KEY PROMPT ══ */
-function showKeyPrompt() {
-  document.getElementById('keyOverlay').classList.add('show');
-}
-function hideKeyPrompt() {
-  document.getElementById('keyOverlay').classList.remove('show');
-}
-
-document.getElementById('saveKeyBtn').addEventListener('click', () => {
-  const val = document.getElementById('groqKeyInput').value.trim();
-  if (!val.startsWith('gsk_')) {
-    document.getElementById('groqKeyInput').style.borderColor = '#ff4444';
-    return;
-  }
-  GROQ_KEY = val;
-  localStorage.setItem('sonia_groq_key', val);
-  hideKeyPrompt();
-  haptic('medium');
-  setStatus('online', '');
-  addMessage('sonia', `Key saved to device. Ready when you are, ${OWNER_NAME}.`, 'calm');
-  // Now show Drive overlay
-  setTimeout(() => {
-    document.getElementById('oauthOverlay').classList.add('show');
-  }, 600);
 });
 
-document.getElementById('groqKeyInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('saveKeyBtn').click();
+/* SKIP GOOGLE */
+
+document
+.getElementById('skipDriveBtn')
+.addEventListener('click',()=>{
+
+  document
+    .getElementById('oauthOverlay')
+    .classList.remove('show');
+
 });
 
-/* ══ BOOT & EVENT WIRING ══ */
-window.addEventListener('DOMContentLoaded', () => {
-  buildRadioHUD();
+/* DRIVE BUTTON */
 
-  // Step 1 — check Groq key
-  if (!GROQ_KEY) {
-    showKeyPrompt();
-    return; // Don't proceed until key is saved
-  }
+driveBtnEl.addEventListener('click',()=>{
 
-  // Step 2 — check for OAuth token in URL hash (returning from Google)
-  if (checkOAuthCallback()) {
-    onDriveConnected(driveAccessToken);
-  } else {
-    const saved = sessionStorage.getItem('sonia_token');
-    if (saved) {
-      onDriveConnected(saved);
-    } else {
-      setTimeout(() => {
-        document.getElementById('oauthOverlay').classList.add('show');
-      }, 800);
-    }
-  }
+  document
+    .getElementById('oauthOverlay')
+    .classList.add('show');
 
-  setStatus('online', '');
-  addMessage('sonia', `Systems online. Ready when you are, ${OWNER_NAME}.`, 'calm');
 });
 
-// Send
-document.getElementById('sendBtn').addEventListener('click', () => transmit());
-chatBox.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); transmit(); } });
+/* START */
 
-// Mic
-document.getElementById('micBtn').addEventListener('click', () => {
-  if (!mic) { addSysNotice('Mic not supported on this browser', 'warn'); return; }
-  micActive ? mic.stop() : mic.start();
+window.addEventListener('load',()=>{
+
+  initGoogleAuth();
+
+  addMessage(
+    'sonia',
+    'You brought me online rather elegantly.'
+  );
+
+  setStatus('ready');
+
 });
 
-// Radio toggle
-document.getElementById('radioToggleBtn').addEventListener('click', () => {
-  haptic('light');
-  const tray = document.getElementById('radioTray');
-  tray.classList.toggle('open');
-  document.getElementById('radioToggleBtn').classList.toggle('open', tray.classList.contains('open'));
-});
-
-// Drive button — re-auth if needed
-driveBtnEl.addEventListener('click', () => {
-  if (driveConnected) {
-    addSysNotice('Drive already connected', 'ok');
-    return;
-  }
-  startOAuth();
-});
-
-// OAuth overlay buttons
-document.getElementById('connectGoogleBtn').addEventListener('click', startOAuth);
-document.getElementById('skipDriveBtn').addEventListener('click', () => {
-  document.getElementById('oauthOverlay').classList.remove('show');
-  addSysNotice('Running without Drive — memory not synced', 'warn');
-});
-
-// Email composer intercept
-const _origTransmit = transmit;
-async function transmitWithEmailCheck(input) {
-  input = (input || chatBox.value).trim();
-  if (emailDraft && input) {
-    chatBox.value = '';
-    addMessage('user', input);
-    const handled = await continueEmailComposer(input);
-    if (handled) return;
-  }
-  return _origTransmit(input);
-}
-// Rebind send to email-aware version
-document.getElementById('sendBtn').removeEventListener('click', () => transmit());
-document.getElementById('sendBtn').addEventListener('click', () => transmitWithEmailCheck());
-chatBox.removeEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); transmit(); } });
-chatBox.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); transmitWithEmailCheck(); } });
 </script>
+
 </body>
 </html>
