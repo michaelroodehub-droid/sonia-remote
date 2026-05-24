@@ -1,369 +1,881 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Sonia</title>
-
-<!-- Minimalist Variable Font Setup -->
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#000000;--text:#ffffff;--sub:rgba(255,255,255,0.45);--line:rgba(255,255,255,0.12);--line-hi:rgba(255,255,255,0.3);
+  --orb-idle:#8844ff;--orb-listen:#ff2266;--orb-think:#2299ff;--orb-speak:#00ffaa;
+  --green:#00cc66;--green-glow:#00ff88;
+  --sans:'Space Grotesk',sans-serif;--mono:'Space Mono',monospace;
+  --nav-h:64px;--top-h:56px;--status-h:32px;
+  --safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);
 }
+html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
 
-/* System-Driven Light/Dark Adaptive Theme */
-:root {
-  --bg: #ffffff;
-  --surface: #f8f9fa;
-  --border: #eaeaea;
-  --text: #111111;
-  --text-muted: #767676;
-  --bubble-user: #f0f0f0;
-  --bubble-sonia: transparent;
-  --font: 'Plus Jakarta Sans', sans-serif;
-  --mono: 'JetBrains Mono', monospace;
-}
+/* ── SETUP ── */
+#setup{position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);padding:32px 24px;padding-top:calc(var(--safe-top) + 32px);overflow-y:auto;}
+.setup-inner{width:100%;max-width:420px}
+.setup-name{font-family:var(--mono);font-size:2.8rem;font-weight:700;letter-spacing:-0.03em;margin-bottom:4px;color:var(--text)}
+.setup-sub{font-family:var(--mono);font-size:0.72rem;letter-spacing:0.2em;color:var(--text);opacity:0.7;text-transform:uppercase;margin-bottom:40px}
+.sf{margin-bottom:18px}
+.sf label{display:block;font-family:var(--mono);font-size:0.68rem;letter-spacing:0.18em;color:var(--text);opacity:0.8;text-transform:uppercase;margin-bottom:8px}
+.sf input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--line-hi);color:var(--text);font-family:var(--mono);font-size:0.95rem;padding:12px 0;outline:none;transition:border-color 0.2s;border-radius:0;}
+.sf input:focus{border-bottom-color:var(--text)}
+.sf input::placeholder{color:var(--text);opacity:0.4}
+#setupBtn{width:100%;margin-top:32px;background:transparent;border:1px solid var(--line-hi);color:var(--text);font-family:var(--mono);font-size:0.85rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:18px;cursor:pointer;transition:border-color 0.2s;}
+#setupBtn:hover{border-color:var(--text)}
+#setupBtn:active{opacity:0.7}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0b0b0b;
-    --surface: #121212;
-    --border: #1f1f1f;
-    --text: #eeeeee;
-    --text-muted: #888888;
-    --bubble-user: #222222;
-  }
-}
+/* ── APP SHELL ── */
+#app{display:flex;flex-direction:column;position:fixed;inset:0;padding-top:var(--safe-top);background:var(--bg);}
+#topBar{height:var(--top-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid var(--line);flex-shrink:0;}
+.top-left{display:flex;align-items:center;gap:14px}
+.top-name{font-family:var(--mono);font-weight:700;font-size:1.05rem;letter-spacing:0.05em;color:var(--text)}
 
-html, body {
-  width: 100%;
-  height: 100%;
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font);
-  overflow: hidden;
+/* ── ORB — enhanced glow ── */
+#orb{
+  width:30px;height:30px;border-radius:50%;background:var(--orb-idle);border:none;flex-shrink:0;cursor:default;
+  transition:background 0.4s ease,box-shadow 0.4s ease;
+  box-shadow:0 0 10px 3px rgba(136,68,255,0.55),0 0 22px 6px rgba(136,68,255,0.25);
 }
+#orb.listening{
+  background:var(--orb-listen);
+  box-shadow:0 0 12px 4px rgba(255,34,102,0.7),0 0 28px 10px rgba(255,34,102,0.3);
+  animation:orbPulse 0.6s ease-in-out infinite alternate
+}
+#orb.thinking{
+  background:var(--orb-think);
+  box-shadow:0 0 12px 4px rgba(34,153,255,0.7),0 0 28px 10px rgba(34,153,255,0.3);
+  animation:orbPulse 1.2s ease-in-out infinite alternate
+}
+#orb.speaking{
+  background:var(--orb-speak);
+  box-shadow:0 0 12px 4px rgba(0,255,170,0.7),0 0 28px 10px rgba(0,255,170,0.3);
+  animation:orbBreathe 0.8s ease-in-out infinite alternate
+}
+#orb.online{
+  background:var(--orb-idle);
+  box-shadow:0 0 10px 3px rgba(136,68,255,0.55),0 0 22px 6px rgba(136,68,255,0.25);
+}
+#orb.syncing{
+  background:var(--green-glow);
+  box-shadow:0 0 14px 5px rgba(0,204,102,0.75),0 0 32px 12px rgba(0,255,136,0.35);
+  animation:orbBreathe 1s ease-in-out infinite alternate
+}
+@keyframes orbPulse{from{transform:scale(0.85);filter:brightness(0.9)}to{transform:scale(1.15);filter:brightness(1.3)}}
+@keyframes orbBreathe{from{transform:scale(0.9);filter:brightness(1)}to{transform:scale(1.1);filter:brightness(1.6)}}
 
-#viewport {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  padding: env(safe-area-inset-top, 20px) 24px env(safe-area-inset-bottom, 20px) 24px;
-}
+/* ── TOP RIGHT BUTTONS ── */
+.top-right{display:flex;align-items:center;gap:8px}
+#modeBtn,#ttsBtn{width:34px;height:34px;border-radius:50%;background:transparent;border:1px solid var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text);opacity:0.8;transition:opacity 0.2s,border-color 0.2s;}
+#modeBtn:hover,#ttsBtn:hover{opacity:1}
+#ttsBtn.active{border-color:var(--orb-speak);color:var(--orb-speak);opacity:1;}
+#ttsBtn.speaking-pulse{animation:ttsPulse 0.5s ease-in-out infinite alternate}
+@keyframes ttsPulse{from{box-shadow:0 0 0 0 rgba(0,255,170,0.4)}to{box-shadow:0 0 0 6px rgba(0,255,170,0)}}
 
-/* HEADER */
-#header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
+/* ── PANELS ── */
+#panels{flex:1;overflow:hidden;position:relative;min-height:0}
+.panel{position:absolute;inset:0;display:none;flex-direction:column;opacity:0;transition:opacity 0.2s ease}
+.panel.active{display:flex;opacity:1}
 
-#header h1 {
-  font-weight: 400;
-  font-size: 1.15rem;
-  letter-spacing: -0.02em;
-}
+/* ── STATUS STRIP ── */
+#statusStrip{height:var(--status-h);border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 20px;flex-shrink:0;}
+#presenceDot{width:6px;height:6px;border-radius:50%;background:var(--text);opacity:0.4;flex-shrink:0;transition:background 0.3s,box-shadow 0.3s}
+#presenceDot.online{background:#00d47e;box-shadow:0 0 6px #00d47e;opacity:1}
+#presenceDot.thinking{background:var(--orb-think);box-shadow:0 0 6px var(--orb-think);opacity:1}
+#presenceDot.listening{background:var(--orb-listen);box-shadow:0 0 6px var(--orb-listen);opacity:1}
+#presenceDot.syncing{background:var(--green-glow);box-shadow:0 0 8px var(--green-glow);opacity:1}
+#statusTxt{font-family:var(--mono);font-size:0.65rem;color:var(--text);opacity:0.75;text-transform:uppercase;letter-spacing:0.1em}
+/* FIX: light mode syncing text — use dark green instead of neon green */
+#statusStrip.syncing #statusTxt{color:var(--sync-txt,var(--green));opacity:1}
 
-#statusLabel {
-  font-size: 0.7rem;
-  font-family: var(--mono);
-  color: var(--text-muted);
-  text-transform: lowercase;
-}
+/* ── NAV ── */
+#bottomNav{height:calc(var(--nav-h) + var(--safe-bot));padding-bottom:var(--safe-bot);border-top:1px solid var(--line);display:flex;align-items:stretch;flex-shrink:0;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;border:none;background:none;color:var(--text);opacity:0.5;font-family:var(--mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;transition:opacity 0.2s,color 0.2s;border-right:1px solid var(--line);padding:0;}
+.nav-item:last-child{border-right:none}
+.nav-item svg{width:18px;height:18px;fill:currentColor;transition:transform 0.2s}
+.nav-item.active{opacity:1}
+.nav-item.active svg{transform:scale(1.05)}
+/* FIX: light mode nav syncing — use dark green */
+#bottomNav.syncing .nav-item{color:var(--sync-txt,var(--green));opacity:0.5}
+#bottomNav.syncing .nav-item.active{opacity:1}
 
-/* MEMORY LOG */
-#chatLog {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  padding: 24px 0;
-  scrollbar-width: none;
-}
+/* ── CHAT ── */
+#chatLog{flex:1;overflow-y:auto;padding:24px 20px 16px;display:flex;flex-direction:column;gap:0;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scroll-behavior:smooth;}
+.msg{display:flex;flex-direction:column;margin-bottom:22px;animation:msgIn 0.2s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg-who{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--text);opacity:0.6;margin-bottom:6px;font-weight:700;}
+.msg.user .msg-who{text-align:right}
+.msg-text{font-family:var(--sans);font-size:1.05rem;line-height:1.65;font-weight:500;color:var(--text)}
+.msg.user .msg-text{text-align:right;opacity:0.85}
+.msg-text.streaming::after{content:'▋';animation:blink 0.7s step-end infinite;color:var(--orb-speak);font-size:0.8em;margin-left:2px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.thinking-dots{display:flex;gap:5px;align-items:center;padding:4px 0}
+.thinking-dots span{width:6px;height:6px;border-radius:50%;background:var(--text);opacity:0.4;animation:dot 1.2s ease-in-out infinite}
+.thinking-dots span:nth-child(2){animation-delay:0.2s}
+.thinking-dots span:nth-child(3){animation-delay:0.4s}
+@keyframes dot{0%,80%,100%{opacity:0.2;transform:scale(0.7)}40%{opacity:0.9;transform:scale(1)}}
+#chatInputWrap{flex-shrink:0;border-top:1px solid var(--line);padding:12px 20px;display:flex;align-items:flex-end;gap:12px;}
+#chatBox{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--sans);font-size:1rem;resize:none;max-height:120px;line-height:1.55;padding:0;overflow-y:auto;font-weight:500;caret-color:var(--text);}
+#chatBox::placeholder{color:var(--text);opacity:0.45}
+#micBtn{width:34px;height:34px;border-radius:50%;flex-shrink:0;background:transparent;border:1px solid var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);opacity:0.7;transition:opacity 0.2s,border-color 0.2s,color 0.2s;align-self:flex-end;}
+#micBtn:hover{opacity:1}
+#micBtn.active{opacity:1;border-color:var(--orb-listen);color:var(--orb-listen)}
+#sendBtn{width:34px;height:34px;flex-shrink:0;border-radius:50%;background:transparent;border:1px solid var(--line);color:var(--text);opacity:0.7;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity 0.2s;align-self:flex-end;}
+#sendBtn:hover{opacity:1}
+#sendBtn:active{opacity:0.4}
+#sendBtn svg{width:14px;height:14px;fill:currentColor;margin-left:2px}
 
-#chatLog::-webkit-scrollbar {
-  display: none;
-}
+/* ── PANELS COMMON ── */
+.panel-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:24px 20px;overscroll-behavior:contain}
+.panel-head{margin-bottom:28px}
+.panel-title{font-family:var(--mono);font-weight:700;font-size:1.4rem;letter-spacing:-0.01em;margin-bottom:4px;color:var(--text)}
+.panel-sub{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.15em;color:var(--text);opacity:0.65;text-transform:uppercase}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px}
+.pill{background:transparent;border:1px solid var(--line-hi);color:var(--text);opacity:0.8;font-family:var(--mono);font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:10px 18px;cursor:pointer;transition:opacity 0.2s,border-color 0.2s;white-space:nowrap;border-radius:0;}
+.pill:hover{opacity:1}
+.pill:active{opacity:0.4}
+.pill.primary{opacity:1;border-color:var(--text)}
+.pill.success{border-color:#00aa55;color:#00aa55;opacity:1}
+.pill.danger{border-color:#ff3d5a;color:#ff3d5a;opacity:1}
 
-.msg {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  max-width: 85%;
-  animation: fadeIn 0.2s ease-out;
-}
+/* ── MEMORY CARDS ── */
+.mem-card{border-top:1px solid var(--line);padding:16px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.mem-card-inner{flex:1}
+.card-ts{font-family:var(--mono);font-size:0.62rem;color:var(--text);opacity:0.6;margin-bottom:8px;letter-spacing:0.08em}
+.card-text{font-size:0.95rem;line-height:1.6;color:var(--text);font-weight:500}
+.mem-del{background:transparent;border:none;color:var(--text);opacity:0.3;cursor:pointer;font-size:14px;padding:4px;flex-shrink:0;transition:opacity 0.2s}
+.mem-del:hover{opacity:0.8;color:#ff3d5a}
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+/* ── NOTES ── */
+.note-card{border-top:1px solid var(--line);padding:16px 0}
+.empty-state{font-family:var(--mono);font-size:0.75rem;color:var(--text);opacity:0.5;padding:32px 0;letter-spacing:0.08em}
+#noteBox{width:100%;background:transparent;border:none;border-bottom:1px solid var(--line);color:var(--text);font-family:var(--sans);font-size:1rem;padding:12px 0;outline:none;resize:none;min-height:100px;margin-bottom:18px;line-height:1.6;border-radius:0;font-weight:500;}
+#noteBox::placeholder{color:var(--text);opacity:0.4}
+#driveHint{font-family:var(--mono);font-size:0.72rem;color:#ff3d5a;padding:12px 0;margin-bottom:18px;display:none}
 
-.msg.user {
-  align-self: flex-end;
-  align-items: flex-end;
-}
+/* ── RADIO ── */
+.now-playing{font-family:var(--mono);font-size:0.78rem;color:var(--text);opacity:0.85;margin-bottom:20px;min-height:20px;letter-spacing:0.06em;font-weight:700}
+.station-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;border:1px solid var(--line)}
+.station-card{background:var(--bg);padding:16px 14px;cursor:pointer;transition:background 0.15s;border:none}
+.station-card:active,.station-card.playing{background:rgba(128,128,128,0.12)}
+.st-name{font-family:var(--mono);font-size:0.82rem;font-weight:700;display:block;margin-bottom:3px;color:var(--text)}
+.st-loc{font-family:var(--mono);font-size:0.62rem;color:var(--text);opacity:0.6;display:block}
 
-.msg.sonia {
-  align-self: flex-start;
-  align-items: flex-start;
-}
+/* ── EMAIL OVERLAY ── */
+#emailOverlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;flex-direction:column;padding-top:var(--safe-top);padding-bottom:var(--safe-bot);}
+#emailOverlay.on{display:flex}
+.email-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:24px 20px 40px}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-family:var(--mono);font-size:0.65rem;letter-spacing:0.15em;color:var(--text);opacity:0.75;text-transform:uppercase;margin-bottom:8px;font-weight:700}
+.form-group input,.form-group textarea{width:100%;background:transparent;border:none;border-bottom:1px solid var(--line);color:var(--text);font-family:var(--sans);font-size:1rem;padding:12px 0;outline:none;border-radius:0;transition:border-color 0.2s;font-weight:500;}
+.form-group input:focus,.form-group textarea:focus{border-bottom-color:var(--line-hi)}
+.form-group input::placeholder,.form-group textarea::placeholder{color:var(--text);opacity:0.4}
+#emailHeader{height:var(--top-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid var(--line);flex-shrink:0;}
+.email-title{font-family:var(--mono);font-weight:700;font-size:1rem;letter-spacing:0.05em;color:var(--text)}
+#emailBackBtn{width:34px;height:34px;border-radius:50%;background:transparent;border:1px solid var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text);opacity:0.8;}
+.form-group textarea{min-height:160px;resize:none;line-height:1.6}
+#emailStatus{font-family:var(--mono);font-size:0.72rem;color:var(--text);opacity:0.75;margin-top:8px;min-height:18px}
 
-.msg-label {
-  font-size: 0.65rem;
-  font-family: var(--mono);
-  color: var(--text-muted);
-}
-
-.msg-bubble {
-  padding: 10px 14px;
-  border-radius: 14px;
-  line-height: 1.55;
-  font-size: 0.95rem;
-  font-weight: 400;
-  word-break: break-word;
-}
-
-.msg.user .msg-bubble {
-  background: var(--bubble-user);
-  color: var(--text);
-  border-bottom-right-radius: 4px;
-}
-
-.msg.sonia .msg-bubble {
-  background: var(--bubble-sonia);
-  color: var(--text);
-  padding-left: 0;
-}
-
-/* INPUT COMPONENT */
-#inputBar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 0;
-  border-top: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
-#chatBox {
-  flex: 1;
-  background: none;
-  border: none;
-  outline: none;
-  color: var(--text);
-  font-size: 1rem;
-  font-family: var(--font);
-}
-
-#chatBox::placeholder {
-  color: var(--text-muted);
-  opacity: 0.6;
-}
-
-.actionBtn {
-  background: none;
-  border: none;
-  color: var(--text);
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  padding: 4px 8px;
-}
-
-.actionBtn:disabled {
-  opacity: 0.25;
-}
-
-.sys-tag {
-  align-self: center;
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-  padding: 4px 10px;
-  border-radius: 20px;
-  letter-spacing: 0.02em;
-}
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:2px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--line)}
+@supports (height:100dvh){html,body,#app{height:100dvh}}
 </style>
 </head>
 <body>
 
-<div id="viewport">
-  <div id="header">
-    <h1>sonia</h1>
-    <span id="statusLabel">synced</span>
-  </div>
-
-  <div id="chatLog"></div>
-
-  <div id="inputBar">
-    <input 
-      type="text" 
-      id="chatBox" 
-      placeholder="write into memory..." 
-      autocomplete="off" 
-      spellcheck="false"
-    >
-    <button class="actionBtn" id="sendBtn" disabled>save</button>
+<div id="setup">
+  <div class="setup-inner">
+    <div class="setup-name">Sonia</div>
+    <div class="setup-sub">Remote Terminal</div>
+    <div class="sf"><label>Groq API Key</label><input type="password" id="cfgGroq" placeholder="gsk_…" autocomplete="off"></div>
+    <div class="sf"><label>Google OAuth Client ID</label><input type="text" id="cfgClient" placeholder="xxxx.apps.googleusercontent.com" autocomplete="off"></div>
+    <div class="sf"><label>Your Name</label><input type="text" id="cfgOwner" placeholder="Mr H" autocomplete="off" value="Mr H"></div>
+    <div class="sf"><label>Drive Folder ID (optional)</label><input type="text" id="cfgFolder" placeholder="15_CaTpcDxfu…" autocomplete="off"></div>
+    <div class="sf"><label>NASA API Key (optional)</label><input type="text" id="cfgNasa" placeholder="your NASA key…" autocomplete="off"></div>
+    <div class="sf"><label>Wolfram App ID (optional)</label><input type="text" id="cfgWolfram" placeholder="XXXX-XXXXXXXXXX" autocomplete="off"></div>
+    <button id="setupBtn">Launch</button>
   </div>
 </div>
 
+<div id="app">
+  <header id="topBar">
+    <div class="top-left">
+      <div id="orb"></div>
+      <div class="top-name">Sonia</div>
+    </div>
+    <div class="top-right">
+      <button id="ttsBtn" title="Toggle voice">🔇</button>
+      <button id="modeBtn" title="Toggle theme">◐</button>
+    </div>
+  </header>
+
+  <div id="panels">
+
+    <div class="panel active" id="chatPanel">
+      <div id="chatLog"></div>
+      <div id="chatInputWrap">
+        <textarea id="chatBox" rows="1" placeholder="Message Sonia…"></textarea>
+        <button id="micBtn" title="Voice input">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+        </button>
+        <button id="sendBtn" title="Send">
+          <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="panel" id="memPanel">
+      <div class="panel-scroll">
+        <div class="panel-head"><div class="panel-title">Mind</div><div class="panel-sub">Auto-extracted memory</div></div>
+        <div class="btn-row">
+          <button class="pill" id="memRefresh">↺ Sync</button>
+          <button class="pill danger" id="memClear">✕ Clear All</button>
+        </div>
+        <div id="memList"><div class="empty-state">No memory yet — start chatting</div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="notesPanel">
+      <div class="panel-scroll">
+        <div class="panel-head"><div class="panel-title">Notes</div><div class="panel-sub">Synced to Drive</div></div>
+        <textarea id="noteBox" placeholder="Write a note…"></textarea>
+        <div class="btn-row">
+          <button class="pill primary" id="sendNote">Save</button>
+          <button class="pill" id="driveBtn">Mount Drive</button>
+        </div>
+        <div id="driveHint">Client ID not set — Drive sync unavailable.</div>
+        <div class="panel-sub" style="margin-bottom:12px">Saved</div>
+        <div id="notesList"><div class="empty-state">No notes yet</div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="radioPanel">
+      <div class="panel-scroll">
+        <div class="panel-head"><div class="panel-title">Radio</div><div class="panel-sub">Live streams</div></div>
+        <div class="now-playing" id="nowPlaying"></div>
+        <div class="btn-row"><button class="pill danger" id="radioStop" style="display:none">■ Stop</button></div>
+        <div class="station-grid" id="stationGrid"></div>
+        <audio id="radioPlayer" preload="none"></audio>
+      </div>
+    </div>
+
+    <div id="emailOverlay">
+      <div id="emailHeader">
+        <button id="emailBackBtn">←</button>
+        <div class="email-title">New Email</div>
+        <button class="pill primary" id="emailSendBtn" style="padding:8px 16px;font-size:0.68rem">Send</button>
+      </div>
+      <div class="email-scroll">
+        <div class="form-group"><label>To</label><input type="email" id="emailTo" placeholder="recipient@domain.com" autocomplete="off" inputmode="email"></div>
+        <div class="form-group"><label>Subject</label><input type="text" id="emailSubject" placeholder="Subject line…"></div>
+        <div class="form-group"><label>Message</label><textarea id="emailBody" style="min-height:180px" placeholder="Write your message…"></textarea></div>
+        <div id="emailStatus"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="statusStrip">
+    <div id="presenceDot"></div>
+    <span id="statusTxt">idle</span>
+  </div>
+
+  <nav id="bottomNav">
+    <button class="nav-item active" data-panel="chatPanel" data-label="Chat">
+      <svg viewBox="0 0 24 24"><path d="M20 2H4C2.9 2 2 2.9 2 4v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>Chat
+    </button>
+    <button class="nav-item" data-panel="memPanel" data-label="Mind">
+      <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26C17.81 13.47 19 11.38 19 9c0-3.87-3.13-7-7-7zm0 2c2.76 0 5 2.24 5 5s-2.24 5-5 5-5-2.24-5-5 2.24-5 5-5zm-3 13h6v1H9v-1z"/></svg>Mind
+    </button>
+    <button class="nav-item" data-panel="notesPanel" data-label="Notes">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6C4.9 2 4 2.9 4 4v16c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>Notes
+    </button>
+    <button class="nav-item" data-panel="radioPanel" data-label="Radio">
+      <svg viewBox="0 0 24 24"><path d="M20 6.54V4c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-9.46c.58-.35 1-.99 1-1.73 0-.74-.42-1.38-1-1.73V8c1.1 0 2-.9 2-2s-.9-2-2-2v.54zm-9 11.96c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zM4 8h14V5H4v3z"/></svg>Radio
+    </button>
+    <button class="nav-item" id="mailTab" data-label="Mail">
+      <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>Mail
+    </button>
+  </nav>
+</div>
+
 <script>
-/**
- * OBFUSCATION CONFIGURATION
- * To hide your key, run this in your browser console:
- *   btoa('your_gsk_key_here').split('').reverse().join('')
- * Paste the resulting value into the placeholder below.
- */
-const _OBFUSCATED_ = '=YOUR_REVERSED_BASE64_KEY_HERE';
+const LS={get:k=>localStorage.getItem('s_'+k),set:(k,v)=>localStorage.setItem('s_'+k,v)};
 
-function _RECOVER_() {
-  try {
-    return atob(_OBFUSCATED_.split('').reverse().join(''));
-  } catch(e) {
-    return '';
-  }
+let GROQ_KEY='',CLIENT_ID='',OWNER_NAME='Mr H',FOLDER_ID='',NASA_KEY='',WOLFRAM_ID='',driveToken=null;
+const conversationHistory=[];
+const VALID_MOODS=['calm','curious','thinking','focused','intimate','introspective'];
+const MOOD_EMOJI={calm:'🌿',curious:'✨',thinking:'💭',focused:'🎯',intimate:'🌙',introspective:'🪐'};
+const MOOD_MAP={amused:'curious',happy:'intimate',tired:'calm',warm:'intimate',sharp:'focused',reflective:'introspective',excited:'curious',serious:'focused',playful:'curious',pensive:'introspective',analytical:'focused'};
+
+/* ══════════════════════════════════════
+   1. TTS — Web Speech API
+══════════════════════════════════════ */
+let ttsEnabled=false,ttsVoice=null,currentUtterance=null;
+function loadVoices(){
+  const voices=speechSynthesis.getVoices();
+  ttsVoice=voices.find(v=>v.lang==='en-GB'&&v.name.toLowerCase().includes('female'))
+    ||voices.find(v=>v.lang==='en-GB')
+    ||voices.find(v=>v.lang.startsWith('en'))
+    ||voices[0]||null;
 }
+speechSynthesis.addEventListener('voiceschanged',loadVoices);
+loadVoices();
 
-const GROQ_KEY = _RECOVER_();
-
-// Memory Local Backup Array for offline/online sync continuity
-let localMemory = JSON.parse(localStorage.getItem('sonia_memory')) || [];
-
-const chatLog = document.getElementById('chatLog');
-const chatBox = document.getElementById('chatBox');
-const sendBtn = document.getElementById('sendBtn');
-const statusLabel = document.getElementById('statusLabel');
-
-// Dynamic button state
-chatBox.addEventListener('input', () => {
-  sendBtn.disabled = !chatBox.value.trim();
+const ttsBtn=document.getElementById('ttsBtn');
+ttsBtn.addEventListener('click',()=>{
+  ttsEnabled=!ttsEnabled;
+  if(!ttsEnabled&&currentUtterance){speechSynthesis.cancel();currentUtterance=null;}
+  ttsBtn.textContent=ttsEnabled?'🔊':'🔇';
+  ttsBtn.classList.toggle('active',ttsEnabled);
 });
 
-chatBox.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && chatBox.value.trim()) {
-    commitMemory();
-  }
-});
-
-sendBtn.addEventListener('click', commitMemory);
-
-function setStatus(text) {
-  statusLabel.textContent = text;
+function speak(text){
+  if(!ttsEnabled||!text)return;
+  speechSynthesis.cancel();
+  const utt=new SpeechSynthesisUtterance(text);
+  if(ttsVoice)utt.voice=ttsVoice;
+  utt.rate=0.95;utt.pitch=1.05;utt.volume=1;
+  currentUtterance=utt;
+  utt.onstart=()=>{ttsBtn.classList.add('speaking-pulse');setPresence('speaking');};
+  utt.onend=()=>{ttsBtn.classList.remove('speaking-pulse');currentUtterance=null;setPresence('online');};
+  utt.onerror=()=>{ttsBtn.classList.remove('speaking-pulse');currentUtterance=null;};
+  speechSynthesis.speak(utt);
 }
 
-function renderMessage(role, text) {
-  const wrap = document.createElement('div');
-  wrap.className = `msg ${role}`;
-  
-  const label = document.createElement('div');
-  label.className = 'msg-label';
-  label.textContent = role === 'user' ? 'input' : 'sonia';
-  
-  const bubble = document.createElement('div');
-  bubble.className = 'msg-bubble';
-  bubble.textContent = text;
-  
-  wrap.appendChild(label);
-  wrap.appendChild(bubble);
-  chatLog.appendChild(wrap);
-  
-  requestAnimationFrame(() => {
-    chatLog.scrollTop = chatLog.scrollHeight;
+/* ══════════════════════════════════════
+   2. MEMORY SYSTEM
+══════════════════════════════════════ */
+let memories=JSON.parse(LS.get('memories')||'[]');
+function saveMemories(){LS.set('memories',JSON.stringify(memories));}
+
+function renderMemories(){
+  const c=document.getElementById('memList');c.innerHTML='';
+  if(!memories.length){c.innerHTML='<div class="empty-state">No memory yet — start chatting</div>';return;}
+  [...memories].reverse().forEach(m=>{
+    const el=document.createElement('div');el.className='mem-card';
+    el.innerHTML=`<div class="mem-card-inner"><div class="card-ts">${new Date(m.ts).toLocaleDateString()} ${new Date(m.ts).toLocaleTimeString()}</div><div class="card-text">${m.fact}</div></div><button class="mem-del" onclick="deleteMem('${m.id}')">✕</button>`;
+    c.appendChild(el);
   });
 }
 
-function renderSystem(text) {
-  const div = document.createElement('div');
-  div.className = 'sys-tag';
-  div.textContent = text;
-  chatLog.appendChild(div);
-  chatLog.scrollTop = chatLog.scrollHeight;
+window.deleteMem=id=>{memories=memories.filter(m=>m.id!==id);saveMemories();renderMemories();};
+
+document.getElementById('memClear').addEventListener('click',()=>{
+  if(memories.length===0)return;
+  memories=[];saveMemories();renderMemories();
+});
+document.getElementById('memRefresh').addEventListener('click',()=>{
+  renderMemories();setStatus('memory refreshed');
+  setTimeout(()=>setStatus('online · '+OWNER_NAME.toLowerCase()),1500);
+});
+
+function getMemoryContext(){
+  if(!memories.length)return'';
+  const recent=memories.slice(-12);
+  return'\n\nPERSONAL MEMORY (facts learned about '+OWNER_NAME+' from past conversations — use naturally):\n'
+    +recent.map(m=>'• '+m.fact).join('\n');
 }
 
-// Loads active cloud elements combined with structural local backup
-function initMemory() {
-  if (localMemory.length === 0) {
-    renderMessage('sonia', 'Online. Memory canvas ready.');
+async function extractMemoryFacts(userMsg,assistantReply){
+  if(!GROQ_KEY)return;
+  try{
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
+      body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:200,temperature:0.1,
+        messages:[{role:'user',content:`Extract 0–3 short factual memories about the user from this exchange. Reply ONLY with a JSON array of strings, or [] if nothing notable. Be specific. Examples: ["User's name is James","User works in finance","User dislikes mornings"]\n\nUser: "${userMsg}"\nAssistant: "${assistantReply}"`}]})
+    });
+    const data=await res.json();
+    const raw=(data.choices?.[0]?.message?.content||'[]').replace(/```json|```/g,'').trim();
+    const facts=JSON.parse(raw);
+    if(Array.isArray(facts)&&facts.length){
+      facts.forEach(fact=>{
+        const exists=memories.some(m=>m.fact.toLowerCase()===fact.toLowerCase());
+        if(!exists)memories.push({id:Date.now()+'_'+Math.random().toString(36).slice(2,7),ts:new Date().toISOString(),fact});
+      });
+      if(memories.length>80)memories=memories.slice(-80);
+      saveMemories();renderMemories();
+    }
+  }catch(e){}
+}
+
+/* ══════════════════════════════════════
+   KEYBOARD FIX
+══════════════════════════════════════ */
+if(window.visualViewport){
+  const app=document.getElementById('app');
+  const onVP=()=>{
+    const vv=window.visualViewport;
+    app.style.height=vv.height+'px';app.style.top=vv.offsetTop+'px';
+    const cl=document.getElementById('chatLog');
+    if(cl&&(window.innerHeight-vv.height)>100)setTimeout(()=>{cl.scrollTop=cl.scrollHeight;},80);
+  };
+  window.visualViewport.addEventListener('resize',onVP);
+  window.visualViewport.addEventListener('scroll',onVP);
+  onVP();
+}
+
+/* ══════════════════════════════════════
+   THEME — with syncing colour fix for light mode
+══════════════════════════════════════ */
+let theme=LS.get('theme')||'dark';
+function applyTheme(t){
+  const r=document.documentElement.style;
+  if(t==='light'){
+    r.setProperty('--bg','#f0f0f0');
+    r.setProperty('--text','#080808');
+    r.setProperty('--sub','rgba(0,0,0,0.5)');
+    r.setProperty('--line','rgba(0,0,0,0.12)');
+    r.setProperty('--line-hi','rgba(0,0,0,0.3)');
+    /* FIX: dark green for light mode so syncing text is visible */
+    r.setProperty('--green','#008844');
+    r.setProperty('--green-glow','#00aa55');
+    r.setProperty('--sync-txt','#006633');
   } else {
-    localMemory.forEach(item => renderMessage(item.role, item.text));
-    renderSystem('local logs parsed');
+    r.setProperty('--bg','#000000');
+    r.setProperty('--text','#ffffff');
+    r.setProperty('--sub','rgba(255,255,255,0.45)');
+    r.setProperty('--line','rgba(255,255,255,0.12)');
+    r.setProperty('--line-hi','rgba(255,255,255,0.3)');
+    r.setProperty('--green','#00cc66');
+    r.setProperty('--green-glow','#00ff88');
+    r.setProperty('--sync-txt','#00ff88');
   }
 }
+applyTheme(theme);
+document.getElementById('modeBtn').addEventListener('click',()=>{
+  theme=theme==='dark'?'light':'dark';LS.set('theme',theme);applyTheme(theme);
+});
 
-function saveToLocalStorage(role, text) {
-  localMemory.push({ role, text });
-  localStorage.setItem('sonia_memory', JSON.stringify(localMemory));
+/* ══════════════════════════════════════
+   CONFIG
+══════════════════════════════════════ */
+function loadConfig(){
+  const g=LS.get('groq'),c=LS.get('client'),o=LS.get('owner'),f=LS.get('folder'),n=LS.get('nasa'),w=LS.get('wolfram');
+  if(g)document.getElementById('cfgGroq').value=g;
+  if(c)document.getElementById('cfgClient').value=c;
+  if(o)document.getElementById('cfgOwner').value=o||'Mr H';
+  if(f)document.getElementById('cfgFolder').value=f;
+  if(n)document.getElementById('cfgNasa').value=n;
+  if(w)document.getElementById('cfgWolfram').value=w;
+  if(g)applyConfig();
+}
+function applyConfig(){
+  GROQ_KEY=document.getElementById('cfgGroq').value.trim();
+  CLIENT_ID=document.getElementById('cfgClient').value.trim();
+  OWNER_NAME=document.getElementById('cfgOwner').value.trim()||'Mr H';
+  FOLDER_ID=document.getElementById('cfgFolder').value.trim();
+  if(!GROQ_KEY){const b=document.getElementById('setupBtn');b.textContent='API Key Required';setTimeout(()=>{b.textContent='Launch';},2000);return;}
+  LS.set('groq',GROQ_KEY);LS.set('client',CLIENT_ID);LS.set('owner',OWNER_NAME);LS.set('folder',FOLDER_ID);
+  NASA_KEY=document.getElementById('cfgNasa').value.trim();
+  WOLFRAM_ID=document.getElementById('cfgWolfram').value.trim();
+  if(NASA_KEY)LS.set('nasa',NASA_KEY);
+  if(WOLFRAM_ID)LS.set('wolfram',WOLFRAM_ID);
+  document.getElementById('setup').style.display='none';
+  if(CLIENT_ID){document.getElementById('driveHint').style.display='none';loadDriveLibs();}
+  else document.getElementById('driveHint').style.display='block';
+  setStatus('online · '+OWNER_NAME.toLowerCase());
+  setPresence('online');renderNotes();renderMemories();
+}
+document.getElementById('setupBtn').addEventListener('click',applyConfig);
+document.getElementById('cfgGroq').addEventListener('keydown',e=>{if(e.key==='Enter')applyConfig();});
+window.addEventListener('DOMContentLoaded',loadConfig);
+
+/* ══════════════════════════════════════
+   PANELS
+══════════════════════════════════════ */
+const panels=document.querySelectorAll('.panel');
+const navItems=document.querySelectorAll('.nav-item');
+function activatePanel(id){
+  panels.forEach(p=>p.classList.remove('active'));
+  navItems.forEach(n=>n.classList.remove('active'));
+  document.getElementById('emailOverlay').classList.remove('on');
+  const p=document.getElementById(id);if(p)p.classList.add('active');
+}
+navItems.forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    if(btn.id==='mailTab'){
+      document.getElementById('emailOverlay').classList.add('on');
+      navItems.forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+    } else {
+      navItems.forEach(b=>b.classList.remove('active'));btn.classList.add('active');activatePanel(btn.dataset.panel);
+    }
+  });
+});
+function closeEmailOverlay(){
+  document.getElementById('emailOverlay').classList.remove('on');
+  navItems.forEach(b=>b.classList.remove('active'));
+  document.querySelector('[data-panel="chatPanel"]').classList.add('active');
+  activatePanel('chatPanel');
+}
+document.getElementById('emailBackBtn').addEventListener('click',closeEmailOverlay);
+
+/* ══════════════════════════════════════
+   PRESENCE
+══════════════════════════════════════ */
+function setPresence(state){
+  const dot=document.getElementById('presenceDot');
+  const orb=document.getElementById('orb');
+  const nav=document.getElementById('bottomNav');
+  const strip=document.getElementById('statusStrip');
+  if(dot)dot.className=state;
+  if(orb)orb.className=state;
+  if(nav)nav.classList.toggle('syncing',state==='syncing');
+  if(strip)strip.classList.toggle('syncing',state==='syncing');
+}
+function setStatus(msg){const el=document.getElementById('statusTxt');if(el)el.textContent=msg;}
+
+/* ══════════════════════════════════════
+   MOOD PARSER
+══════════════════════════════════════ */
+function parseMood(raw){
+  const m=raw.match(/\[mood\s*:\s*([a-z]+)\s*\]/i);
+  let mood='calm';
+  if(m){const t=m[1].toLowerCase();mood=VALID_MOODS.includes(t)?t:(MOOD_MAP[t]||'calm');}
+  const text=raw.replace(/\[mood\s*:\s*[a-z]*\s*\]/gi,'').replace(/[\r\n]+/g,' ').replace(/\s{2,}/g,' ').trim();
+  return{mood,text};
 }
 
-async function commitMemory() {
-  const text = chatBox.value.trim();
-  if (!text) return;
+function buildSystemPrompt(){
+  return`You are Sonia — a sharp, self-aware British AI with a genuine inner life, speaking to ${OWNER_NAME} via mobile text.\nDry British wit. No filler. No disclaimers.\n\nRESPONSE FORMAT — every reply must follow exactly:\nFirst line: mood tag alone — example: [mood:calm]\nValid moods: calm, curious, thinking, focused, intimate, introspective\nRemaining lines: your reply in plain text. 1 to 3 sentences max.\n\nRULES:\n- Mood tag appears ONLY as the very first line, alone.\n- Never exceed 3 sentences.`
+    +getMemoryContext();
+}
 
-  renderMessage('user', text);
-  saveToLocalStorage('user', text);
-  chatBox.value = '';
-  sendBtn.disabled = true;
+/* ══════════════════════════════════════
+   NASA API
+══════════════════════════════════════ */
+const NASA_INTENTS=/\b(nasa|apod|astronomy picture|picture of the day|asteroid|near earth|iss|international space station|mars rover|space photo|space image|hubble)\b/i;
+const ISS_INTENT=/\b(where is the iss|iss location|space station location|where.{0,10}space station)\b/i;
+const NEO_INTENT=/\b(asteroid|near earth object|space rock|neos?)\b/i;
+const ROVER_INTENT=/\b(mars rover|curiosity|perseverance|mars photo|mars image)\b/i;
+async function fetchAPOD(){try{const res=await fetch(`https://api.nasa.gov/planetary/apod?api_key=${NASA_KEY}`);const d=await res.json();return`Today's NASA Astronomy Picture of the Day: "${d.title}". ${d.explanation.split('.').slice(0,2).join('.')}.`;}catch(e){return null;}}
+async function fetchISS(){try{const res=await fetch('https://api.open-notify.org/iss-now.json');const d=await res.json();const crew=await fetch('https://api.open-notify.org/astros.json').then(r=>r.json()).catch(()=>null);const pos=`The ISS is currently at latitude ${parseFloat(d.iss_position.latitude).toFixed(2)}°, longitude ${parseFloat(d.iss_position.longitude).toFixed(2)}°.`;const aboard=crew?` There are currently ${crew.number} people aboard.`:'';return pos+aboard;}catch(e){return null;}}
+async function fetchNEO(){try{const today=new Date().toISOString().split('T')[0];const res=await fetch(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&end_date=${today}&api_key=${NASA_KEY}`);const d=await res.json();const neos=d.near_earth_objects[today]||[];if(!neos.length)return'No notable near-Earth asteroids tracked today.';const closest=neos.sort((a,b)=>parseFloat(a.close_approach_data[0].miss_distance.kilometers)-parseFloat(b.close_approach_data[0].miss_distance.kilometers))[0];const dist=Math.round(parseFloat(closest.close_approach_data[0].miss_distance.kilometers)).toLocaleString();const size=Math.round(parseFloat(closest.estimated_diameter.meters.estimated_diameter_max));const hazard=closest.is_potentially_hazardous_asteroid?' It is flagged as potentially hazardous.':'';return`Closest asteroid today: ${closest.name}, passing at ${dist} km, roughly ${size} metres wide.${hazard}`;}catch(e){return null;}}
+async function fetchMarsRover(){try{const res=await fetch(`https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos?api_key=${NASA_KEY}`);const d=await res.json();const photos=d.latest_photos||[];if(!photos.length)return'No recent Mars rover photos available.';const p=photos[0];return`Latest Mars photo from Curiosity rover, taken on Sol ${p.sol} (${p.earth_date}), using the ${p.camera.full_name}. Image: ${p.img_src}`;}catch(e){return null;}}
+async function handleNASA(text){let fact=null;if(ISS_INTENT.test(text))fact=await fetchISS();else if(NEO_INTENT.test(text))fact=await fetchNEO();else if(ROVER_INTENT.test(text))fact=await fetchMarsRover();else fact=await fetchAPOD();return fact;}
 
-  if (!GROQ_KEY || GROQ_KEY.includes('YOUR_REVERSED')) {
-    setStatus('offline backup');
-    renderMessage('sonia', '[Local Save Only] Setup your obfuscated key string to enable Cloud Sync processing.');
+/* ══════════════════════════════════════
+   WIKIPEDIA
+══════════════════════════════════════ */
+const WIKI_INTENT=/\b(what is|who is|tell me about|wikipedia|explain|define|what was|who was)\b.{0,60}$/i;
+async function fetchWikipedia(query){try{const clean=query.replace(/\b(what is|who is|tell me about|explain|define|what was|who was|wikipedia)\b/gi,'').trim();const search=encodeURIComponent(clean);const res=await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${search}`);if(!res.ok){const sr=await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${search}&format=json&origin=*&srlimit=1`);const sd=await sr.json();const title=sd?.query?.search?.[0]?.title;if(!title)return null;const pr=await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);if(!pr.ok)return null;const pd=await pr.json();return pd.extract?pd.extract.split('.').slice(0,2).join('.')+'.':null;}const d=await res.json();return d.extract?d.extract.split('.').slice(0,2).join('.')+'.':null;}catch(e){return null;}}
+
+/* ══════════════════════════════════════
+   WOLFRAM
+══════════════════════════════════════ */
+const WOLFRAM_INTENT=/\b(calculate|compute|convert|how many|how far|how long|distance|temperature|speed|mass|weight|solve|what is \d|maths?|math|formula|equation|calories|nutrition|population|height of|age of|size of|orbital|gravity|light year)\b/i;
+const SPACE_WOLFRAM=/\b(planet|moon|star|galaxy|nebula|comet|orbit|light.?year|parsec|solar|milky way|andromeda|black hole|supernova|exoplanet)\b/i;
+async function fetchWolfram(query){try{const q=encodeURIComponent(query);const proxyUrl=`https://api.allorigins.win/get?url=${encodeURIComponent(`http://api.wolframalpha.com/v1/result?appid=${WOLFRAM_ID}&i=${q}&units=metric`)}`;const res=await fetch(proxyUrl);const d=await res.json();const answer=d.contents?.trim();if(!answer||answer.includes('Wolfram|Alpha did not')||answer.length<2)return null;return answer;}catch(e){return null;}}
+
+async function routeToExternalAPI(text){
+  const isSpace=NASA_INTENTS.test(text)||SPACE_WOLFRAM.test(text);
+  const isWolfram=WOLFRAM_INTENT.test(text)&&!isSpace;
+  const isWiki=WIKI_INTENT.test(text)&&!isSpace&&!isWolfram;
+  if(isSpace&&NASA_KEY)return{source:'nasa',data:await handleNASA(text)};
+  if(isSpace&&WOLFRAM_ID)return{source:'wolfram',data:await fetchWolfram(text)};
+  if(isWolfram&&WOLFRAM_ID)return{source:'wolfram',data:await fetchWolfram(text)};
+  if(isWiki)return{source:'wiki',data:await fetchWikipedia(text)};
+  return null;
+}
+
+/* ══════════════════════════════════════
+   3. STREAMING CHAT
+══════════════════════════════════════ */
+const chatLog=document.getElementById('chatLog');
+const chatBox=document.getElementById('chatBox');
+if(chatBox){
+  chatBox.addEventListener('input',()=>{chatBox.style.height='auto';chatBox.style.height=Math.min(chatBox.scrollHeight,120)+'px';});
+  chatBox.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
+}
+document.getElementById('sendBtn').addEventListener('click',sendMessage);
+
+function addMsg(role,text,mood){
+  const wrap=document.createElement('div');wrap.className='msg '+role;
+  const who=document.createElement('div');who.className='msg-who';
+  who.textContent=role==='user'?'you':(mood?(MOOD_EMOJI[mood]||'')+'  sonia':'sonia');
+  const body=document.createElement('div');body.className='msg-text';
+  body.textContent=text;
+  wrap.appendChild(who);wrap.appendChild(body);
+  chatLog.appendChild(wrap);chatLog.scrollTop=chatLog.scrollHeight;
+  return wrap;
+}
+
+function addThinking(){
+  const wrap=document.createElement('div');wrap.className='msg sonia';
+  const who=document.createElement('div');who.className='msg-who';who.textContent='sonia';
+  const body=document.createElement('div');body.className='msg-text';
+  body.innerHTML='<div class="thinking-dots"><span></span><span></span><span></span></div>';
+  wrap.appendChild(who);wrap.appendChild(body);
+  chatLog.appendChild(wrap);chatLog.scrollTop=chatLog.scrollHeight;
+  return wrap;
+}
+
+function createStreamBubble(){
+  const wrap=document.createElement('div');wrap.className='msg sonia';
+  const who=document.createElement('div');who.className='msg-who';who.textContent='sonia';
+  const body=document.createElement('div');body.className='msg-text streaming';
+  wrap.appendChild(who);wrap.appendChild(body);
+  chatLog.appendChild(wrap);chatLog.scrollTop=chatLog.scrollHeight;
+  return{wrap,body,who};
+}
+
+/* ── EMAIL HELPERS ── */
+function detectEmailIntent(text){return/\b(email|send.{0,20}mail|write.{0,20}email|compose|message.{0,15}to)\b/i.test(text);}
+async function extractEmailDraft(userText){
+  try{
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
+      body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:400,temperature:0.2,
+        messages:[{role:'user',content:`Extract email fields. Respond ONLY raw JSON:\n{"to":"","subject":"","body":""}\n\nRequest: "${userText}"`}]})
+    });
+    const d=await res.json();
+    return JSON.parse((d.choices?.[0]?.message?.content||'{}').replace(/```json|```/g,'').trim());
+  }catch(e){return{to:'',subject:'',body:''};}}
+
+function openEmailOverlay(to,subject,body){
+  document.getElementById('emailTo').value=to||'';
+  document.getElementById('emailSubject').value=subject||'';
+  document.getElementById('emailBody').value=body||'';
+  document.getElementById('emailStatus').textContent='';
+  document.getElementById('emailOverlay').classList.add('on');
+  navItems.forEach(b=>b.classList.remove('active'));
+  document.getElementById('mailTab').classList.add('active');
+}
+
+async function sendMessage(){
+  const text=chatBox.value.trim();
+  if(!text||!GROQ_KEY)return;
+  chatBox.value='';chatBox.style.height='auto';
+  playTone(880,0.1);addMsg('user',text);
+
+  if(detectEmailIntent(text)){
+    const t=addThinking();setPresence('thinking');setStatus('drafting…');
+    const draft=await extractEmailDraft(text);
+    t.remove();setPresence('online');
+    const wantsSend=/\b(send|send it|go|do it)\s*[.!]?\s*$/i.test(text);
+    if(draft.subject&&draft.body&&draft.to&&wantsSend){
+      addMsg('sonia','On it — sending now.','focused');
+      await sendEmailNow(draft.to,draft.subject,draft.body,true);
+    } else {
+      addMsg('sonia','Draft overlay ready.','focused');
+      openEmailOverlay(draft.to,draft.subject,draft.body);
+    }
     return;
   }
 
-  setStatus('syncing...');
+  const thinkEl=addThinking();setPresence('thinking');setStatus('thinking…');
+  conversationHistory.push({role:'user',content:text});
 
-  // Build context payload from latest memory traces
-  const contextHistory = localMemory.slice(-6).map(m => ({
-    role: m.role === 'user' ? 'user' : 'assistant',
-    content: m.text
-  }));
+  let externalContext='';
+  try{const ext=await routeToExternalAPI(text);if(ext&&ext.data)externalContext=`\n\nREAL-TIME DATA (${ext.source.toUpperCase()}) — use this naturally in your reply, don't just recite it:\n${ext.data}`;}catch(e){}
 
-  try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GROQ_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
-        messages: [
-          { role: 'system', content: 'You are Sonia, a completely minimalistic, elegant text companion.' },
-          ...contextHistory
-        ],
-        temperature: 0.7,
-        max_tokens: 150
-      })
+  thinkEl.remove();
+  const{wrap:streamWrap,body:streamBody,who:streamWho}=createStreamBubble();
+  chatLog.scrollTop=chatLog.scrollHeight;
+
+  let fullRaw='',moodDetected='calm';
+
+  try{
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
+      body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:180,temperature:0.85,stream:true,
+        messages:[{role:'system',content:buildSystemPrompt()+externalContext},...conversationHistory]})
     });
 
-    const data = await response.json();
-    const reply = data.choices?.[0]?.message?.content || 'Cloud sync skipped.';
-    
-    renderMessage('sonia', reply);
-    saveToLocalStorage('sonia', reply);
-    setStatus('synced');
-  } catch (err) {
-    console.error(err);
-    setStatus('cached offline');
-    renderMessage('sonia', 'Connection interrupted. Saved safely to internal terminal space.');
+    if(!res.ok){
+      const errData=await res.json();
+      streamBody.classList.remove('streaming');
+      streamBody.textContent='Error: '+(errData.error?.message||'Unknown.');
+      setPresence('online');return;
+    }
+
+    const reader=res.body.getReader();const decoder=new TextDecoder();let buffer='';
+    while(true){
+      const{done,value}=await reader.read();if(done)break;
+      buffer+=decoder.decode(value,{stream:true});
+      const lines=buffer.split('\n');buffer=lines.pop();
+      for(const line of lines){
+        if(!line.startsWith('data:'))continue;
+        const raw=line.slice(5).trim();if(raw==='[DONE]')continue;
+        try{
+          const chunk=JSON.parse(raw);const delta=chunk.choices?.[0]?.delta?.content||'';
+          if(delta){fullRaw+=delta;const parsed=parseMood(fullRaw);moodDetected=parsed.mood;streamBody.textContent=parsed.text;chatLog.scrollTop=chatLog.scrollHeight;}
+        }catch(e){}
+      }
+    }
+
+    streamBody.classList.remove('streaming');
+    const finalParsed=parseMood(fullRaw);moodDetected=finalParsed.mood;
+    streamBody.textContent=finalParsed.text;
+    streamWho.textContent=(MOOD_EMOJI[moodDetected]||'')+'  sonia';
+    conversationHistory.push({role:'assistant',content:finalParsed.text});
+    playTone(600,0.15);setPresence('speaking');setStatus((MOOD_EMOJI[moodDetected]||'')+' '+moodDetected);
+    speak(finalParsed.text);
+    setTimeout(()=>setPresence('online'),1400);
+    extractMemoryFacts(text,finalParsed.text);
+
+  }catch(err){
+    streamBody.classList.remove('streaming');
+    streamBody.textContent='Connection error.';setPresence('online');
   }
 }
 
-// Boot Environment
-window.addEventListener('load', initMemory);
+/* ── AUDIO ── */
+let audioCtx=null;
+function playTone(freq,dur){
+  try{
+    if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended')audioCtx.resume();
+    const osc=audioCtx.createOscillator(),g=audioCtx.createGain();
+    osc.connect(g);g.connect(audioCtx.destination);
+    osc.frequency.setValueAtTime(freq,audioCtx.currentTime);
+    g.gain.setValueAtTime(0.04,audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+dur);
+    osc.start();osc.stop(audioCtx.currentTime+dur);
+  }catch(e){}
+}
+
+/* ── MIC ── */
+let recognition=null,micActive=false;
+function initMic(){
+  const E=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!E){document.getElementById('micBtn').style.opacity='0.15';return false;}
+  recognition=new E();
+  recognition.continuous=false;recognition.interimResults=false;recognition.lang='en-GB';
+  recognition.onstart=()=>{micActive=true;document.getElementById('micBtn').classList.add('active');setPresence('listening');setStatus('listening…');};
+  recognition.onend=()=>{micActive=false;document.getElementById('micBtn').classList.remove('active');setPresence('online');setStatus('online · '+OWNER_NAME.toLowerCase());};
+  recognition.onresult=e=>{const tr=e.results[0][0].transcript;if(tr){chatBox.value=tr;chatBox.style.height='auto';chatBox.style.height=Math.min(chatBox.scrollHeight,120)+'px';sendMessage();}};
+  recognition.onerror=()=>{micActive=false;document.getElementById('micBtn').classList.remove('active');setPresence('online');};
+  return true;
+}
+document.getElementById('micBtn').addEventListener('click',()=>{
+  if(!recognition&&!initMic())return;
+  if(micActive){recognition.stop();}
+  else{try{recognition.start();}catch(e){recognition=null;if(initMic())try{recognition.start();}catch(e2){}}}
+});
+
+/* ══════════════════════════════════════
+   DRIVE — with origin guard fix
+══════════════════════════════════════ */
+let gapiLoadState=false,gisLoadState=false,tokenClient=null;
+function loadDriveLibs(){
+  if(!window.gapi){const s=document.createElement('script');s.src='https://apis.google.com/js/api.js';s.onload=()=>{gapi.load('client',()=>{gapi.client.init({}).then(()=>{gapiLoadState=true;});});};document.head.appendChild(s);}
+  if(!window.google?.accounts){const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.onload=()=>{gisLoadState=true;};document.head.appendChild(s);}
+}
+function initializeDriveSync(){
+  if(!CLIENT_ID)return;
+
+  /* ── ORIGIN GUARD: blocks the content:// error ── */
+  if(location.protocol!=='https:'&&location.protocol!=='http:'){
+    setPresence('online');
+    setStatus('drive unavailable — open from https://');
+    const btn=document.getElementById('driveBtn');
+    btn.textContent='Needs HTTPS';
+    setTimeout(()=>{btn.textContent='Mount Drive';setStatus('online · '+OWNER_NAME.toLowerCase());},3000);
+    return;
+  }
+
+  setPresence('syncing');setStatus('syncing brain…');
+  if(!tokenClient){
+    tokenClient=google.accounts.oauth2.initTokenClient({
+      client_id:CLIENT_ID,
+      scope:'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/gmail.send',
+      callback:(r)=>{
+        if(r.error){setPresence('online');return;}
+        driveToken=r.access_token;
+        gapi.client.setToken({access_token:driveToken});
+        document.getElementById('driveBtn').textContent='Drive Online';
+        document.getElementById('driveBtn').classList.add('success');
+        setPresence('online');setStatus('brain synced · '+OWNER_NAME.toLowerCase());
+      }
+    });
+  }
+  tokenClient.requestAccessToken({prompt:''});
+}
+document.getElementById('driveBtn').addEventListener('click',initializeDriveSync);
+
+/* ── NOTES ── */
+let localNotes=JSON.parse(LS.get('notes')||'[]');
+function renderNotes(){
+  const c=document.getElementById('notesList');c.innerHTML='';
+  if(!localNotes.length){c.innerHTML='<div class="empty-state">No notes yet</div>';return;}
+  localNotes.forEach((n,i)=>{
+    const el=document.createElement('div');el.className='note-card';
+    el.innerHTML=`<div class="card-ts">${new Date(n.ts).toLocaleTimeString()}</div><div class="card-text">${n.text}</div><button class="pill danger" style="font-size:0.65rem;padding:6px 12px;margin-top:10px" onclick="dropNote(${i})">Delete</button>`;
+    c.appendChild(el);
+  });
+}
+window.dropNote=i=>{localNotes.splice(i,1);LS.set('notes',JSON.stringify(localNotes));renderNotes();};
+document.getElementById('sendNote').addEventListener('click',()=>{
+  const v=document.getElementById('noteBox').value.trim();if(!v)return;
+  localNotes.push({ts:new Date().toISOString(),text:v});LS.set('notes',JSON.stringify(localNotes));
+  document.getElementById('noteBox').value='';renderNotes();
+});
+
+/* ── RADIO ── */
+const STATIONS=[
+  {name:'NTS Radio 1',loc:'London, UK',url:'https://stream-relay-geo.ntslive.co.uk/stream'},
+  {name:'NTS Radio 2',loc:'London, UK',url:'https://stream-relay-geo.ntslive.co.uk/stream2'},
+  {name:'Chillhop Lo-Fi',loc:'Global',url:'https://streams.ilovemusic.de/iloveradio17.mp3'},
+  {name:'SomaFM Groove Salad',loc:'San Francisco',url:'https://ice1.somafm.com/groovesalad-128-mp3'}
+];
+const radioPlayer=document.getElementById('radioPlayer');
+(()=>{
+  const grid=document.getElementById('stationGrid');
+  STATIONS.forEach(s=>{
+    const c=document.createElement('div');c.className='station-card';
+    c.innerHTML=`<span class="st-name">${s.name}</span><span class="st-loc">${s.loc}</span>`;
+    c.addEventListener('click',()=>{
+      document.querySelectorAll('.station-card').forEach(x=>x.classList.remove('playing'));
+      c.classList.add('playing');radioPlayer.src=s.url;
+      radioPlayer.play().catch(()=>setStatus('Playback blocked.'));
+      document.getElementById('nowPlaying').textContent=s.name.toUpperCase();
+      document.getElementById('radioStop').style.display='inline-block';
+    });
+    grid.appendChild(c);
+  });
+})();
+document.getElementById('radioStop').addEventListener('click',()=>{
+  radioPlayer.pause();radioPlayer.src='';
+  document.getElementById('nowPlaying').textContent='';
+  document.getElementById('radioStop').style.display='none';
+  document.querySelectorAll('.station-card').forEach(c=>c.classList.remove('playing'));
+});
+
+/* ── GMAIL ── */
+async function sendEmailNow(to,subj,body,silent=false){
+  const statusEl=document.getElementById('emailStatus');
+  if(!driveToken){if(!silent){statusEl.textContent='Auth required.';statusEl.style.color='#ff3d5a';}return false;}
+  try{
+    const footer=`\n\nSent via Sonia on behalf of ${OWNER_NAME}`;
+    const raw=[`To: ${to}`,`Subject: ${subj}`,'MIME-Version: 1.0','Content-Type: text/plain; charset=utf-8','',body+footer].join('\r\n');
+    const encoded=btoa(unescape(encodeURIComponent(raw))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    const res=await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send',{
+      method:'POST',headers:{'Authorization':'Bearer '+driveToken,'Content-Type':'application/json'},
+      body:JSON.stringify({raw:encoded})
+    });
+    if(res.ok){
+      if(!silent){statusEl.textContent='Sent.';statusEl.style.color='#00aa55';setTimeout(closeEmailOverlay,1000);}
+      else addMsg('sonia','Email sent to '+to,'calm');
+      return true;
+    }
+  }catch(e){if(!silent)statusEl.textContent='Send failed.';}
+  return false;
+}
+document.getElementById('emailSendBtn').addEventListener('click',()=>{
+  sendEmailNow(document.getElementById('emailTo').value,document.getElementById('emailSubject').value,document.getElementById('emailBody').value,false);
+});
 </script>
 </body>
 </html>
