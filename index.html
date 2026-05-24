@@ -308,6 +308,25 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
 </div>
 
 <script>
+/* ══════════════════════════════════════
+   BOOT DIAGNOSTIC — catches silent WebView crashes
+   Shows the real error on screen instead of a blank/broken state.
+   Remove this block after confirming stable on device.
+══════════════════════════════════════ */
+window.onerror = function(msg, src, line, col, err) {
+  const box = document.createElement('div');
+  box.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#000;color:#ff2266;font-family:monospace;font-size:13px;padding:24px;overflow:auto;white-space:pre-wrap;';
+  box.textContent = '⚠ SONIA BOOT ERROR\n\n' + msg + '\n\nFile: ' + src + '\nLine: ' + line + ':' + col + '\n\n' + (err?.stack || '');
+  document.body.appendChild(box);
+  return false;
+};
+window.addEventListener('unhandledrejection', function(e) {
+  const box = document.createElement('div');
+  box.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#000;color:#ff2266;font-family:monospace;font-size:13px;padding:24px;overflow:auto;white-space:pre-wrap;';
+  box.textContent = '⚠ SONIA ASYNC ERROR\n\n' + (e.reason?.stack || e.reason || 'Unknown promise rejection');
+  document.body.appendChild(box);
+});
+
 const LS={get:k=>localStorage.getItem('s_'+k),set:(k,v)=>localStorage.setItem('s_'+k,v)};
 
 let GROQ_KEY='',CLIENT_ID='',OWNER_NAME='Mr H',FOLDER_ID='',NASA_KEY='',WOLFRAM_ID='',driveToken=null;
@@ -325,8 +344,8 @@ const MOOD_MAP={amused:'curious',happy:'intimate',tired:'calm',warm:'intimate',s
 
 /* ── VOICE MATRIX CONSTANTS ── */
 const VM = {
-  RATE: 1.20,      // Matches desktop Piper rate
-  PITCH: 1.18,     // Matches desktop Piper pitch
+  RATE: 0.88,      // Slightly slower — room to breathe, more human cadence
+  PITCH: 1.08,     // Pulled back from 1.18 — warmer, less synthetic sharpness
   VOLUME: 1.0,
 
   /*
@@ -426,7 +445,9 @@ function vmScoreTier1(voice) {
  */
 function vmBootstrapVoiceMatrix() {
   if (vmBootstrapped) return;
-  const voices = window.speechSynthesis.getVoices();
+  const ss = window.speechSynthesis;
+  if (!ss) return; // WebView has no TTS engine — exit silently
+  const voices = ss.getVoices();
   if (!voices || voices.length === 0) return; // Not ready yet — onvoiceschanged will retry
 
   vmBootstrapped = true;
@@ -480,8 +501,10 @@ function vmBootstrapVoiceMatrix() {
  * Both paths fire vmBootstrapVoiceMatrix to ensure it runs exactly once,
  * whether voices load synchronously (desktop) or async (mobile WebView).
  */
-window.speechSynthesis.onvoiceschanged = vmBootstrapVoiceMatrix;
-vmBootstrapVoiceMatrix(); // Attempt immediate boot (sync desktop engines)
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = vmBootstrapVoiceMatrix;
+  vmBootstrapVoiceMatrix(); // Attempt immediate boot (sync desktop engines)
+}
 
 /* ── TTS TOGGLE BUTTON ── */
 const ttsBtn = document.getElementById('ttsBtn');
@@ -495,7 +518,7 @@ ttsBtn.addEventListener('click', () => {
   ttsBtn.textContent = ttsEnabled ? '🔊' : '🔇';
   ttsBtn.classList.toggle('active', ttsEnabled);
   // Lazy bootstrap: if voices weren't ready on page load, try now on first toggle
-  if (ttsEnabled && !vmBootstrapped) vmBootstrapVoiceMatrix();
+  if (ttsEnabled && !vmBootstrapped && window.speechSynthesis) vmBootstrapVoiceMatrix();
 });
 
 /*
@@ -510,7 +533,7 @@ ttsBtn.addEventListener('click', () => {
  *   100ms guard below absorbs the async cancellation tick on Xiaomi MIUI.
  */
 function speak(text) {
-  if (!ttsEnabled || !text) return;
+  if (!ttsEnabled || !text || !window.speechSynthesis) return;
 
   // INTERRUPT INTEGRITY: cancel any active speech buffer immediately
   window.speechSynthesis.cancel();
@@ -524,7 +547,7 @@ function speak(text) {
    */
   setTimeout(() => {
     // Re-check after timeout in case user toggled TTS off during the tick
-    if (!ttsEnabled) return;
+    if (!ttsEnabled || !window.speechSynthesis) return;
 
     const utt = new SpeechSynthesisUtterance(text);
 
@@ -532,8 +555,14 @@ function speak(text) {
     if (ttsVoice) utt.voice = ttsVoice;
 
     // Apply Sonia's signature vocal parameters (jenny_dioco approximation)
-    utt.rate   = VM.RATE;    // 1.20 — energetic, forward pace
-    utt.pitch  = VM.PITCH;   // 1.18 — youthful, bright British tone
+    // Micro-variation: ±0.04 rate, ±0.04 pitch per utterance
+    // Humans never speak at exactly the same speed/pitch twice —
+    // this tiny randomness is the single biggest humanising factor in TTS
+    const rateJitter  = (Math.random() * 0.08) - 0.04;
+    const pitchJitter = (Math.random() * 0.08) - 0.04;
+
+    utt.rate   = VM.RATE  + rateJitter;   // 0.88 ± 0.04
+    utt.pitch  = VM.PITCH + pitchJitter;  // 1.08 ± 0.04
     utt.volume = VM.VOLUME;
 
     // Set lang explicitly so WebView TTS engine selects correct phoneme set
