@@ -3,605 +3,914 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Sonia · Diary</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<title>Sonia Diary · Mr H</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{
-  --bg:#000000;--text:#ffffff;--sub:rgba(255,255,255,0.45);--line:rgba(255,255,255,0.12);--line-hi:rgba(255,255,255,0.3);
-  --orb-idle:#8844ff;--green:#00cc66;--green-glow:#00ff88;--sync-txt:#00ff88;
-  --sans:'Space Grotesk',sans-serif;--mono:'Space Mono',monospace;
-  --nav-h:64px;--top-h:56px;--status-h:32px;
-  --safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);
-}
-html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
-@supports (height:100dvh){html,body,#app{height:100dvh}}
+  :root {
+    --bg:       #000;
+    --surface:  #0a0a0a;
+    --border:   rgba(160,100,255,0.25);
+    --accent:   rgba(160,100,255,0.9);
+    --accent2:  rgba(120,180,255,0.85);
+    --text:     #ffffff;
+    --muted:    rgba(255,255,255,0.6);
+    --danger:   rgba(255,80,80,0.9);
+    --synced:   rgba(80,255,140,0.9);
+    --fs:       1.18rem;
+    --fs-mono:  0.72rem;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%; width: 100%;
+    background: var(--bg); color: var(--text);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: var(--fs);
+    overflow: hidden;
+  }
 
-/* ── SETUP ── */
-#setup{position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);padding:32px 24px;padding-top:calc(var(--safe-top) + 32px);overflow-y:auto;}
-.setup-inner{width:100%;max-width:420px}
-.setup-name{font-family:var(--mono);font-size:2.8rem;font-weight:700;letter-spacing:-0.03em;margin-bottom:4px;color:var(--text)}
-.setup-sub{font-family:var(--mono);font-size:0.72rem;letter-spacing:0.2em;color:var(--text);opacity:0.7;text-transform:uppercase;margin-bottom:40px}
-.sf{margin-bottom:18px}
-.sf label{display:block;font-family:var(--mono);font-size:0.68rem;letter-spacing:0.18em;color:var(--text);opacity:0.8;text-transform:uppercase;margin-bottom:8px}
-.sf input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--line-hi);color:var(--text);font-family:var(--mono);font-size:0.95rem;padding:12px 0;outline:none;transition:border-color 0.2s;border-radius:0;}
-.sf input:focus{border-bottom-color:var(--text)}
-.sf input::placeholder{color:var(--text);opacity:0.4}
-.setup-hint{font-family:var(--mono);font-size:0.65rem;color:var(--text);opacity:0.5;margin-top:8px;line-height:1.6;letter-spacing:0.05em;}
-#setupBtn{width:100%;margin-top:32px;background:transparent;border:1px solid var(--line-hi);color:var(--text);font-family:var(--mono);font-size:0.85rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:18px;cursor:pointer;transition:border-color 0.2s;border-radius:0;}
-#setupBtn:hover{border-color:var(--text)}
-#setupBtn:active{opacity:0.7}
-.skip-btn{width:100%;margin-top:14px;background:transparent;border:1px solid var(--line);color:var(--text);font-family:var(--mono);font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:13px;cursor:pointer;opacity:0.6;transition:opacity 0.2s;border-radius:0;}
-.skip-btn:hover{opacity:1}
+  /* ── LAYOUT ── */
+  #app {
+    display: flex; flex-direction: column;
+    height: 100%; height: 100dvh;
+    padding-top: env(safe-area-inset-top, 0);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
 
-/* ── APP SHELL ── */
-#app{display:flex;flex-direction:column;position:fixed;inset:0;padding-top:var(--safe-top);background:var(--bg);}
-#topBar{height:var(--top-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid var(--line);flex-shrink:0;}
-.top-left{display:flex;align-items:center;gap:14px}
-.top-name{font-family:var(--mono);font-weight:700;font-size:1.05rem;letter-spacing:0.05em;color:var(--text)}
-.top-tag{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.18em;color:var(--text);opacity:0.45;text-transform:uppercase;margin-top:2px;}
+  /* ── HEADER ── */
+  #header {
+    flex-shrink: 0;
+    padding: 18px 20px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  #header-top {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  #title-block h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300; font-size: 1.55rem;
+    letter-spacing: 0.35em; color: #fff;
+  }
+  #title-block .byline {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.4em;
+    color: var(--muted); margin-top: 2px;
+  }
+  #header-actions { display: flex; gap: 10px; align-items: center; }
 
-/* ── ORB ── */
-#orb{
-  width:30px;height:30px;border-radius:50%;background:var(--orb-idle);border:none;flex-shrink:0;
-  transition:background 0.4s ease,box-shadow 0.4s ease;
-  box-shadow:0 0 10px 3px rgba(136,68,255,0.55),0 0 22px 6px rgba(136,68,255,0.25);
-}
-#orb.syncing{
-  background:var(--green-glow);
-  box-shadow:0 0 14px 5px rgba(0,204,102,0.75),0 0 32px 12px rgba(0,255,136,0.35);
-  animation:orbBreathe 1s ease-in-out infinite alternate
-}
-#orb.online{background:var(--orb-idle);box-shadow:0 0 10px 3px rgba(136,68,255,0.55),0 0 22px 6px rgba(136,68,255,0.25);}
-@keyframes orbBreathe{from{transform:scale(0.9);filter:brightness(1)}to{transform:scale(1.1);filter:brightness(1.6)}}
+  /* Font sizer */
+  #font-sizer {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .fs-btn {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.15em;
+    padding: 4px 8px; cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .fs-btn:hover { color: #fff; border-color: var(--accent); }
 
-/* ── TOP RIGHT ── */
-.top-right{display:flex;align-items:center;gap:8px}
-#modeBtn,#syncBtn{width:34px;height:34px;border-radius:50%;background:transparent;border:1px solid var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text);opacity:0.8;transition:opacity 0.2s,border-color 0.2s;}
-#modeBtn:hover,#syncBtn:hover{opacity:1}
-#syncBtn.syncing{border-color:var(--green-glow);color:var(--green-glow);opacity:1;}
-#syncBtn.success{border-color:#00aa55;color:#00aa55;opacity:1;}
+  /* Search */
+  #search-wrap {
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 2px;
+  }
+  #search {
+    flex: 1; background: none; border: none; outline: none;
+    color: var(--text); font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem; letter-spacing: 0.18em;
+    padding: 4px 0;
+  }
+  #search::placeholder { color: var(--muted); }
+  #search-clear {
+    background: none; border: none; color: var(--muted);
+    font-family: 'Share Tech Mono', monospace; font-size: 0.55rem;
+    cursor: pointer; padding: 2px 4px;
+    display: none;
+  }
+  #search-clear.visible { display: block; }
 
-/* ── PANELS ── */
-#panels{flex:1;overflow:hidden;position:relative;min-height:0}
-.panel{position:absolute;inset:0;display:none;flex-direction:column;opacity:0;transition:opacity 0.2s ease}
-.panel.active{display:flex;opacity:1}
+  /* Stats row */
+  #stats-row {
+    display: flex; gap: 14px; align-items: center;
+  }
+  .stat {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.3em;
+    color: var(--muted);
+  }
+  .stat span { color: var(--accent2); }
 
-/* ── STATUS STRIP ── */
-#statusStrip{height:var(--status-h);border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 20px;flex-shrink:0;}
-#presenceDot{width:6px;height:6px;border-radius:50%;background:var(--text);opacity:0.4;flex-shrink:0;transition:background 0.3s,box-shadow 0.3s}
-#presenceDot.online{background:#00d47e;box-shadow:0 0 6px #00d47e;opacity:1}
-#presenceDot.syncing{background:var(--green-glow);box-shadow:0 0 8px var(--green-glow);opacity:1}
-#presenceDot.offline{background:var(--text);opacity:0.4}
-#statusTxt{font-family:var(--mono);font-size:0.65rem;color:var(--text);opacity:0.75;text-transform:uppercase;letter-spacing:0.1em}
-#statusStrip.syncing #statusTxt{color:var(--sync-txt,var(--green));opacity:1}
+  /* Sync status */
+  #sync-status {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem; letter-spacing: 0.3em;
+    padding: 3px 8px; border: 1px solid var(--border);
+    color: var(--muted); cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+  }
+  #sync-status.syncing { color: var(--accent2); border-color: var(--accent2); animation: pulse 1s ease-in-out infinite; }
+  #sync-status.ok     { color: var(--synced);  border-color: var(--synced); }
+  #sync-status.err    { color: var(--danger);  border-color: var(--danger); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-/* ── NAV ── */
-#bottomNav{height:calc(var(--nav-h) + var(--safe-bot));padding-bottom:var(--safe-bot);border-top:1px solid var(--line);display:flex;align-items:stretch;flex-shrink:0;}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;border:none;background:none;color:var(--text);opacity:0.5;font-family:var(--mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;transition:opacity 0.2s,color 0.2s;border-right:1px solid var(--line);padding:0;}
-.nav-item:last-child{border-right:none}
-.nav-item svg{width:18px;height:18px;fill:currentColor;transition:transform 0.2s}
-.nav-item.active{opacity:1}
-.nav-item.active svg{transform:scale(1.05)}
+  /* ── ENTRIES LIST ── */
+  #entries-wrap {
+    flex: 1; overflow-y: auto; overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 0 8px;
+  }
+  #entries-wrap::-webkit-scrollbar { display: none; }
 
-/* ── DIARY PANEL ── */
-#diaryInputWrap{flex-shrink:0;border-top:1px solid var(--line);padding:12px 20px;display:flex;align-items:flex-end;gap:12px;}
-#diaryBox{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--sans);font-size:1rem;resize:none;max-height:140px;line-height:1.55;padding:0;overflow-y:auto;font-weight:500;caret-color:var(--text);}
-#diaryBox::placeholder{color:var(--text);opacity:0.45}
-#saveBtn{width:34px;height:34px;flex-shrink:0;border-radius:50%;background:transparent;border:1px solid var(--line);color:var(--text);opacity:0.7;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity 0.2s;align-self:flex-end;}
-#saveBtn:hover{opacity:1}
-#saveBtn:active{opacity:0.4}
-#saveBtn svg{width:14px;height:14px;fill:currentColor;margin-left:2px}
-#diaryLog{flex:1;overflow-y:auto;padding:24px 20px 16px;display:flex;flex-direction:column;gap:0;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scroll-behavior:smooth;}
-.entry{margin-bottom:28px;animation:entryIn 0.2s ease;border-top:1px solid var(--line);padding-top:16px;}
-.entry:first-child{border-top:none}
-@keyframes entryIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.entry-ts{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;color:var(--text);opacity:0.55;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
-.entry-text{font-family:var(--sans);font-size:1rem;line-height:1.7;font-weight:500;color:var(--text);white-space:pre-wrap;}
-.entry-del{background:transparent;border:none;color:var(--text);opacity:0.25;cursor:pointer;font-size:13px;padding:2px 4px;transition:opacity 0.2s;flex-shrink:0;}
-.entry-del:hover{opacity:0.8;color:#ff3d5a}
-.empty-state{font-family:var(--mono);font-size:0.75rem;color:var(--text);opacity:0.5;padding:32px 0;letter-spacing:0.08em;}
+  #empty {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    height: 100%; gap: 10px;
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem; letter-spacing: 0.3em;
+    text-align: center;
+  }
+  #empty .orb-hint {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 1px solid rgba(160,100,255,0.3);
+    box-shadow: 0 0 20px rgba(160,100,255,0.12);
+    animation: breathe 3s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%,100%{box-shadow:0 0 18px rgba(160,100,255,0.12)}
+    50%{box-shadow:0 0 40px rgba(160,100,255,0.28)}
+  }
 
-/* ── LOG PANEL (entries list) ── */
-.panel-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:24px 20px;overscroll-behavior:contain}
-.panel-head{margin-bottom:28px}
-.panel-title{font-family:var(--mono);font-weight:700;font-size:1.4rem;letter-spacing:-0.01em;margin-bottom:4px;color:var(--text)}
-.panel-sub{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.15em;color:var(--text);opacity:0.65;text-transform:uppercase}
-.btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px}
-.pill{background:transparent;border:1px solid var(--line-hi);color:var(--text);opacity:0.8;font-family:var(--mono);font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:10px 18px;cursor:pointer;transition:opacity 0.2s,border-color 0.2s;white-space:nowrap;border-radius:0;}
-.pill:hover{opacity:1}
-.pill:active{opacity:0.4}
-.pill.primary{opacity:1;border-color:var(--text)}
-.pill.success{border-color:#00aa55;color:#00aa55;opacity:1}
-.pill.danger{border-color:#ff3d5a;color:#ff3d5a;opacity:1}
-.log-entry{border-top:1px solid var(--line);padding:16px 0;}
-.log-entry:first-child{border-top:none}
-.log-ts{font-family:var(--mono);font-size:0.62rem;color:var(--text);opacity:0.55;margin-bottom:8px;letter-spacing:0.08em;}
-.log-text{font-size:0.95rem;line-height:1.6;color:var(--text);font-weight:500;white-space:pre-wrap;}
-.sync-info{font-family:var(--mono);font-size:0.68rem;color:var(--text);opacity:0.5;margin-top:6px;letter-spacing:0.06em;}
-.sync-info.synced{color:#00aa55;opacity:1;}
+  /* Date group header */
+  .date-group { padding: 14px 20px 4px; }
+  .date-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.48rem; letter-spacing: 0.45em;
+    color: var(--muted); text-transform: uppercase;
+  }
 
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar{width:2px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--line)}
+  /* Entry card with swipe */
+  .entry-outer {
+    position: relative; overflow: hidden;
+  }
+  .entry-delete-bg {
+    position: absolute; right: 0; top: 0; bottom: 0;
+    width: 80px; background: rgba(255,60,60,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.5rem; letter-spacing: 0.2em; color: var(--danger);
+    transition: background 0.2s;
+  }
+  .entry-delete-bg.active { background: rgba(255,60,60,0.35); }
+
+  .entry-card {
+    position: relative;
+    margin: 6px 16px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    transition: transform 0.08s, border-color 0.2s;
+    touch-action: pan-y;
+    will-change: transform;
+    user-select: none;
+  }
+  .entry-card:active { border-color: var(--accent); }
+  .entry-card.swiping { transition: none; }
+
+  .entry-time {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: var(--fs-mono);
+    color: var(--muted); margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sync-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--muted); flex-shrink: 0;
+    transition: background 0.3s;
+  }
+  .sync-dot.synced { background: var(--synced); }
+
+  .entry-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: var(--fs);
+    font-weight: 300; line-height: 1.7;
+    color: var(--text);
+    word-break: break-word;
+  }
+  .entry-text .highlight {
+    background: rgba(160,100,255,0.25);
+    border-radius: 2px; padding: 0 2px;
+  }
+
+  /* ── COMPOSE AREA ── */
+  #compose {
+    flex-shrink: 0;
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0));
+    background: var(--bg);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  #compose-inner {
+    display: flex; gap: 10px; align-items: flex-end;
+  }
+  #entry-input {
+    flex: 1;
+    background: none; border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: var(--fs);
+    font-weight: 300; line-height: 1.6;
+    padding: 6px 0 8px;
+    resize: none; outline: none;
+    min-height: 36px; max-height: 120px;
+    overflow-y: auto;
+    transition: border-color 0.3s;
+  }
+  #entry-input::placeholder { color: var(--muted); font-style: italic; }
+  #entry-input:focus { border-color: var(--accent); }
+
+  #save-btn {
+    background: none; border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.52rem; letter-spacing: 0.3em;
+    padding: 8px 14px; cursor: pointer;
+    transition: all 0.2s; white-space: nowrap;
+    align-self: flex-end;
+  }
+  #save-btn:hover { background: rgba(160,100,255,0.12); }
+  #save-btn:active { background: rgba(160,100,255,0.25); }
+  #save-btn.saving { opacity: 0.5; pointer-events: none; }
+
+  #char-count {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.45rem; letter-spacing: 0.2em;
+    color: var(--muted); text-align: right;
+    transition: color 0.2s;
+  }
+  #char-count.warn { color: rgba(255,200,60,0.7); }
+  #char-count.over { color: var(--danger); }
+
+  /* ── MODAL (entry detail) ── */
+  #modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.8); z-index: 100;
+    align-items: flex-end; justify-content: center;
+  }
+  #modal-overlay.open { display: flex; }
+  #modal {
+    width: 100%; max-width: 600px;
+    background: #0d0d0d;
+    border-top: 1px solid var(--border);
+    padding: 24px 20px;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0));
+    animation: slideUp 0.22s cubic-bezier(0.4,0,0.2,1);
+  }
+  @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+  #modal-ts {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.52rem; letter-spacing: 0.35em;
+    color: var(--muted); margin-bottom: 14px;
+  }
+  #modal-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: calc(var(--fs) * 1.05);
+    font-weight: 300; line-height: 1.8;
+    color: var(--text); margin-bottom: 20px;
+    max-height: 50vh; overflow-y: auto;
+  }
+  #modal-text::-webkit-scrollbar { display: none; }
+  #modal-actions {
+    display: flex; gap: 12px; justify-content: flex-end;
+  }
+  .modal-btn {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.5rem; letter-spacing: 0.25em;
+    padding: 8px 16px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .modal-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .modal-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #111; border: 1px solid var(--border);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.52rem; letter-spacing: 0.25em;
+    color: var(--text); padding: 8px 20px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s;
+    white-space: nowrap; z-index: 200;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── DRIVE CONFIG PANEL ── */
+  #drive-panel {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.92); z-index: 150;
+    align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  #drive-panel.open { display: flex; }
+  #drive-inner {
+    width: 100%; max-width: 400px;
+    border: 1px solid var(--border);
+    background: #0a0a0a;
+    padding: 24px 20px;
+  }
+  #drive-inner h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300; font-size: 1.2rem;
+    letter-spacing: 0.3em; color: #fff;
+    margin-bottom: 18px;
+  }
+  .drive-field {
+    margin-bottom: 14px;
+  }
+  .drive-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.48rem; letter-spacing: 0.35em;
+    color: var(--muted); margin-bottom: 6px;
+    display: block;
+  }
+  .drive-input {
+    width: 100%; background: none;
+    border: none; border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem; letter-spacing: 0.15em;
+    padding: 6px 0; outline: none;
+  }
+  .drive-input:focus { border-color: var(--accent); }
+  .drive-input::placeholder { color: var(--muted); }
+  #drive-save {
+    margin-top: 20px; width: 100%;
+    background: none; border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.52rem; letter-spacing: 0.3em;
+    padding: 10px; cursor: pointer;
+    transition: background 0.2s;
+  }
+  #drive-save:hover { background: rgba(160,100,255,0.1); }
+  #drive-cancel {
+    margin-top: 10px; width: 100%;
+    background: none; border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.5rem; letter-spacing: 0.25em;
+    padding: 8px; cursor: pointer;
+  }
+
 </style>
 </head>
 <body>
 
-<!-- SETUP -->
-<div id="setup">
-  <div class="setup-inner">
-    <div class="setup-name">Sonia</div>
-    <div class="setup-sub">Diary · Mobile</div>
-    <div class="sf">
-      <label>Your Name</label>
-      <input type="text" id="cfgOwner" placeholder="Mr H" autocomplete="off" value="Mr H">
-    </div>
-    <div class="sf">
-      <label>Google OAuth Client ID</label>
-      <input type="text" id="cfgClient" placeholder="xxxx.apps.googleusercontent.com" autocomplete="off">
-      <div class="setup-hint">Required for Drive sync. Leave blank for offline-only mode.</div>
-    </div>
-    <div class="sf">
-      <label>Drive Folder ID (optional)</label>
-      <input type="text" id="cfgFolder" placeholder="Leave blank to use Drive root" autocomplete="off">
-    </div>
-    <button id="setupBtn">Start Writing</button>
-    <button class="skip-btn" id="skipBtn">Skip — offline only</button>
-  </div>
-</div>
-
-<!-- APP -->
 <div id="app">
-  <header id="topBar">
-    <div class="top-left">
-      <div id="orb"></div>
-      <div>
-        <div class="top-name">Sonia</div>
-        <div class="top-tag">Diary</div>
+
+  <!-- HEADER -->
+  <div id="header">
+    <div id="header-top">
+      <div id="title-block">
+        <h1>Diary</h1>
+        <div class="byline">SONIA · MR H</div>
       </div>
-    </div>
-    <div class="top-right">
-      <button id="syncBtn" title="Sync to Drive">☁</button>
-      <button id="modeBtn" title="Toggle theme">◐</button>
-    </div>
-  </header>
-
-  <div id="panels">
-
-    <!-- WRITE panel -->
-    <div class="panel active" id="writePanel">
-      <div id="diaryLog"></div>
-      <div id="diaryInputWrap">
-        <textarea id="diaryBox" rows="1" placeholder="Write today's entry…"></textarea>
-        <button id="saveBtn" title="Save entry">
-          <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- LOG panel -->
-    <div class="panel" id="logPanel">
-      <div class="panel-scroll">
-        <div class="panel-head">
-          <div class="panel-title">Log</div>
-          <div class="panel-sub">All diary entries</div>
+      <div id="header-actions">
+        <div id="font-sizer">
+          <button class="fs-btn" id="fs-down">A−</button>
+          <button class="fs-btn" id="fs-up">A+</button>
         </div>
-        <div class="btn-row">
-          <button class="pill primary" id="syncAllBtn">☁ Sync All</button>
-          <button class="pill danger" id="clearAllBtn">✕ Clear All</button>
-        </div>
-        <div id="syncStatusMsg" style="font-family:var(--mono);font-size:0.68rem;color:var(--text);opacity:0.6;margin-bottom:18px;min-height:16px;letter-spacing:0.06em;"></div>
-        <div id="logList"></div>
+        <div id="sync-status" title="Tap to configure Drive sync">OFFLINE</div>
       </div>
     </div>
 
+    <div id="search-wrap">
+      <input id="search" type="search" placeholder="SEARCH ENTRIES..." autocomplete="off" spellcheck="false">
+      <button id="search-clear">✕</button>
+    </div>
+
+    <div id="stats-row">
+      <div class="stat">ENTRIES <span id="stat-count">0</span></div>
+      <div class="stat">TODAY <span id="stat-today">0</span></div>
+      <div class="stat">UNSYNCED <span id="stat-unsynced">0</span></div>
+    </div>
   </div>
 
-  <div id="statusStrip">
-    <div id="presenceDot"></div>
-    <span id="statusTxt">offline</span>
+  <!-- ENTRIES -->
+  <div id="entries-wrap">
+    <div id="empty">
+      <div class="orb-hint"></div>
+      <div>NO ENTRIES YET</div>
+      <div style="font-size:0.45rem;margin-top:4px;color:rgba(255,255,255,0.15)">WRITE YOUR FIRST THOUGHT BELOW</div>
+    </div>
+    <div id="entries-list"></div>
   </div>
 
-  <nav id="bottomNav">
-    <button class="nav-item active" data-panel="writePanel">
-      <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm17.71-10.21c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-      Write
-    </button>
-    <button class="nav-item" data-panel="logPanel">
-      <svg viewBox="0 0 24 24"><path d="M14 2H6C4.9 2 4 2.9 4 4v16c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-      Log
-    </button>
-  </nav>
+  <!-- COMPOSE -->
+  <div id="compose">
+    <div id="compose-inner">
+      <textarea id="entry-input" placeholder="Write something…" rows="1" maxlength="2000"></textarea>
+      <button id="save-btn">SAVE</button>
+    </div>
+    <div id="char-count">0 / 2000</div>
+  </div>
+
 </div>
+
+<!-- MODAL -->
+<div id="modal-overlay">
+  <div id="modal">
+    <div id="modal-ts"></div>
+    <div id="modal-text"></div>
+    <div id="modal-actions">
+      <button class="modal-btn danger" id="modal-delete">DELETE</button>
+      <button class="modal-btn" id="modal-copy">COPY</button>
+      <button class="modal-btn" id="modal-close">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- DRIVE CONFIG PANEL -->
+<div id="drive-panel">
+  <div id="drive-inner">
+    <h2>Drive Sync</h2>
+    <div class="drive-field">
+      <label class="drive-label">GOOGLE OAUTH TOKEN</label>
+      <input class="drive-input" id="cfg-token" type="password" placeholder="paste access token…">
+    </div>
+    <div class="drive-field">
+      <label class="drive-label">DIARY FOLDER ID</label>
+      <input class="drive-input" id="cfg-folder" placeholder="1Pq-8HJW_IadiYI37MnWiiHuKm5ylr3wY">
+    </div>
+    <div class="drive-field">
+      <label class="drive-label">FILE NAME</label>
+      <input class="drive-input" id="cfg-file" placeholder="sonia_diary_mr_h.json">
+    </div>
+    <button id="drive-save">SAVE &amp; SYNC NOW</button>
+    <button id="drive-cancel">CANCEL</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
 
 <script>
-/* ══ BOOT ERROR CATCHER ══ */
-window.onerror = function(msg, src, line, col, err) {
-  const box = document.createElement('div');
-  box.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#000;color:#ff2266;font-family:monospace;font-size:13px;padding:24px;overflow:auto;white-space:pre-wrap;';
-  box.textContent = '⚠ SONIA BOOT ERROR\n\n' + msg + '\n\nFile: ' + src + '\nLine: ' + line + ':' + col + '\n\n' + (err?.stack || '');
-  document.body.appendChild(box);
-  return false;
-};
-window.addEventListener('unhandledrejection', function(e) {
-  const box = document.createElement('div');
-  box.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#000;color:#ff2266;font-family:monospace;font-size:13px;padding:24px;overflow:auto;white-space:pre-wrap;';
-  box.textContent = '⚠ SONIA ASYNC ERROR\n\n' + (e.reason?.stack || e.reason || 'Unknown promise rejection');
-  document.body.appendChild(box);
-});
+/* ══════════════════════════════════════════════
+   SONIA MOBILE DIARY  v2.1
+   — localStorage key: sonia_diary_v2
+   — Drive: writes to diary subfolder
+   — Font sizer: A− / A+
+   — Swipe left to delete
+   — Search / filter
+   — Entry modal with copy
+   — Auto-sync on save
+══════════════════════════════════════════════ */
 
-/* ══ STORAGE ══ */
-const LS = { get: k => localStorage.getItem('sd_' + k), set: (k, v) => localStorage.setItem('sd_' + k, v) };
+const STORAGE_KEY   = 'sonia_diary_v2';
+const FS_KEY        = 'sonia_diary_fs';
+const CFG_KEY       = 'sonia_diary_cfg';
+const MAX_CHARS     = 2000;
+const FONT_SIZES    = [0.92, 1.02, 1.18, 1.3, 1.42, 1.55];
+let   fsSizeIdx     = 2;  // default index (1.18rem)
 
-/* ══ STATE ══ */
-let OWNER_NAME = 'Mr H', CLIENT_ID = '', FOLDER_ID = '';
-let driveToken = null;
-let gapiReady = false, gisReady = false, tokenClient = null;
+// ── STATE ──────────────────────────────────────
+let entries     = [];
+let searchQuery = '';
+let openEntry   = null;
+let syncTimer   = null;
+let cfg         = { token: '', folder: '1Pq-8HJW_IadiYI37MnWiiHuKm5ylr3wY', file: 'sonia_diary_mr_h.json' };
 
-/* ══ ENTRIES ══
-   Each entry: { id, ts, text, synced: bool }
-*/
-let entries = JSON.parse(LS.get('entries') || '[]');
-function saveEntries() { LS.set('entries', JSON.stringify(entries)); }
-
-/* ══ VISUAL LOCK (keyboard shield) ══ */
-(function() {
-  const app = document.getElementById('app');
-  if (!app) return;
-  function setH() {
-    const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-    document.documentElement.style.setProperty('--vl-locked-h', h + 'px');
-  }
-  setH();
-  window.addEventListener('resize', setH, { passive: true });
-  if (window.visualViewport) {
-    const onVP = () => {
-      const vv = window.visualViewport;
-      app.style.height = vv.height + 'px';
-      app.style.top = vv.offsetTop + 'px';
-      const dl = document.getElementById('diaryLog');
-      if (dl && (window.innerHeight - vv.height) > 100) setTimeout(() => { dl.scrollTop = dl.scrollHeight; }, 80);
-    };
-    window.visualViewport.addEventListener('resize', onVP, { passive: true });
-    window.visualViewport.addEventListener('scroll', onVP, { passive: true });
-    onVP();
-  }
-})();
-
-/* ══ THEME ══ */
-let theme = LS.get('theme') || 'dark';
-function applyTheme(t) {
-  const r = document.documentElement.style;
-  if (t === 'light') {
-    r.setProperty('--bg', '#f0f0f0'); r.setProperty('--text', '#080808');
-    r.setProperty('--sub', 'rgba(0,0,0,0.5)'); r.setProperty('--line', 'rgba(0,0,0,0.12)');
-    r.setProperty('--line-hi', 'rgba(0,0,0,0.3)'); r.setProperty('--green', '#008844');
-    r.setProperty('--green-glow', '#00aa55'); r.setProperty('--sync-txt', '#006633');
-  } else {
-    r.setProperty('--bg', '#000000'); r.setProperty('--text', '#ffffff');
-    r.setProperty('--sub', 'rgba(255,255,255,0.45)'); r.setProperty('--line', 'rgba(255,255,255,0.12)');
-    r.setProperty('--line-hi', 'rgba(255,255,255,0.3)'); r.setProperty('--green', '#00cc66');
-    r.setProperty('--green-glow', '#00ff88'); r.setProperty('--sync-txt', '#00ff88');
-  }
+// ── INIT ───────────────────────────────────────
+function init() {
+  loadCfg();
+  loadEntries();
+  loadFontSize();
+  renderAll();
+  bindEvents();
+  autoResize(elInput());
 }
-applyTheme(theme);
-document.getElementById('modeBtn').addEventListener('click', () => {
-  theme = theme === 'dark' ? 'light' : 'dark'; LS.set('theme', theme); applyTheme(theme);
-});
 
-/* ══ PRESENCE / STATUS ══ */
-function setPresence(state) {
-  const dot = document.getElementById('presenceDot');
-  const orb = document.getElementById('orb');
-  const strip = document.getElementById('statusStrip');
-  if (dot) dot.className = state;
-  if (orb) orb.className = state;
-  if (strip) strip.classList.toggle('syncing', state === 'syncing');
+// ── STORAGE ────────────────────────────────────
+function loadEntries() {
+  try { entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+  catch(e) { entries = []; }
 }
-function setStatus(msg) { const el = document.getElementById('statusTxt'); if (el) el.textContent = msg; }
-
-/* ══ PANELS ══ */
-const panels = document.querySelectorAll('.panel');
-const navItems = document.querySelectorAll('.nav-item');
-function activatePanel(id) {
-  panels.forEach(p => p.classList.remove('active'));
-  navItems.forEach(n => n.classList.remove('active'));
-  const p = document.getElementById(id); if (p) p.classList.add('active');
-  if (id === 'logPanel') renderLog();
+function saveEntries() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 }
-navItems.forEach(btn => {
-  btn.addEventListener('click', () => {
-    navItems.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activatePanel(btn.dataset.panel);
-  });
-});
+function loadCfg() {
+  try { const c = JSON.parse(localStorage.getItem(CFG_KEY)); if(c) cfg = {...cfg, ...c}; }
+  catch(e) {}
+}
+function saveCfg() { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }
+function loadFontSize() {
+  const saved = localStorage.getItem(FS_KEY);
+  if (saved !== null) fsSizeIdx = parseInt(saved);
+  applyFontSize();
+}
+function applyFontSize() {
+  const fs = FONT_SIZES[fsSizeIdx];
+  document.documentElement.style.setProperty('--fs', fs + 'rem');
+  document.documentElement.style.setProperty('--fs-mono', (fs * 0.6) + 'rem');
+  localStorage.setItem(FS_KEY, fsSizeIdx);
+}
 
-/* ══ RENDER DIARY LOG (write panel — today's entries) ══ */
-function renderDiaryLog() {
-  const container = document.getElementById('diaryLog');
-  container.innerHTML = '';
-  if (!entries.length) {
-    container.innerHTML = '<div class="empty-state">No entries yet — start writing</div>';
-    return;
-  }
-  // Show today's entries in write panel, newest first
+// ── EL HELPERS ─────────────────────────────────
+const el  = id => document.getElementById(id);
+const elInput = () => el('entry-input');
+
+// ── RENDER ─────────────────────────────────────
+function renderAll() {
+  updateStats();
+  renderEntries();
+}
+
+function updateStats() {
   const today = new Date().toDateString();
-  const todayEntries = entries.filter(e => new Date(e.ts).toDateString() === today);
-  if (!todayEntries.length) {
-    container.innerHTML = '<div class="empty-state">Nothing written today yet</div>';
-    return;
-  }
-  [...todayEntries].reverse().forEach(e => {
-    const el = document.createElement('div');
-    el.className = 'entry';
-    const time = new Date(e.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    el.innerHTML = `
-      <div class="entry-ts">
-        <span>${time}${e.synced ? ' · ☁' : ''}</span>
-        <button class="entry-del" onclick="deleteEntry('${e.id}')">✕</button>
-      </div>
-      <div class="entry-text">${escHtml(e.text)}</div>`;
-    container.appendChild(el);
-  });
-  container.scrollTop = container.scrollHeight;
+  const todayCount = entries.filter(e => new Date(e.ts).toDateString() === today).length;
+  const unsynced   = entries.filter(e => !e.synced).length;
+  el('stat-count').textContent   = entries.length;
+  el('stat-today').textContent   = todayCount;
+  el('stat-unsynced').textContent = unsynced;
 }
 
-/* ══ RENDER ALL LOG (log panel) ══ */
-function renderLog() {
-  const container = document.getElementById('logList');
-  container.innerHTML = '';
-  if (!entries.length) {
-    container.innerHTML = '<div class="empty-state">No entries yet</div>';
+function renderEntries() {
+  const list  = el('entries-list');
+  const empty = el('empty');
+  const q     = searchQuery.trim().toLowerCase();
+  let   shown = entries;
+  if (q) shown = entries.filter(e => e.text.toLowerCase().includes(q));
+  shown = [...shown].reverse(); // newest first
+
+  if (!shown.length) {
+    list.innerHTML = '';
+    empty.style.display = 'flex';
     return;
   }
-  const unsynced = entries.filter(e => !e.synced).length;
-  const msg = document.getElementById('syncStatusMsg');
-  if (msg) msg.textContent = unsynced > 0 ? `${unsynced} entry${unsynced > 1 ? 's' : ''} pending sync` : (entries.length ? 'All entries synced ✓' : '');
+  empty.style.display = 'none';
 
-  [...entries].reverse().forEach(e => {
-    const el = document.createElement('div');
-    el.className = 'log-entry';
-    const d = new Date(e.ts);
-    const dateStr = d.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-    const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    el.innerHTML = `
-      <div class="log-ts">${dateStr} · ${timeStr}</div>
-      <div class="log-text">${escHtml(e.text)}</div>
-      <div class="sync-info ${e.synced ? 'synced' : ''}">${e.synced ? '☁ synced to Drive' : '○ not yet synced'}</div>`;
-    container.appendChild(el);
+  // Group by date
+  const groups = {};
+  shown.forEach(e => {
+    const d = fmtDate(e.ts);
+    if (!groups[d]) groups[d] = [];
+    groups[d].push(e);
   });
+
+  let html = '';
+  Object.keys(groups).forEach(dateKey => {
+    html += `<div class="date-group"><div class="date-label">${dateKey}</div></div>`;
+    groups[dateKey].forEach(e => {
+      const text = q ? highlightText(e.text, q) : escHtml(e.text);
+      html += `
+        <div class="entry-outer" data-id="${e.id}">
+          <div class="entry-delete-bg">DELETE</div>
+          <div class="entry-card" data-id="${e.id}">
+            <div class="entry-time">
+              <div class="sync-dot ${e.synced ? 'synced' : ''}"></div>
+              ${fmtTime(e.ts)}
+            </div>
+            <div class="entry-text">${text}</div>
+          </div>
+        </div>`;
+    });
+  });
+  list.innerHTML = html;
+  bindSwipe();
+  bindEntryTap();
 }
 
 function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function highlightText(text, q) {
+  const safe = escHtml(text);
+  const re   = new RegExp('(' + escRegex(q) + ')', 'gi');
+  return safe.replace(re, '<span class="highlight">$1</span>');
+}
+function escRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+
+function fmtDate(ts) {
+  const d = new Date(ts);
+  const today = new Date();
+  const yest  = new Date(today); yest.setDate(today.getDate()-1);
+  if (d.toDateString() === today.toDateString()) return 'TODAY';
+  if (d.toDateString() === yest.toDateString())  return 'YESTERDAY';
+  return d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toUpperCase();
+}
+function fmtTime(ts) {
+  return new Date(ts).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+function fmtFull(ts) {
+  return new Date(ts).toLocaleString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
 }
 
-/* ══ SAVE ENTRY ══ */
-function saveEntry() {
-  const box = document.getElementById('diaryBox');
-  const text = box.value.trim();
-  if (!text) return;
+// ── SWIPE TO DELETE ────────────────────────────
+function bindSwipe() {
+  document.querySelectorAll('.entry-card').forEach(card => {
+    let startX = 0, curX = 0, swiping = false;
+    const bg = card.closest('.entry-outer').querySelector('.entry-delete-bg');
+
+    card.addEventListener('touchstart', e => {
+      startX = e.touches[0].clientX;
+      swiping = false;
+      card.classList.remove('swiping');
+    }, { passive: true });
+
+    card.addEventListener('touchmove', e => {
+      curX = e.touches[0].clientX;
+      const dx = startX - curX;
+      if (dx > 8) {
+        swiping = true;
+        card.classList.add('swiping');
+        const clamp = Math.min(dx, 80);
+        card.style.transform = `translateX(-${clamp}px)`;
+        bg.classList.toggle('active', clamp >= 60);
+      }
+    }, { passive: true });
+
+    card.addEventListener('touchend', () => {
+      if (!swiping) return;
+      const dx = startX - curX;
+      card.classList.remove('swiping');
+      if (dx >= 60) {
+        deleteEntry(card.dataset.id);
+      } else {
+        card.style.transform = 'translateX(0)';
+      }
+    });
+  });
+}
+
+function bindEntryTap() {
+  document.querySelectorAll('.entry-card').forEach(card => {
+    let touchMoved = false;
+    card.addEventListener('touchstart', () => { touchMoved = false; }, { passive: true });
+    card.addEventListener('touchmove',  () => { touchMoved = true;  }, { passive: true });
+    card.addEventListener('touchend', () => {
+      if (!touchMoved) openModal(card.dataset.id);
+    });
+    card.addEventListener('click', () => openModal(card.dataset.id));
+  });
+}
+
+// ── MODAL ──────────────────────────────────────
+function openModal(id) {
+  openEntry = entries.find(e => e.id === id);
+  if (!openEntry) return;
+  el('modal-ts').textContent   = fmtFull(openEntry.ts).toUpperCase();
+  el('modal-text').textContent = openEntry.text;
+  el('modal-overlay').classList.add('open');
+}
+function closeModal() {
+  el('modal-overlay').classList.remove('open');
+  openEntry = null;
+}
+
+// ── ENTRY CRUD ─────────────────────────────────
+function addEntry(text) {
   const entry = {
-    id: Date.now() + '_' + Math.random().toString(36).slice(2, 7),
-    ts: new Date().toISOString(),
-    text,
+    id:     Date.now() + '_' + Math.random().toString(36).slice(2,7),
+    ts:     new Date().toISOString(),
+    text:   text.trim(),
     synced: false
   };
   entries.push(entry);
   saveEntries();
-  box.value = '';
-  box.style.height = 'auto';
-  renderDiaryLog();
-  setStatus('saved · ' + OWNER_NAME.toLowerCase());
-  setTimeout(() => setStatus(driveToken ? 'online · ' + OWNER_NAME.toLowerCase() : 'offline'), 1800);
+  renderAll();
+  scheduleDriveSync();
+  return entry;
 }
 
-const diaryBox = document.getElementById('diaryBox');
-diaryBox.addEventListener('input', () => { diaryBox.style.height = 'auto'; diaryBox.style.height = Math.min(diaryBox.scrollHeight, 140) + 'px'; });
-diaryBox.addEventListener('keydown', e => { if (e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); saveEntry(); } });
-document.getElementById('saveBtn').addEventListener('click', saveEntry);
-
-/* ══ DELETE ENTRY ══ */
-window.deleteEntry = id => {
+function deleteEntry(id) {
   entries = entries.filter(e => e.id !== id);
   saveEntries();
-  renderDiaryLog();
-};
-
-/* ══ CLEAR ALL ══ */
-document.getElementById('clearAllBtn').addEventListener('click', () => {
-  if (!entries.length) return;
-  if (!confirm('Delete all diary entries? This cannot be undone.')) return;
-  entries = [];
-  saveEntries();
-  renderLog();
-  renderDiaryLog();
-});
-
-/* ══ DRIVE SETUP ══ */
-function loadDriveLibs() {
-  if (!CLIENT_ID) return;
-  if (!window.gapi) {
-    const s = document.createElement('script');
-    s.src = 'https://apis.google.com/js/api.js';
-    s.onload = () => { gapi.load('client', () => { gapi.client.init({}).then(() => { gapiReady = true; }); }); };
-    document.head.appendChild(s);
-  }
-  if (!window.google?.accounts) {
-    const s = document.createElement('script');
-    s.src = 'https://accounts.google.com/gsi/client';
-    s.onload = () => { gisReady = true; };
-    document.head.appendChild(s);
-  }
+  renderAll();
+  showToast('ENTRY DELETED');
 }
 
-function authDrive(callback) {
-  if (!CLIENT_ID) { setStatus('no client id — Drive unavailable'); return; }
-  if (location.protocol !== 'https:' && location.protocol !== 'http:') {
-    setStatus('needs https for Drive');
+// ── DRIVE SYNC ─────────────────────────────────
+function setSyncStatus(state, label) {
+  const s = el('sync-status');
+  s.className = '';
+  s.classList.add(state);
+  s.textContent = label;
+}
+
+function scheduleDriveSync() {
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(syncToDrive, 1800);
+}
+
+async function syncToDrive() {
+  if (!cfg.token || !cfg.folder || !cfg.file) {
+    setSyncStatus('', 'OFFLINE');
     return;
   }
-  if (!tokenClient) {
-    tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: CLIENT_ID,
-      scope: 'https://www.googleapis.com/auth/drive.file',
-      callback: (r) => {
-        if (r.error) { setPresence('offline'); setStatus('auth failed'); return; }
-        driveToken = r.access_token;
-        gapi.client.setToken({ access_token: driveToken });
-        setPresence('online');
-        setStatus('drive connected · ' + OWNER_NAME.toLowerCase());
-        document.getElementById('syncBtn').classList.add('success');
-        if (callback) callback();
-      }
-    });
-  }
-  tokenClient.requestAccessToken({ prompt: '' });
-}
-
-/* ══ SYNC TO DRIVE ══ */
-async function syncToDrive() {
-  const unsynced = entries.filter(e => !e.synced);
-  if (!unsynced.length) { setStatus('nothing to sync'); setTimeout(() => setStatus('online · ' + OWNER_NAME.toLowerCase()), 1600); return; }
-
-  setPresence('syncing');
-  setStatus('syncing ' + unsynced.length + ' entr' + (unsynced.length > 1 ? 'ies' : 'y') + '…');
-  document.getElementById('syncBtn').classList.add('syncing');
-  document.getElementById('statusStrip').classList.add('syncing');
-
-  // Build diary content — append to existing file or create new
-  const filename = 'sonia_diary_' + OWNER_NAME.toLowerCase().replace(/\s+/g, '_') + '.json';
-
+  setSyncStatus('syncing', 'SYNCING…');
   try {
-    // Check if file already exists
-    const searchRes = await fetch(
-      `https://www.googleapis.com/drive/v3/files?q=name='${filename}'${FOLDER_ID ? "+and+'"+FOLDER_ID+"'+in+parents" : ''}&fields=files(id)`,
-      { headers: { 'Authorization': 'Bearer ' + driveToken } }
-    );
-    const searchData = await searchRes.json();
-    const existingId = searchData.files?.[0]?.id || null;
+    // Find existing file
+    const q    = encodeURIComponent(`name='${cfg.file}' and '${cfg.folder}' in parents and trashed=false`);
+    const list = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
+      headers: { Authorization: 'Bearer ' + cfg.token }
+    });
+    if (list.status === 401) { setSyncStatus('err', 'TOKEN EXPIRED'); return; }
+    const lj   = await list.json();
+    const fid  = lj.files?.[0]?.id;
+    const body = JSON.stringify(entries, null, 2);
 
-    let existingEntries = [];
-    if (existingId) {
-      // Download existing to merge
-      const dlRes = await fetch(`https://www.googleapis.com/drive/v3/files/${existingId}?alt=media`, {
-        headers: { 'Authorization': 'Bearer ' + driveToken }
-      });
-      try { existingEntries = await dlRes.json(); } catch (e) { existingEntries = []; }
-    }
-
-    // Merge: existing + new unsynced (avoid duplicates by id)
-    const existingIds = new Set(existingEntries.map(e => e.id));
-    const merged = [...existingEntries, ...unsynced.filter(e => !existingIds.has(e.id))];
-    merged.sort((a, b) => new Date(a.ts) - new Date(b.ts));
-
-    const body = JSON.stringify(merged, null, 2);
-    const blob = new Blob([body], { type: 'application/json' });
-
-    let uploadRes;
-    if (existingId) {
-      // Update existing file
-      uploadRes = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${existingId}?uploadType=media`, {
+    let res;
+    if (fid) {
+      res = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fid}?uploadType=media`, {
         method: 'PATCH',
-        headers: { 'Authorization': 'Bearer ' + driveToken, 'Content-Type': 'application/json' },
-        body: blob
+        headers: { Authorization: 'Bearer ' + cfg.token, 'Content-Type': 'application/json' },
+        body
       });
     } else {
-      // Create new file
-      const meta = { name: filename, mimeType: 'application/json' };
-      if (FOLDER_ID) meta.parents = [FOLDER_ID];
-      const form = new FormData();
-      form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
-      form.append('file', blob);
-      uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+      const boundary = 'sonia314159';
+      const meta     = { name: cfg.file, parents: [cfg.folder] };
+      const mp = `--${boundary}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(meta)}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${boundary}--`;
+      res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
         method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + driveToken },
-        body: form
+        headers: {
+          Authorization: 'Bearer ' + cfg.token,
+          'Content-Type': `multipart/related; boundary="${boundary}"`
+        },
+        body: mp
       });
     }
-
-    if (uploadRes.ok) {
-      // Mark all as synced
-      const syncedIds = new Set(unsynced.map(e => e.id));
-      entries = entries.map(e => syncedIds.has(e.id) ? { ...e, synced: true } : e);
+    if (res.ok) {
+      entries = entries.map(e => ({ ...e, synced: true }));
       saveEntries();
-      setPresence('online');
-      setStatus('synced ' + unsynced.length + ' entr' + (unsynced.length > 1 ? 'ies' : 'y') + ' ✓');
-      document.getElementById('syncBtn').classList.remove('syncing');
-      document.getElementById('syncBtn').classList.add('success');
-      document.getElementById('statusStrip').classList.remove('syncing');
-      renderDiaryLog();
-      renderLog();
-      setTimeout(() => setStatus('online · ' + OWNER_NAME.toLowerCase()), 2500);
+      updateStats();
+      document.querySelectorAll('.sync-dot').forEach(d => d.classList.add('synced'));
+      setSyncStatus('ok', 'SYNCED ✓');
+      setTimeout(() => setSyncStatus('', 'DRIVE ON'), 4000);
     } else {
-      throw new Error('Upload failed: ' + uploadRes.status);
+      setSyncStatus('err', 'SYNC ERR ' + res.status);
     }
-  } catch (err) {
-    setPresence('offline');
-    setStatus('sync failed — try again');
-    document.getElementById('syncBtn').classList.remove('syncing');
-    document.getElementById('statusStrip').classList.remove('syncing');
-    console.error('Sync error:', err);
+  } catch(e) {
+    setSyncStatus('err', 'NETWORK ERR');
   }
 }
 
-function triggerSync() {
-  if (!CLIENT_ID) { setStatus('no Drive configured'); setTimeout(() => setStatus('offline'), 2000); return; }
-  if (!driveToken) {
-    authDrive(() => syncToDrive());
-  } else {
-    syncToDrive();
+async function loadFromDrive() {
+  if (!cfg.token || !cfg.folder || !cfg.file) return;
+  setSyncStatus('syncing', 'LOADING…');
+  try {
+    const q    = encodeURIComponent(`name='${cfg.file}' and '${cfg.folder}' in parents and trashed=false`);
+    const list = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
+      headers: { Authorization: 'Bearer ' + cfg.token }
+    });
+    const lj  = await list.json();
+    const fid = lj.files?.[0]?.id;
+    if (!fid) { setSyncStatus('err', 'FILE NOT FOUND'); return; }
+    const dl  = await fetch(`https://www.googleapis.com/drive/v3/files/${fid}?alt=media`, {
+      headers: { Authorization: 'Bearer ' + cfg.token }
+    });
+    const remote = await dl.json();
+    if (Array.isArray(remote)) {
+      // Merge: keep local entries not in remote, add remote entries
+      const remoteIds = new Set(remote.map(e => e.id));
+      const localOnly = entries.filter(e => !remoteIds.has(e.id));
+      entries = [...remote, ...localOnly].sort((a,b) => a.ts.localeCompare(b.ts));
+      saveEntries();
+      renderAll();
+      setSyncStatus('ok', 'LOADED ✓');
+      setTimeout(() => setSyncStatus('', 'DRIVE ON'), 3000);
+      showToast('ENTRIES LOADED FROM DRIVE');
+    }
+  } catch(e) {
+    setSyncStatus('err', 'LOAD ERR');
   }
 }
 
-document.getElementById('syncBtn').addEventListener('click', triggerSync);
-document.getElementById('syncAllBtn').addEventListener('click', triggerSync);
+// ── EVENTS ─────────────────────────────────────
+function bindEvents() {
 
-/* ══ SETUP / CONFIG ══ */
-function applyConfig(skipDrive) {
-  OWNER_NAME = document.getElementById('cfgOwner').value.trim() || 'Mr H';
-  CLIENT_ID = document.getElementById('cfgClient').value.trim();
-  FOLDER_ID = document.getElementById('cfgFolder').value.trim();
-  LS.set('owner', OWNER_NAME);
-  LS.set('client', CLIENT_ID);
-  LS.set('folder', FOLDER_ID);
-  document.getElementById('setup').style.display = 'none';
-  if (CLIENT_ID && !skipDrive) loadDriveLibs();
-  setStatus(CLIENT_ID ? 'ready · ' + OWNER_NAME.toLowerCase() : 'offline · ' + OWNER_NAME.toLowerCase());
-  setPresence(CLIENT_ID ? 'online' : 'offline');
-  renderDiaryLog();
-  renderLog();
+  // Save button
+  el('save-btn').addEventListener('click', doSave);
+  elInput().addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSave(); }
+  });
+
+  // Char count
+  elInput().addEventListener('input', () => {
+    const len = elInput().value.length;
+    const cc  = el('char-count');
+    cc.textContent = `${len} / ${MAX_CHARS}`;
+    cc.className   = len > 1800 ? 'over' : len > 1500 ? 'warn' : '';
+    autoResize(elInput());
+  });
+
+  // Font sizer
+  el('fs-down').addEventListener('click', () => {
+    if (fsSizeIdx > 0) { fsSizeIdx--; applyFontSize(); showToast('TEXT SMALLER'); }
+  });
+  el('fs-up').addEventListener('click', () => {
+    if (fsSizeIdx < FONT_SIZES.length - 1) { fsSizeIdx++; applyFontSize(); showToast('TEXT LARGER'); }
+  });
+
+  // Search
+  el('search').addEventListener('input', e => {
+    searchQuery = e.target.value;
+    el('search-clear').classList.toggle('visible', !!searchQuery);
+    renderEntries();
+  });
+  el('search-clear').addEventListener('click', () => {
+    el('search').value = '';
+    searchQuery = '';
+    el('search-clear').classList.remove('visible');
+    renderEntries();
+  });
+
+  // Sync status tap → open config OR load from drive if configured
+  el('sync-status').addEventListener('click', () => {
+    if (cfg.token) loadFromDrive();
+    else openDrivePanel();
+  });
+
+  // Modal
+  el('modal-overlay').addEventListener('click', e => {
+    if (e.target === el('modal-overlay')) closeModal();
+  });
+  el('modal-close').addEventListener('click', closeModal);
+  el('modal-delete').addEventListener('click', () => {
+    if (openEntry) { deleteEntry(openEntry.id); closeModal(); }
+  });
+  el('modal-copy').addEventListener('click', () => {
+    if (openEntry) {
+      navigator.clipboard.writeText(openEntry.text).then(() => showToast('COPIED'));
+    }
+  });
+
+  // Drive panel
+  el('drive-save').addEventListener('click', () => {
+    cfg.token  = el('cfg-token').value.trim();
+    cfg.folder = el('cfg-folder').value.trim() || cfg.folder;
+    cfg.file   = el('cfg-file').value.trim()   || cfg.file;
+    saveCfg();
+    closeDrivePanel();
+    setSyncStatus('', 'DRIVE ON');
+    loadFromDrive();
+  });
+  el('drive-cancel').addEventListener('click', closeDrivePanel);
 }
 
-function loadConfig() {
-  const o = LS.get('owner'), c = LS.get('client'), f = LS.get('folder');
-  if (o) document.getElementById('cfgOwner').value = o;
-  if (c) document.getElementById('cfgClient').value = c;
-  if (f) document.getElementById('cfgFolder').value = f;
-  // Auto-launch if name is set (previous session)
-  if (o) {
-    applyConfig(false);
-  }
+function doSave() {
+  const text = elInput().value.trim();
+  if (!text) return;
+  el('save-btn').classList.add('saving');
+  el('save-btn').textContent = '…';
+  addEntry(text);
+  elInput().value = '';
+  el('char-count').textContent = '0 / 2000';
+  el('char-count').className   = '';
+  autoResize(elInput());
+  setTimeout(() => {
+    el('save-btn').classList.remove('saving');
+    el('save-btn').textContent = 'SAVE';
+  }, 600);
+  showToast('ENTRY SAVED');
 }
 
-document.getElementById('setupBtn').addEventListener('click', () => applyConfig(false));
-document.getElementById('skipBtn').addEventListener('click', () => applyConfig(true));
-document.getElementById('cfgOwner').addEventListener('keydown', e => { if (e.key === 'Enter') applyConfig(false); });
+function openDrivePanel() {
+  el('cfg-token').value  = cfg.token  || '';
+  el('cfg-folder').value = cfg.folder || '';
+  el('cfg-file').value   = cfg.file   || '';
+  el('drive-panel').classList.add('open');
+}
+function closeDrivePanel() { el('drive-panel').classList.remove('open'); }
 
-window.addEventListener('DOMContentLoaded', loadConfig);
+function autoResize(ta) {
+  ta.style.height = 'auto';
+  ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+}
 
-/* ══ ONLINE INDICATOR ══ */
-window.addEventListener('online', () => {
-  setStatus(driveToken ? 'online · ' + OWNER_NAME.toLowerCase() : 'connection available');
-  if (CLIENT_ID && !driveToken) document.getElementById('syncBtn').title = 'Tap to connect Drive';
-});
-window.addEventListener('offline', () => {
-  setStatus('offline · entries saved locally');
-  setPresence('offline');
-});
+let toastTimer;
+function showToast(msg) {
+  const t = el('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── START ──────────────────────────────────────
+init();
+
+// If token exists, show drive as online
+if (cfg.token) setSyncStatus('', 'DRIVE ON');
 </script>
 </body>
 </html>
